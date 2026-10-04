@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nihongo Playground</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#fff9e6; --ink:#2b2540; --muted:#7a7491; --accent:#ff7aa8; --accent-ink:#d93f78; --mint:#4fd1c5; --yellow:#ffc93c; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font-family:"M PLUS Rounded 1c",sans-serif; font-weight:500; line-height:1.6; }
+.wrap { max-width:760px; margin:0 auto; padding:28px 16px 60px; }
+.top { text-align:center; margin-bottom:22px; }
+.top .mark { font-size:44px; line-height:1; }
+h1 { margin:8px 0 2px; font-size:28px; font-weight:800; }
+.top p { margin:0; color:var(--muted); font-size:14px; }
+h2 { margin:28px 0 10px; font-size:13px; font-weight:800; letter-spacing:.08em; color:var(--accent-ink); }
+h2 small { font-weight:700; color:var(--muted); letter-spacing:0; margin-left:6px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px; }
+a.tile { display:block; text-decoration:none; color:inherit; background:#fff; border:3px solid var(--ink); border-radius:20px; box-shadow:4px 4px 0 var(--ink); padding:16px; transition:transform .1s, box-shadow .1s; }
+a.tile:hover { transform:translate(2px,2px); box-shadow:2px 2px 0 var(--ink); }
+a.tile .ic { width:48px; height:48px; border:2.5px solid var(--ink); border-radius:14px; display:grid; place-items:center; font-size:26px; margin-bottom:10px; }
+a.tile b { display:block; font-size:17px; font-weight:800; line-height:1.3; }
+a.tile .en { display:block; font-size:12px; color:var(--muted); font-weight:700; margin-bottom:4px; }
+a.tile p { margin:0; font-size:12.5px; color:var(--muted); }
+a.tile .go { display:inline-block; margin-top:10px; font-size:12px; font-weight:800; color:var(--accent-ink); }
+.back { display:inline-block; margin-bottom:6px; font-size:13px; font-weight:800; color:var(--muted); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="../index.html">← Home</a>
+  <div class="top">
+    <div class="mark">🎮</div>
+    <h1 id="title">Nihongo Playground</h1>
+    <p>Practice Japanese with Natsuki's games and quizzes.</p>
+  </div>
+  <div id="lib"></div>
+</div>
+<script>
+const BASE = "https://natsuki1997m-hue.github.io/";
+const SECTIONS = [
+  { h: "Daily life", jp: "くらしの日本語", color: "#ffe3ee", items: [
+    { ic: "🕒", t: "時間", en: "Telling time", d: "Read and say the time in Japanese.", u: "clock-practice/clock_practice.html" },
+    { ic: "📅", t: "カレンダー", en: "Calendar quiz", d: "Dates, days of the week and months.", u: "calendar/calendar_quiz.html" },
+    { ic: "💴", t: "おかね", en: "Money", d: "Count yen and practice prices.", u: "moneypractice/" },
+    { ic: "🗑️", t: "世田谷区ごみゲーム", en: "Setagaya garbage game", d: "Sort your garbage the Setagaya way.", u: "setagaya-gomi-game/" },
+    { ic: "🧭", t: "道案内", en: "Giving directions", d: "Find your way around in Japanese.", u: "navigame/" },
+  ] },
+  { h: "Kanji", jp: "漢字", color: "#fff1cc", items: [
+    { ic: "✏️", t: "げんき1 漢字", en: "Genki I kanji", d: "Kanji practice for Genki I.", u: "kanji_practice1/" },
+    { ic: "🖌️", t: "げんき2 漢字", en: "Genki II kanji", d: "Kanji practice for Genki II.", u: "kanji_practice2/" },
+  ] },
+  { h: "Grammar", jp: "文法", color: "#d9f7f1", items: [
+    { ic: "🔄", t: "活用", en: "Conjugation master", d: "Train verb and adjective forms.", u: "conjugationmaster/" },
+  ] },
+];
+const lib = document.getElementById("lib");
+SECTIONS.forEach(s => {
+  const h = document.createElement("h2"); h.innerHTML = s.h.toUpperCase() + "<small>" + s.jp + "</small>"; lib.append(h);
+  const g = document.createElement("div"); g.className = "grid";
+  s.items.forEach(i => {
+    const a = document.createElement("a"); a.className = "tile"; a.href = BASE + i.u; a.target = "_blank"; a.rel = "noopener";
+    a.innerHTML = '<div class="ic" style="background:' + s.color + '">' + i.ic + '</div><b></b><span class="en"></span><p></p><span class="go">Open →</span>';
+    a.querySelector("b").textContent = i.t; a.querySelector(".en").textContent = i.en; a.querySelector("p").textContent = i.d;
+    g.append(a);
+  });
+  lib.append(g);
+});
+</script>
+</body>
+</html>

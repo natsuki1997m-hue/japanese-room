@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Natsuki's Japanese Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#fff9e6; --surface:#fff; --ink:#2b2540; --muted:#7a7491; --accent:#ff7aa8; --accent-ink:#d93f78; --accent-soft:#ffe3ee; --yellow:#ffc93c; --bad:#ff5a5f; --shadow:4px 4px 0 #2b2540; }
+* { box-sizing: border-box; }
+body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; background:var(--bg); color:var(--ink); font-family:"M PLUS Rounded 1c",sans-serif; font-weight:500; line-height:1.6; }
+.card { width:100%; max-width:400px; background:var(--surface); border:3px solid var(--ink); border-radius:24px; box-shadow:var(--shadow); padding:32px 24px; text-align:center; }
+.mark { font-size:44px; line-height:1; }
+h1 { margin:10px 0 4px; font-size:22px; font-weight:800; }
+p { margin:0 0 20px; color:var(--muted); font-size:14px; }
+input { width:100%; margin-top:10px; font:inherit; font-size:18px; font-weight:700; text-align:center; padding:12px 14px; border:3px solid var(--ink); border-radius:14px; background:#fff; color:var(--ink); outline:none; }
+input:focus { background:var(--accent-soft); }
+button { width:100%; margin-top:16px; font:inherit; font-size:17px; font-weight:800; padding:12px; color:var(--ink); background:var(--yellow); border:3px solid var(--ink); border-radius:14px; box-shadow:3px 3px 0 var(--ink); cursor:pointer; }
+button:active { transform:translate(3px,3px); box-shadow:none; }
+a.teacher { display:inline-block; margin-top:14px; font-size:13px; font-weight:800; color:var(--muted); text-decoration:none; border-bottom:2px dashed var(--muted); }
+.tnote { margin-top:8px; font-size:12px; font-weight:700; color:var(--accent-ink); }
+button:disabled { opacity:.6; cursor:wait; }
+.err { min-height:22px; margin-top:12px; font-size:13px; font-weight:700; color:var(--bad); }
+</style>
+</head>
+<body>
+<form class="card" id="f" autocomplete="off">
+  <div class="mark">🌸</div>
+  <h1>Natsuki's Japanese Room</h1>
+  <p>Enter your name and passcode to see your lesson report.</p>
+  <input id="name" type="text" placeholder="Your name" aria-label="Your name" autofocus>
+  <input id="pass" type="password" placeholder="Passcode" aria-label="Passcode" autocapitalize="characters">
+  <button id="go" type="submit">Enter →</button>
+  <div class="err" id="err" role="alert"></div>
+  <a href="library/index.html" class="teacher" style="margin-right:14px">🎮 Nihongo Playground</a>
+  <a href="http://127.0.0.1:8770/" id="teacher" class="teacher">👩‍🏫 先生はこちら（Teacher）</a>
+  <div class="tnote" id="tnote"></div>
+</form>
+<script>
+const IDX = {"f67234c0520b7198": "dfb8a009624dbbee", "2032198f0e6cfb43": "dfb8a009624dbbee", "1887e2897be80165": "dfb8a009624dbbee", "f1d14341071ad17f": "dfb8a009624dbbee", "e7acf8eb9fa23c8e": "dfb8a009624dbbee", "7f41ed63ca3e129d": "55931b79eca33aaf", "b27fc3c8b512c166": "55931b79eca33aaf", "4ca6f6d5a544bf57": "55931b79eca33aaf", "c6c634130b4628d5": "55931b79eca33aaf", "28c5b5622d721fd1": "a57d82bb4a71359a", "bc12b8f31ccdb4f7": "a57d82bb4a71359a", "11155dac624a9bea": "a57d82bb4a71359a", "7d3805ebbf897567": "a57d82bb4a71359a", "514803870aa0ff7b": "a57d82bb4a71359a", "61f847547a4c52ed": "db16eaed0cbfad58", "98789b6581c45bdf": "db16eaed0cbfad58", "42ee91c6b1437cb3": "db16eaed0cbfad58"};
+const ITER = 200000;
+const normName = s => s.normalize("NFKC").toLowerCase().replace(/[\s　]+/g, "").replace(/(さん|san)$/, "");
+const normPass = s => s.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9]/g, "");
+const enc = new TextEncoder();
+const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const BAD = "Name or passcode is not correct.";
+
+function loadBlob(id) {
+  return new Promise((resolve, reject) => {
+    window.__cb = resolve;
+    const s = document.createElement("script");
+    s.src = "d/" + id + ".js";
+    s.onerror = () => reject(new Error("missing"));
+    document.head.appendChild(s);
+  });
+}
+
+async function open(name, pass) {
+  const h = hex(await crypto.subtle.digest("SHA-256", enc.encode(normName(name)))).slice(0, 16);
+  const id = IDX[h];
+  if (!id) throw new Error("unknown");
+  const raw = b64(await loadBlob(id));
+  const salt = raw.slice(0, 16), iv = raw.slice(16, 32), tag = raw.slice(32, 64), ct = raw.slice(64);
+  const base = await crypto.subtle.importKey("raw", enc.encode(normPass(pass)), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: ITER, hash: "SHA-256" }, base, 512);
+  const macKey = await crypto.subtle.importKey("raw", bits.slice(32), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+  const msg = new Uint8Array(iv.length + ct.length); msg.set(iv); msg.set(ct, iv.length);
+  if (!(await crypto.subtle.verify("HMAC", macKey, tag, msg))) throw new Error("bad");
+  const aesKey = await crypto.subtle.importKey("raw", bits.slice(0, 32), "AES-CBC", false, ["decrypt"]);
+  return new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-CBC", iv }, aesKey, ct));
+}
+
+document.getElementById("teacher").addEventListener("click", async e => {
+  e.preventDefault();
+  const note = document.getElementById("tnote"); note.textContent = "";
+  try { await fetch("http://127.0.0.1:8770/ping", { mode: "no-cors" }); location.href = "http://127.0.0.1:8770/"; }
+  catch (x) { note.textContent = "先生の画面が起動していません。フォルダの「先生の画面.command」を開いてください。"; }
+});
+document.getElementById("f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const err = document.getElementById("err"), go = document.getElementById("go");
+  const name = document.getElementById("name").value, pass = document.getElementById("pass").value;
+  err.textContent = "";
+  if (!normName(name) || !normPass(pass)) { err.textContent = BAD; return; }
+  go.disabled = true; go.textContent = "Opening…";
+  try {
+    const html = await open(name, pass);
+    document.open(); document.write(html); document.close();
+  } catch (x) {
+    err.textContent = BAD; go.disabled = false; go.textContent = "Enter →";
+  }
+});
+</script>
+</body>
+</html>
