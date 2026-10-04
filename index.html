@@ -39,8 +39,9 @@ button:disabled { opacity:.6; cursor:wait; }
   <div class="tnote" id="tnote"></div>
 </form>
 <script>
-const IDX = {"f67234c0520b7198": "09ab1120a9cfc37a", "2032198f0e6cfb43": "09ab1120a9cfc37a", "1887e2897be80165": "09ab1120a9cfc37a", "f1d14341071ad17f": "09ab1120a9cfc37a", "e7acf8eb9fa23c8e": "09ab1120a9cfc37a", "7f41ed63ca3e129d": "6d84d42390655033", "b27fc3c8b512c166": "6d84d42390655033", "4ca6f6d5a544bf57": "6d84d42390655033", "c6c634130b4628d5": "6d84d42390655033", "28c5b5622d721fd1": "b65d666abbfe4afa", "bc12b8f31ccdb4f7": "b65d666abbfe4afa", "11155dac624a9bea": "b65d666abbfe4afa", "7d3805ebbf897567": "b65d666abbfe4afa", "514803870aa0ff7b": "b65d666abbfe4afa", "61f847547a4c52ed": "b5ee5153fb17b8c1", "98789b6581c45bdf": "b5ee5153fb17b8c1", "42ee91c6b1437cb3": "b5ee5153fb17b8c1"};
+const IDX = {"f67234c0520b7198": "735b0fa484ee0163", "2032198f0e6cfb43": "735b0fa484ee0163", "1887e2897be80165": "735b0fa484ee0163", "f1d14341071ad17f": "735b0fa484ee0163", "e7acf8eb9fa23c8e": "735b0fa484ee0163", "7f41ed63ca3e129d": "d8a25f4a6510f1b4", "b27fc3c8b512c166": "d8a25f4a6510f1b4", "4ca6f6d5a544bf57": "d8a25f4a6510f1b4", "c6c634130b4628d5": "d8a25f4a6510f1b4", "28c5b5622d721fd1": "57c576adacf3b8a4", "bc12b8f31ccdb4f7": "57c576adacf3b8a4", "11155dac624a9bea": "57c576adacf3b8a4", "7d3805ebbf897567": "57c576adacf3b8a4", "514803870aa0ff7b": "57c576adacf3b8a4", "61f847547a4c52ed": "7e2afc8234ac1007", "98789b6581c45bdf": "7e2afc8234ac1007", "42ee91c6b1437cb3": "7e2afc8234ac1007"};
 const ITER = 200000;
+const BUILD = 1791126273;
 const normName = s => s.normalize("NFKC").toLowerCase().replace(/[\s　]+/g, "").replace(/(さん|san)$/, "");
 const normPass = s => s.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9]/g, "");
 const enc = new TextEncoder();
@@ -52,7 +53,7 @@ function loadBlob(id) {
   return new Promise((resolve, reject) => {
     window.__cb = resolve;
     const s = document.createElement("script");
-    s.src = "d/" + id + ".js";
+    s.src = "d/" + id + ".js?v=" + BUILD;
     s.onerror = () => reject(new Error("missing"));
     document.head.appendChild(s);
   });
