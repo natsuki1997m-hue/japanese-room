@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ja" data-look="game">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>にほんご おしゃべりゲーム</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700&family=Hachi+Maru+Pop&family=DotGothic16&family=Dela+Gothic+One&display=swap">
+<style>
+/* Five switchable looks (data-look on the root): strawberry, mint, notebook, game, popart. Tokens first, shared structure after. */
+:root{--disp:"Mochiy Pop One","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;--dispw:400;--bw:3px;--r1:26px;--r2:18px;--r3:16px;--sh1:7px 7px 0 var(--shadow);--sh2:3px 3px 0 var(--shadow);--tilt:-.7deg;--tiltA:-.8deg;--tiltB:.8deg;--tiltJ:-1.5deg;--tape:block;--hl:var(--pink);--tshadow:none;--bgimg:radial-gradient(var(--dots) 2.5px,transparent 3px);--bgsize:24px 24px;--cs:light;--bg:#fff0f5;--dots:#ffd9e6;--panel:#ffffff;--fg:#4a2740;--muted:#8a6580;--line:#4a2740;--ink:#4a2740;--shadow:#f6a9c4;--on:#4a2740;--pink:#ff9ec0;--yellow:#ffcfa8;--blue:#dccfff;--mint:#b5ecd9;--lilac:#dccfff;--soft:#fff7fa;--c1:#ffe6ef;--c2:#ffeedd;--c3:#e3f7ef;--body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Noto Sans JP",system-ui,sans-serif}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#2b1733;--dots:#3b2245;--panel:#3b2342;--fg:#fff0f6;--muted:#d7b5c9;--line:#ffd9e8;--ink:#ffd9e8;--shadow:#ff9ec0;--on:#4a2740;--pink:#ff9ec0;--yellow:#ffcfa8;--blue:#dccfff;--mint:#b5ecd9;--lilac:#dccfff;--soft:#4a2c55;--c1:#5a2d48;--c2:#5a4030;--c3:#28504a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#2b1733;--dots:#3b2245;--panel:#3b2342;--fg:#fff0f6;--muted:#d7b5c9;--line:#ffd9e8;--ink:#ffd9e8;--shadow:#ff9ec0;--on:#4a2740;--pink:#ff9ec0;--yellow:#ffcfa8;--blue:#dccfff;--mint:#b5ecd9;--lilac:#dccfff;--soft:#4a2c55;--c1:#5a2d48;--c2:#5a4030;--c3:#28504a;color-scheme:dark}
+:root[data-look="strawberry"]{--disp:"Mochiy Pop One","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;--dispw:400;--bw:3px;--r1:26px;--r2:18px;--r3:16px;--sh1:7px 7px 0 var(--shadow);--sh2:3px 3px 0 var(--shadow);--tilt:-.7deg;--tiltA:-.8deg;--tiltB:.8deg;--tiltJ:-1.5deg;--tape:block;--hl:var(--pink);--tshadow:none;--bgimg:radial-gradient(var(--dots) 2.5px,transparent 3px);--bgsize:24px 24px;--cs:light;--bg:#fff0f5;--dots:#ffd9e6;--panel:#ffffff;--fg:#4a2740;--muted:#8a6580;--line:#4a2740;--ink:#4a2740;--shadow:#f6a9c4;--on:#4a2740;--pink:#ff9ec0;--yellow:#ffcfa8;--blue:#dccfff;--mint:#b5ecd9;--lilac:#dccfff;--soft:#fff7fa;--c1:#ffe6ef;--c2:#ffeedd;--c3:#e3f7ef;color-scheme:light}
+@media (prefers-color-scheme: dark){:root[data-look="strawberry"]:not([data-theme="light"]){--bg:#2b1733;--dots:#3b2245;--panel:#3b2342;--fg:#fff0f6;--muted:#d7b5c9;--line:#ffd9e8;--ink:#ffd9e8;--shadow:#ff9ec0;--on:#4a2740;--pink:#ff9ec0;--yellow:#ffcfa8;--blue:#dccfff;--mint:#b5ecd9;--lilac:#dccfff;--soft:#4a2c55;--c1:#5a2d48;--c2:#5a4030;--c3:#28504a;color-scheme:dark}}
+:root[data-look="strawberry"][data-theme="dark"]{--bg:#2b1733;--dots:#3b2245;--panel:#3b2342;--fg:#fff0f6;--muted:#d7b5c9;--line:#ffd9e8;--ink:#ffd9e8;--shadow:#ff9ec0;--on:#4a2740;--pink:#ff9ec0;--yellow:#ffcfa8;--blue:#dccfff;--mint:#b5ecd9;--lilac:#dccfff;--soft:#4a2c55;--c1:#5a2d48;--c2:#5a4030;--c3:#28504a;color-scheme:dark}
+:root[data-look="mint"]{--disp:"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;--dispw:700;--bw:2px;--r1:28px;--r2:20px;--r3:999px;--sh1:0 8px 22px var(--shadow);--sh2:0 3px 8px var(--shadow);--tilt:0deg;--tiltA:0deg;--tiltB:0deg;--tiltJ:0deg;--tape:none;--hl:var(--mint);--tshadow:none;--bgimg:none;--bgsize:auto;--cs:light;--bg:#eafaf5;--dots:#d3f1e8;--panel:#ffffff;--fg:#14403a;--muted:#4f827a;--line:#9ddccb;--ink:#14403a;--shadow:rgba(20,64,58,.14);--on:#0f3a33;--pink:#5fd6b5;--yellow:#ffd86e;--blue:#bde8ff;--mint:#8be3c8;--lilac:#ffc2b8;--soft:#f2fffb;--c1:#e0f8f0;--c2:#fff4cf;--c3:#dff2ff;color-scheme:light}
+@media (prefers-color-scheme: dark){:root[data-look="mint"]:not([data-theme="light"]){--bg:#0f2b27;--dots:#16372f;--panel:#173a35;--fg:#e6fff8;--muted:#9fd1c6;--line:#2f6b61;--ink:#e6fff8;--shadow:rgba(0,0,0,.4);--on:#0f3a33;--pink:#5fd6b5;--yellow:#ffd86e;--blue:#bde8ff;--mint:#8be3c8;--lilac:#ffc2b8;--soft:#1c443e;--c1:#1d4a43;--c2:#4a4224;--c3:#1e4457;color-scheme:dark}}
+:root[data-look="mint"][data-theme="dark"]{--bg:#0f2b27;--dots:#16372f;--panel:#173a35;--fg:#e6fff8;--muted:#9fd1c6;--line:#2f6b61;--ink:#e6fff8;--shadow:rgba(0,0,0,.4);--on:#0f3a33;--pink:#5fd6b5;--yellow:#ffd86e;--blue:#bde8ff;--mint:#8be3c8;--lilac:#ffc2b8;--soft:#1c443e;--c1:#1d4a43;--c2:#4a4224;--c3:#1e4457;color-scheme:dark}
+:root[data-look="notebook"]{--disp:"Hachi Maru Pop","Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;--dispw:400;--bw:2px;--r1:6px;--r2:6px;--r3:8px;--sh1:3px 4px 0 var(--shadow);--sh2:2px 2px 0 var(--shadow);--tilt:-.5deg;--tiltA:-.4deg;--tiltB:.4deg;--tiltJ:-1deg;--tape:block;--hl:var(--yellow);--tshadow:none;--bgimg:repeating-linear-gradient(transparent 0 31px,var(--dots) 31px 32px);--bgsize:auto;--cs:light;--bg:#fbfdff;--dots:#d3e6f8;--panel:#ffffff;--fg:#25365a;--muted:#66779e;--line:#25365a;--ink:#25365a;--shadow:rgba(37,54,90,.2);--on:#25365a;--pink:#ffb3c7;--yellow:#fff176;--blue:#a5d8ff;--mint:#b2f2bb;--lilac:#d0bfff;--soft:#f3f8ff;--c1:#ffe3ec;--c2:#fff7c2;--c3:#dcf8e0;color-scheme:light}
+@media (prefers-color-scheme: dark){:root[data-look="notebook"]:not([data-theme="light"]){--bg:#172036;--dots:#243455;--panel:#1f2b47;--fg:#eef3ff;--muted:#a9b8dc;--line:#8fb0ff;--ink:#dbe6ff;--shadow:rgba(0,0,0,.4);--on:#25365a;--pink:#ffb3c7;--yellow:#fff176;--blue:#a5d8ff;--mint:#b2f2bb;--lilac:#d0bfff;--soft:#243256;--c1:#4a2a3a;--c2:#4a4527;--c3:#274a33;color-scheme:dark}}
+:root[data-look="notebook"][data-theme="dark"]{--bg:#172036;--dots:#243455;--panel:#1f2b47;--fg:#eef3ff;--muted:#a9b8dc;--line:#8fb0ff;--ink:#dbe6ff;--shadow:rgba(0,0,0,.4);--on:#25365a;--pink:#ffb3c7;--yellow:#fff176;--blue:#a5d8ff;--mint:#b2f2bb;--lilac:#d0bfff;--soft:#243256;--c1:#4a2a3a;--c2:#4a4527;--c3:#274a33;color-scheme:dark}
+:root[data-look="game"]{--disp:"DotGothic16","Zen Maru Gothic",sans-serif;--dispw:400;--bw:3px;--r1:6px;--r2:6px;--r3:4px;--sh1:6px 6px 0 var(--shadow);--sh2:3px 3px 0 var(--shadow);--tilt:0deg;--tiltA:0deg;--tiltB:0deg;--tiltJ:0deg;--tape:none;--hl:transparent;--tshadow:3px 3px 0 var(--pink);--bgimg:linear-gradient(var(--dots) 1px,transparent 1px),linear-gradient(90deg,var(--dots) 1px,transparent 1px);--bgsize:28px 28px;--cs:dark;--bg:#5c94fc;--dots:#7aa9ff;--panel:#ffffff;--fg:#1a1a1a;--muted:#2b2b2b;--line:#1a1a1a;--ink:#1a1a1a;--shadow:#1a1a1a;--on:#1a1a1a;--pink:#e52521;--yellow:#fbd000;--blue:#b9d4ff;--mint:#6bd98a;--lilac:#ffb36b;--soft:#fff7d6;--c1:#fde0d9;--c2:#fff3b0;--c3:#d9f3d0;--on1:#ffffff;color-scheme:light}
+:root[data-look="popart"]{--disp:"Dela Gothic One","Zen Maru Gothic",sans-serif;--dispw:400;--bw:4px;--r1:12px;--r2:10px;--r3:10px;--sh1:8px 8px 0 var(--shadow);--sh2:4px 4px 0 var(--shadow);--tilt:-1deg;--tiltA:-1deg;--tiltB:1deg;--tiltJ:-2deg;--tape:block;--hl:var(--yellow);--tshadow:none;--bgimg:radial-gradient(var(--dots) 3px,transparent 3.5px);--bgsize:20px 20px;--cs:light;--bg:#ffffff;--dots:#ffd9d4;--panel:#ffffff;--fg:#111111;--muted:#555555;--line:#111111;--ink:#111111;--shadow:#111111;--on:#111111;--pink:#ff5a4d;--yellow:#ffd400;--blue:#6fb1ff;--mint:#43e0a0;--lilac:#ff9fd6;--soft:#fff7d6;--c1:#ffe1de;--c2:#fff2a8;--c3:#d6f0ff;color-scheme:light}
+@media (prefers-color-scheme: dark){:root[data-look="popart"]:not([data-theme="light"]){--bg:#14141c;--dots:#2a2230;--panel:#20202c;--fg:#ffffff;--muted:#c9c9d9;--line:#ffffff;--ink:#ffffff;--shadow:#ff5a4d;--on:#111111;--pink:#ff5a4d;--yellow:#ffd400;--blue:#6fb1ff;--mint:#43e0a0;--lilac:#ff9fd6;--soft:#2c2c3c;--c1:#4a2630;--c2:#4a4420;--c3:#1f3f55;color-scheme:dark}}
+:root[data-look="popart"][data-theme="dark"]{--bg:#14141c;--dots:#2a2230;--panel:#20202c;--fg:#ffffff;--muted:#c9c9d9;--line:#ffffff;--ink:#ffffff;--shadow:#ff5a4d;--on:#111111;--pink:#ff5a4d;--yellow:#ffd400;--blue:#6fb1ff;--mint:#43e0a0;--lilac:#ff9fd6;--soft:#2c2c3c;--c1:#4a2630;--c2:#4a4420;--c3:#1f3f55;color-scheme:dark}
+*{box-sizing:border-box}
+body{background-color:var(--bg);background-image:var(--bgimg);background-size:var(--bgsize);
+  color:var(--fg);font-family:var(--body);font-weight:500;margin:0;line-height:1.6;
+  padding-block:22px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{max-width:780px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between}
+h1{font-family:var(--disp);font-weight:var(--dispw);font-size:clamp(1.6rem,6vw,2.3rem);line-height:1.25;margin:0;color:var(--fg);
+  background:linear-gradient(transparent 64%,var(--hl) 64%);text-shadow:var(--tshadow);align-self:flex-start;padding:0 .2em;text-wrap:balance;letter-spacing:.02em}
+.sub{color:var(--muted);font-size:.85rem;font-weight:700}
+header .sub{background:var(--panel);color:var(--muted);border:2px solid var(--line);border-radius:999px;padding:2px 14px}
+
+.looks{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.looks .sub{margin-right:2px}
+.looks button{font-size:.82rem;padding:3px 13px;border-width:2px;box-shadow:none;border-radius:999px;font-weight:700}
+.looks button[aria-pressed="true"]{background:var(--yellow);color:var(--on)}
+
+button{font:inherit;font-weight:700;cursor:pointer;border-radius:var(--r3);border:var(--bw) solid var(--line);background:var(--panel);color:var(--fg);
+  padding:8px 18px;box-shadow:var(--sh2);transition:transform .08s}
+button:hover{transform:translateY(-1px)}
+button:active{transform:translateY(1px)}
+button:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
+.tabs{display:flex;gap:10px}
+.tabs button{flex:1;font-family:var(--disp);font-weight:var(--dispw);font-size:1.05rem;padding:10px 6px}
+.tabs button[aria-selected="true"]{background:var(--mint);color:var(--on)}
+#tab-card[aria-selected="true"]{background:var(--pink);color:var(--on1,var(--on))}
+#tab-warm[aria-selected="true"]{background:var(--yellow)}
+#tab-bingo[aria-selected="true"]{background:var(--mint)}
+#g1[aria-selected="true"]{background:var(--blue)}
+#g2[aria-selected="true"]{background:var(--lilac)}
+.primary{background:var(--yellow);color:var(--on)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.grow{flex:1}
+
+.card{position:relative;background:var(--panel);border:var(--bw) solid var(--line);border-radius:var(--r1);box-shadow:var(--sh1);
+  padding:26px clamp(18px,4vw,38px);min-height:240px;display:flex;flex-direction:column;gap:14px;justify-content:center;transform:rotate(var(--tilt))}
+.card::before{content:"";display:var(--tape);position:absolute;left:50%;top:-13px;width:84px;height:24px;margin-left:-42px;background:var(--yellow);
+  border:2px solid var(--line);border-radius:5px;transform:rotate(-3deg);opacity:.95}
+.job{align-self:flex-start;font-family:var(--disp);font-weight:var(--dispw);font-size:clamp(1.15rem,4.2vw,1.6rem);letter-spacing:.05em;line-height:1.3;
+  background:var(--pink);color:var(--on1,var(--on));border:var(--bw) solid var(--line);border-radius:var(--r3);padding:4px 16px;box-shadow:var(--sh2);transform:rotate(var(--tiltJ))}
+.scene{font-size:clamp(1.15rem,3.8vw,1.5rem);line-height:1.75;font-weight:700}
+.num{color:var(--muted);font-size:.9rem;font-weight:700}
+.empty{color:var(--muted);font-size:1.15rem;font-weight:700;text-align:center}
+.memo{background:var(--soft);border:var(--bw) dashed var(--line);border-radius:var(--r2);padding:12px 18px;font-size:1.02rem}
+.memo b{font-family:var(--disp);font-weight:var(--dispw);background:var(--blue);color:var(--on);border-radius:8px;padding:0 8px;margin-right:2px}
+.memo .pat{font-weight:700;color:var(--fg);background:linear-gradient(transparent 55%,var(--yellow) 55%)}
+.hist{display:flex;flex-wrap:wrap;gap:6px}
+.hist span{background:var(--c3);color:var(--fg);border:2px solid var(--line);border-radius:999px;padding:0 12px;font-size:.8rem;font-weight:700}
+.notes{font-size:.9rem;color:var(--fg);background:var(--panel);border:var(--bw) solid var(--line);border-radius:var(--r2);padding:12px 18px;box-shadow:var(--sh2)}
+.notes b{font-family:var(--disp);font-weight:var(--dispw);font-size:1rem}
+.notes ul{margin:6px 0 0;padding-left:1.3em}
+.notes li{margin-bottom:2px}
+
+.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.cell{position:relative;min-height:clamp(100px,21vw,146px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;
+  padding:16px 6px 10px;border-radius:var(--r2);border:var(--bw) solid var(--line);background:var(--c1);color:var(--fg);box-shadow:var(--sh2)}
+.cell:nth-child(3n+2){background:var(--c2)}
+.cell:nth-child(3n){background:var(--c3)}
+.cell:nth-child(even){transform:rotate(var(--tiltB))}
+.cell:nth-child(odd){transform:rotate(var(--tiltA))}
+.cell .pat{font-family:var(--disp);font-weight:var(--dispw);font-size:clamp(.95rem,3.4vw,1.35rem);line-height:1.35}
+.cell .cue{font-size:clamp(.7rem,2.3vw,.85rem);color:var(--muted);font-weight:700}
+.cell .mk{position:absolute;top:-10px;right:-8px;width:34px;height:34px;border-radius:50%;border:var(--bw) solid var(--line);background:var(--panel);
+  color:transparent;font-size:1.1rem;line-height:28px;text-align:center}
+.cell[aria-pressed="true"]{background:var(--yellow);color:var(--on)}
+.cell[aria-pressed="true"] .cue{color:var(--on)}
+.cell[aria-pressed="true"] .mk{background:var(--pink);color:var(--on1,var(--on))}
+.cell.line{outline:4px solid var(--pink);outline-offset:3px}
+.banner{font-family:var(--disp);font-weight:var(--dispw);font-size:1.6rem;color:var(--fg);text-shadow:2px 2px 0 var(--pink);min-height:2.4rem}
+
+.bubble{position:relative;align-self:flex-start;font-family:var(--disp);font-weight:var(--dispw);font-size:clamp(1.25rem,4.6vw,1.9rem);line-height:1.5;
+  background:var(--blue);color:var(--on);border:var(--bw) solid var(--line);border-radius:var(--r1);padding:14px 22px;box-shadow:var(--sh2)}
+.bubble::after{content:"";position:absolute;left:30px;bottom:-14px;width:20px;height:20px;background:var(--blue);
+  border-right:var(--bw) solid var(--line);border-bottom:var(--bw) solid var(--line);transform:rotate(45deg) skew(10deg,10deg)}
+.sit{color:var(--muted);font-size:1rem;font-weight:700;margin-top:6px}
+@media (prefers-reduced-motion: reduce){button{transition:none}}
+[hidden]{display:none!important}
+.back{align-self:flex-start;font-weight:700;font-size:.85rem;color:var(--muted);text-decoration:none}
+</style>
+
+</head>
+<body>
+<main>
+  <a class="back" href="../index.html">← Playground</a>
+  <header>
+    <h1>にほんご おしゃべりゲーム</h1>
+    <span class="sub">Genki I　L1–12　／　オンラインクラス用</span>
+  </header>
+
+  <div class="looks" id="looks" role="group" aria-label="デザイン"><span class="sub">デザイン</span></div>
+
+  <div class="tabs" role="tablist">
+    <button id="tab-card" role="tab" aria-selected="true">役割カード</button>
+    <button id="tab-warm" role="tab" aria-selected="false">ウォームアップ</button>
+    <button id="tab-bingo" role="tab" aria-selected="false">文法ビンゴ</button>
+  </div>
+
+  <section id="cardView" aria-label="役割カード">
+    <div class="row" style="margin-bottom:12px">
+      <button id="draw" class="primary">カードをひく</button>
+      <button id="again">もう一度（別の言い方で）</button>
+      <span class="grow"></span>
+      <button id="reveal" aria-pressed="false">先生メモを見る</button>
+    </div>
+    <div class="card" id="card" aria-live="polite">
+      <div class="empty">「カードをひく」をおして、場面に合う文を日本語で言いましょう。</div>
+    </div>
+    <div class="memo" id="memo" hidden style="margin-top:12px"></div>
+    <div class="row" style="margin-top:12px"><span class="sub">ひいたカード</span><div class="hist" id="hist"></div></div>
+    <div class="notes" style="margin-top:12px"><b>進め方（先生用）</b>
+      <ul>
+        <li>最初の数回は宿題の「きっかけ表」を見てOK。慣れたら見せない。</li>
+        <li>簡単な答えでも直さず、「もう少し詳しく言える？」と聞く。</li>
+        <li>言えたら「もう一度」で同じカードを別の言い方で。</li>
+        <li>詰まったら文法名は言わず、「これはお願い？ それとも許可？」と役割を聞き返す。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="warmView" aria-label="ウォームアップ" hidden>
+    <div class="tabs" role="tablist" style="margin-bottom:12px">
+      <button id="g1" role="tab" aria-selected="true">本当2つ、うそ1つ</button>
+      <button id="g2" role="tab" aria-selected="false">ハプニングごっこ</button>
+    </div>
+
+    <div id="game1">
+      <p class="sub" style="margin:0 0 10px">生徒さんが自分のことを3文で言います。1つだけうそ。先生が質問しながら、どれがうそか当てます。</p>
+      <div class="row" style="margin-bottom:12px">
+        <button id="topic" class="primary">お題をひく</button>
+        <span class="grow"></span>
+        <button id="g1reveal" aria-pressed="false">先生の見本を見る</button>
+      </div>
+      <div class="card" id="topicCard"><div class="empty">「お題をひく」をおして、そのお題で3文考えましょう。</div></div>
+      <div class="memo" id="g1memo" hidden style="margin-top:12px"></div>
+      <div class="notes" style="margin-top:12px"><b>進め方（先生用）</b>
+        <ul>
+          <li>最初は先生が見本を見せる。生徒さんは、うそを当てる側から。</li>
+          <li>当てるとき、「どうして？」「いつ行ったの？」「何をしに？」と質問する。理由や目的を言うので、自然に文法が増える。</li>
+          <li>うそをうまくつけたら、先生が「だまされた！」と大げさに悔しがる。</li>
+          <li>直さずに聞き返して、ひと言足してもらう。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="game2" hidden>
+      <p class="sub" style="margin:0 0 10px">先生が「困った人」になります。生徒さんは助けたり、アドバイスしたりします。</p>
+      <div class="row" style="margin-bottom:12px">
+        <button id="hap" class="primary">困ったことをひく</button>
+        <span class="grow"></span>
+        <button id="hapReveal" aria-pressed="false">先生メモを見る</button>
+      </div>
+      <div class="card" id="hapCard" aria-live="polite"><div class="empty">「困ったことをひく」をおすと、先生が困ります。</div></div>
+      <div class="memo" id="hapMemo" hidden style="margin-top:12px"></div>
+      <div class="notes" style="margin-top:12px"><b>進め方（先生用）</b>
+        <ul>
+          <li>先生は、書いてあるせりふをそのまま、困った声で言う。</li>
+          <li>生徒さんがひと言で終わったら、「もう少し助けて」「ほかに何かある？」と続ける。</li>
+          <li>1枚で、ましょうか → たほうがいい のように、2つ言えたらOK。</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="bingoView" aria-label="文法ビンゴ" hidden>
+    <div class="row" style="margin-bottom:8px">
+      <button id="b1" class="primary">ビンゴ 1</button>
+      <button id="b2">ビンゴ 2</button>
+      <span class="grow"></span>
+      <button id="reset">リセット</button>
+    </div>
+    <p class="sub" style="margin:0 0 10px">ふつうに先生と話して、文法を自然に使えたらそのマスをクリック。1列そろえばビンゴ。全部うめたらボーナス！（ビンゴ2はビンゴ1のあと）</p>
+    <div class="banner" id="banner"></div>
+    <div class="board" id="board"></div>
+    <div class="notes" style="margin-top:14px"><b>先生の質問リスト（文法名は言わずに聞く）</b>
+      <ul>
+        <li>〜ので／から ← 「どうして？」</li>
+        <li>〜つもりです ← 「今度の休みは何をするの？」</li>
+        <li>〜たことがある ← 「前にしたことある？」</li>
+        <li>〜に行きます ← 「何をしに行くの？」</li>
+        <li>〜と思います ← 「明日の天気はどうなると思う？」</li>
+        <li>〜なければいけません ← 「行く前にしないといけないことは？」</li>
+        <li>〜ましょうか ← （先生が困ったふりをして）手伝いを申し出てもらう</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<script>
+var CARDS=[
+["ASK PERMISSION","You're at your teacher's house. It's hot. You want to open the window.","〜てもいいですか","窓を開けてもいいですか。"],
+["SAY \"YOU MUST NOT\"","Your friend starts eating her lunch in the library. Tell her it's not allowed.","〜てはいけません","ここで食べてはいけません。"],
+["GIVE ADVICE","Your friend wants to buy a second game, but he has no money. Advise him not to buy it.","〜ないほうがいいです","買わないほうがいいです。"],
+["OFFER HELP","Your friend is making dinner. You want to help by making the salad.","〜ましょうか","サラダを作りましょうか。"],
+["GIVE A REASON","You're late for class. The bus didn't come. Explain why.","〜ので／〜から ＋ 〜なかった","バスが来なかったので、おくれました。"],
+["TALK ABOUT YOUR PLAN","Your friend asks about winter break. You plan to go to your grandma's house.","〜つもりです","冬休みはおばあちゃんのうちに行くつもりです。"],
+["SAY WHAT YOU WANT","Your teacher asks: Where do you want to go in Japan, and why?","〜に行きたいです","（場所）に（〜）しに行きたいです。"],
+["SHARE AN EXPERIENCE","Your friend asks: Have you ever been to a concert?","〜たことがあります","はい、あります／いいえ、行ったことがありません。"],
+["GUESS","Your friend asks: Will it rain tomorrow? You're not sure, but you think it will.","〜と思います（短形）","雨が降ると思います。"],
+["MAKE A REQUEST","Your sister is still getting ready. Ask her to wait for you.","〜てください","ちょっと待ってください。"],
+["REPORT WHAT SOMEONE SAID","Your mom called. She said she will come home late. Tell your sister.","〜と言っていました","お母さんは遅く帰ると言っていました。"],
+["TELL WHAT YOU DID (IN ORDER)","Your friend asks what you did after school: went home, played a game, then slept.","て-form でつなぐ","家に帰って、ゲームをして、寝ました。"]
+];
+var BINGO=[
+[["〜たいです","I want to ___"],["〜ので","because ___"],["〜と思います","I think ___"],["〜てもいいですか","May I ___?"],["〜ないほうがいいです","better not to ___"],["〜に行きます","go to ___ to do ___"],["〜たことがあります","have ___ed before"],["〜つもりです","I plan to ___"],["〜ないでください","Please don't ___"]],
+[["〜てはいけません","must not ___"],["〜なければいけません","have to ___"],["〜ましょうか","Shall I ___?"],["〜てください","Please ___"],["〜ています","doing ___ now"],["もう〜ました","already ___ed"],["〜くなりました","became ___"],["〜すぎます","too much ___"],["〜たほうがいいです","better to ___"]]
+];
+var LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+function $(i){return document.getElementById(i)}
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+
+/* tabs */
+function show(which){
+  ["card","warm","bingo"].forEach(function(k){
+    $(k+"View").hidden=(k!==which);
+    $("tab-"+k).setAttribute("aria-selected",k===which);
+  });
+}
+$("tab-card").onclick=function(){show("card")};
+$("tab-warm").onclick=function(){show("warm")};
+$("tab-bingo").onclick=function(){show("bingo")};
+
+/* cards */
+var deck=[],cur=-1,seen=[],tries=1;
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function render(){
+  if(cur<0)return;
+  var c=CARDS[cur];
+  $("card").innerHTML='<div class="num">No.'+(cur+1)+(tries>1?'　／　'+tries+'回目：べつの言い方で言ってみよう':'')+'</div><div class="job">'+esc(c[0])+'</div><div class="scene">'+esc(c[1])+'</div>';
+  $("memo").innerHTML='<b>想定パターン</b>　<span class="pat">'+esc(c[2])+'</span><br><b>例</b>　'+esc(c[3]);
+  $("hist").innerHTML=seen.map(function(n){return"<span>No."+(n+1)+"</span>"}).join("");
+}
+$("draw").onclick=function(){
+  if(!deck.length)deck=shuffle(CARDS.map(function(_,i){return i}));
+  cur=deck.pop();seen.push(cur);tries=1;
+  $("memo").hidden=true;$("reveal").setAttribute("aria-pressed","false");$("reveal").textContent="先生メモを見る";
+  render();
+};
+$("again").onclick=function(){
+  if(cur<0)return;
+  tries++;
+  $("memo").hidden=true;$("reveal").setAttribute("aria-pressed","false");$("reveal").textContent="先生メモを見る";
+  render();
+};
+$("reveal").onclick=function(){
+  if(cur<0)return;
+  var on=$("memo").hidden;
+  $("memo").hidden=!on;$("reveal").setAttribute("aria-pressed",on);$("reveal").textContent=on?"先生メモをかくす":"先生メモを見る";
+};
+
+/* bingo */
+var cur2=0,marks=[[],[]];
+function drawBoard(){
+  var b=$("board");b.innerHTML="";
+  BINGO[cur2].forEach(function(p,i){
+    var d=document.createElement("button");d.className="cell";d.type="button";
+    d.setAttribute("aria-pressed",!!marks[cur2][i]);
+    d.innerHTML='<span class="mk">✔</span><span class="pat">'+esc(p[0])+'</span><span class="cue">'+esc(p[1])+'</span>';
+    d.onclick=function(){marks[cur2][i]=!marks[cur2][i];drawBoard()};
+    b.appendChild(d);
+  });
+  var m=marks[cur2],hit=LINES.filter(function(l){return l.every(function(i){return m[i]})});
+  var cells=b.children;
+  hit.forEach(function(l){l.forEach(function(i){cells[i].classList.add("line")})});
+  var all=m.filter(Boolean).length===9;
+  $("banner").textContent=all?"全部そろった！ ボーナスラウンド！":hit.length?"ビンゴ！ "+hit.length+"ライン":"";
+  $("b1").className=cur2===0?"primary":"";$("b2").className=cur2===1?"primary":"";
+}
+$("b1").onclick=function(){cur2=0;drawBoard()};
+$("b2").onclick=function(){cur2=1;drawBoard()};
+$("reset").onclick=function(){marks[cur2]=[];drawBoard()};
+drawBoard();
+
+/* warm-up games */
+var TOPICS=[
+["旅行","行ったことがある場所と、これから行くつもりの場所を言ってみよう。","富士山に登ったことがあります。／来年、日本に行くつもりです。／去年、シアトルに行って、友だちに会いました。","〜たことがあります／〜つもりです／〜に行きます"],
+["食べ物","好きなもの、食べたいもの、食べすぎたものを言ってみよう。","たこ焼きが食べたいです。／きのう、ピザを食べすぎました。／なっとうは食べたことがありません。","〜たいです／〜すぎます／〜たことがあります"],
+["週末","この週末のことを言ってみよう。","土曜日はゲームをして、寝ました。／日曜日は友だちと買い物に行くつもりです。／雨が降ると思うので、うちにいます。","て形でつなぐ／〜つもり／〜と思います／〜ので"],
+["子どものころ","子どものころのことを言ってみよう。","子どものころ、毎日ゲームをしていました。／野菜を食べなければいけませんでした。","〜ています／〜なければいけません"],
+["好きなもの","好きなゲーム・本・趣味について言ってみよう。","ゲームを買いに行きたいです。／もう30時間あそびました。／高すぎるので、買わないほうがいいです。","〜に行きたい／もう〜ました／〜すぎます／〜ので"],
+["これから","夏休みや来年の予定を言ってみよう。","来年、日本語がもっと上手になりたいです。／毎日、勉強しなければいけません。","〜たいです／〜くなります／〜なければいけません"]
+];
+var tp=-1;
+function renderTopic(){
+  if(tp<0)return;var t=TOPICS[tp];
+  $("topicCard").innerHTML='<div class="num">お題</div><div class="job">'+esc(t[0])+'</div><div class="scene">'+esc(t[1])+'</div>';
+  $("g1memo").innerHTML='<b>見本</b>　'+esc(t[2])+'<br><b>出やすい文法</b>　<span class="pat">'+esc(t[3])+'</span>';
+}
+$("topic").onclick=function(){
+  var n;do{n=Math.floor(Math.random()*TOPICS.length)}while(n===tp&&TOPICS.length>1);
+  tp=n;$("g1memo").hidden=true;$("g1reveal").setAttribute("aria-pressed","false");$("g1reveal").textContent="先生の見本を見る";
+  renderTopic();
+};
+$("g1reveal").onclick=function(){
+  if(tp<0)return;var on=$("g1memo").hidden;
+  $("g1memo").hidden=!on;$("g1reveal").setAttribute("aria-pressed",on);$("g1reveal").textContent=on?"先生の見本をかくす":"先生の見本を見る";
+};
+
+var HAP=[
+["あ、荷物が重い…","Your teacher is carrying heavy bags. Help.","〜ましょうか","荷物を持ちましょうか。"],
+["のどがかわいたなあ…","Your teacher is thirsty. Offer to get something.","〜ましょうか／〜に行きます","飲み物を買いに行きましょうか。"],
+["暑いなあ…","Your teacher feels hot. The window is closed.","〜ましょうか","窓を開けましょうか。"],
+["頭が痛いんです…","Your teacher has a headache. Give advice.","〜たほうがいいです","休んだほうがいいです。"],
+["もう夜の2時なのに、まだゲームしてるんだ…","Your teacher is still playing a game at 2 a.m. Advise.","〜たほうがいい／〜ないほうがいい／〜すぎ","もう寝たほうがいいです。／ゲームをしすぎないほうがいいです。"],
+["電車の中で、電話しようかな…","Your teacher is about to make a phone call on the train. Ask them not to.","〜ないでください","電車で電話しないでください。"],
+["あしたテストがあるんだ…","Your teacher has a test tomorrow. Say what they have to do.","〜なければいけません／〜と思います","勉強しなければいけませんね。／だいじょうぶだと思います。"],
+["ラーメンを5杯も食べちゃった…","Your teacher ate way too much ramen. React.","〜すぎます／〜と思います","食べすぎです。おなかが痛くなると思います。"]
+];
+var hp=-1;
+function renderHap(){
+  if(hp<0)return;var h=HAP[hp];
+  $("hapCard").innerHTML='<div class="num">No.'+(hp+1)+'</div><div class="bubble">'+esc(h[0])+'</div><div class="sit">'+esc(h[1])+'</div>';
+  $("hapMemo").innerHTML='<b>想定パターン</b>　<span class="pat">'+esc(h[2])+'</span><br><b>例</b>　'+esc(h[3]);
+}
+$("hap").onclick=function(){
+  var n;do{n=Math.floor(Math.random()*HAP.length)}while(n===hp&&HAP.length>1);
+  hp=n;$("hapMemo").hidden=true;$("hapReveal").setAttribute("aria-pressed","false");$("hapReveal").textContent="先生メモを見る";
+  renderHap();
+};
+$("hapReveal").onclick=function(){
+  if(hp<0)return;var on=$("hapMemo").hidden;
+  $("hapMemo").hidden=!on;$("hapReveal").setAttribute("aria-pressed",on);$("hapReveal").textContent=on?"先生メモをかくす":"先生メモを見る";
+};
+
+/* sub tabs */
+function game(n){
+  $("game1").hidden=(n!==1);$("game2").hidden=(n!==2);
+  $("g1").setAttribute("aria-selected",n===1);$("g2").setAttribute("aria-selected",n===2);
+}
+$("g1").onclick=function(){game(1)};
+$("g2").onclick=function(){game(2)};
+/* look picker */
+var LOOKS=[["strawberry","いちご"],["mint","ミントソーダ"],["notebook","ノート"],["game","ゲーム"],["popart","ポップアート"]];
+function setLook(k){
+  document.documentElement.setAttribute("data-look",k);
+  Array.prototype.forEach.call($("looks").querySelectorAll("button"),function(b){b.setAttribute("aria-pressed",b.dataset.k===k)});
+  try{localStorage.setItem("look",k)}catch(e){}
+}
+LOOKS.forEach(function(l){
+  var b=document.createElement("button");b.type="button";b.dataset.k=l[0];b.textContent=l[1];
+  b.onclick=function(){setLook(l[0])};$("looks").appendChild(b);
+});
+var lk="game";try{lk=localStorage.getItem("look")||lk}catch(e){}
+if(!LOOKS.some(function(l){return l[0]===lk}))lk="game";
+setLook(lk);
+</script>
+</body>
+</html>
