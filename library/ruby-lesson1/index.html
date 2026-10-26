@@ -125,6 +125,25 @@ button.ktile{cursor:pointer}
 .kr{font-size:1rem;color:var(--muted)}
 .kword{font-family:var(--f-disp);font-size:1.8rem;font-weight:700;min-width:88px;min-height:72px}
 .kopt{font-size:3rem;min-width:84px;min-height:84px;padding:6px 10px}
+.wallgrid{display:grid;grid-template-columns:auto repeat(5,1fr);gap:6px;align-items:stretch}
+.wrow{font-size:.8rem;color:var(--muted);align-self:center;padding-right:4px;white-space:nowrap}
+.cell{position:relative;min-height:58px;border-radius:10px;border:2px solid var(--line);background:var(--surface);color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px;font-family:var(--f-disp)}
+.cell .cl{font-size:1.5rem;font-weight:700;line-height:1.1}
+.cell .cr{font-size:.68rem;opacity:.85}
+.cell.empty{border:none;background:transparent}
+.cell.l1{background:color-mix(in srgb,var(--rc) 30%,var(--surface));border-color:var(--rc);color:var(--ink)}
+.cell.l2{background:var(--rc);border-color:var(--rc);color:var(--ron,#fff)}
+.cell.l3{background:#F2C318;border-color:#B8920A;color:#2A2200}
+.cell.l3::after{content:'⭐';position:absolute;top:-6px;right:-4px;font-size:.9rem}
+.cell.fresh{animation:roll .9s ease-out}
+@keyframes roll{0%{background-size:0% 100%;transform:scale(1.1)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.cell.fresh{animation:none}}
+.wallhead{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px;border:2px solid var(--line)}
+.wdetail{background:var(--soft);border-radius:12px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.wdetail img{width:96px;border:2px solid var(--ink);border-radius:10px;background:#fff}
+.wsec{margin-top:10px;font-size:.95rem}
 </style>
 </head>
 <body>
@@ -134,6 +153,7 @@ button.ktile{cursor:pointer}
     <div class="row">
       <label class="btn ghost"><input type="checkbox" id="optSlow"> Slow voice</label>
       <label class="btn ghost"><input type="checkbox" id="optBig"> Big text</label>
+      <button class="btn ghost" id="wallBtn">🧱 My wall</button>
       <button class="btn ghost" id="teacherBtn" aria-pressed="false">Teacher notes</button>
       <button class="btn ghost" id="voiceBtn" hidden>🎙 My voice</button>
       <button class="btn ghost" id="resetBtn" hidden>↺ Reset lesson (keeps my voice)</button>
@@ -148,6 +168,11 @@ button.ktile{cursor:pointer}
   <ul id="nbList"></ul>
   <textarea id="nbFree" placeholder="Anything else you want to remember…"></textarea>
   <div class="row" style="margin-top:8px"><button class="btn ghost" id="nbClear">Clear</button><button class="btn" id="nbClose">Close</button></div>
+</aside>
+
+<aside class="vpanel" id="wallPanel" hidden role="dialog" aria-label="My katakana wall">
+  <div class="top"><b>🧱 My katakana wall</b><button class="btn" id="wallClose">Close</button></div>
+  <div id="wallBody"></div>
 </aside>
 
 <aside class="vpanel" id="voicePanel" hidden role="dialog" aria-label="Record my voice">
@@ -266,7 +291,7 @@ const TN={
  intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「ペンキの せんせい」は本人の実際の仕事に合わせて変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
  like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
  cafe:['5枚が終わると「Open the café door」が出る。押すとベルの音とメニューが出る。メニューの絵・値段は小道具。ルビーさんはメニューを見ながら自然に注文できる。','会話は3回(Round 1→2→3)。1回目は同じ文、2回目は好きなものを選ぶ、3回目は役を交代(ルビーさんが店員)。ミスはその場で直さず、終わってから正しい形を言って聞かせる。','言えないときは「🆘 My lines」で文を見せる。先生の店員のセリフは「Waiter lines」。値段は「ろっぴゃくえんです」のように先生が言う。黄色の値段(300・600・800)は読み方が変わるので、ルビーさんに言ってもらう練習にもできる。タップすると読み上げ。'],
- kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。Round 3: 声を聞いて、文字の単語を3つから選ぶ(形ではなく文字を読む)。Round 4: 声を聞いて、文字を3つから選ぶ(1文字ずつ)。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): スマホのアプリ「Memory Hints」で3分だけ見る。'],
+ kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。Round 3: 声を聞いて、文字の単語を3つから選ぶ(形ではなく文字を読む)。Round 4: 声を聞いて、文字を3つから選ぶ(1文字ずつ)。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','終わったら「My wall」(右上)でカタカナの壁を見せる。読めた文字がペンキで塗られていく(薄い=見た、色=読めた、金=別の日にも読めた)。似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): 「My wall」→「Paint 3 cells」(3分)。またはスマホのアプリ「Memory Hints」で3分。'],
  wrap:['まず「Now」で、最初と同じ5つをもう一度。「Before →」の横に最初の結果が出るので、変わったところを見せて褒める。上達が見えるのが大事。その後「言えた文」を見て、1つだけ褒める。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
 };
 
@@ -386,6 +411,100 @@ function galleryHtml(){
 }
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
+/* ---------- katakana wall (cells get painted as letters are read) ---------- */
+const ROWS=[
+ ['ア行','#C2410C','#fff',['ア','イ','ウ','エ','オ']],['カ行','#B45309','#fff',['カ','キ','ク','ケ','コ']],
+ ['サ行','#EAB308','#2A2200',['サ','シ','ス','セ','ソ']],['タ行','#15803D','#fff',['タ','チ','ツ','テ','ト']],
+ ['ナ行','#0F766E','#fff',['ナ','ニ','ヌ','ネ','ノ']],['ハ行','#1D4ED8','#fff',['ハ','ヒ','フ','ヘ','ホ']],
+ ['マ行','#6D28D9','#fff',['マ','ミ','ム','メ','モ']],['ヤ行','#BE185D','#fff',['ヤ','','ユ','','ヨ']],
+ ['ラ行','#B91C1C','#fff',['ラ','リ','ル','レ','ロ']],['ワ行','#475569','#fff',['ワ','','ヲ','','ン']]];
+const EXTRA=['ジ','ザ','ビ','ピ','ッ','ー','ュ'];
+const ROMA={ア:'a',イ:'i',ウ:'u',エ:'e',オ:'o',カ:'ka',キ:'ki',ク:'ku',ケ:'ke',コ:'ko',サ:'sa',シ:'shi',ス:'su',セ:'se',ソ:'so',タ:'ta',チ:'chi',ツ:'tsu',テ:'te',ト:'to',ナ:'na',ニ:'ni',ヌ:'nu',ネ:'ne',ノ:'no',ハ:'ha',ヒ:'hi',フ:'fu',ヘ:'he',ホ:'ho',マ:'ma',ミ:'mi',ム:'mu',メ:'me',モ:'mo',ヤ:'ya',ユ:'yu',ヨ:'yo',ラ:'ra',リ:'ri',ル:'ru',レ:'re',ロ:'ro',ワ:'wa',ヲ:'o',ン:'n',ジ:'ji',ザ:'za',ビ:'bi',ピ:'pi',ッ:'(pause)',ー:'(long)',ュ:'(small yu)'};
+const LOOK2={ク:'ケ',ケ:'ク',ヒ:'ピ',ピ:'ヒ',シ:'ツ',ツ:'シ',ソ:'ン',ン:'ソ',ウ:'ワ',ワ:'ウ',ノ:'メ',メ:'ノ',ジ:'シ',ザ:'サ',ビ:'ヒ'};
+const today=()=>{try{return new Date().toISOString().slice(0,10)}catch(e){return ''}};
+const Wall={data:store.get('ruby1.wall',{}),fresh:{},
+  mark(ch,kind){
+    if(!ROMA[ch])return;
+    const e=this.data[ch]||{lv:0,day:''};const before=e.lv;
+    if(kind==='seen'){if(e.lv<1)e.lv=1}
+    else if(kind==='read'){if(e.lv<2){e.lv=2;e.day=today()}else if(e.lv===2&&e.day!==today())e.lv=3}
+    this.data[ch]=e;if(e.lv!==before)this.fresh[ch]=1;
+    store.set('ruby1.wall',this.data);return e.lv!==before;},
+  markWord(word,kind){[...word].forEach(c=>this.mark(c,kind))},
+  total(){return ROWS.reduce((n,r)=>n+r[3].filter(Boolean).length,0)+EXTRA.length},
+  painted(){return Object.values(this.data).filter(e=>e.lv>=2).length},
+  rowDone(r){const cs=r[3].filter(Boolean);return cs.length&&cs.every(c=>(this.data[c]||{}).lv>=2)}};
+function cellHtml(ch,row){
+  if(!ch)return '<div class="cell empty"></div>';
+  const e=Wall.data[ch]||{lv:0};const fresh=Wall.fresh[ch]?' fresh':'';
+  const style=row?`style="--rc:${row[1]};--ron:${row[2]}"`:`style="--rc:#475569;--ron:#fff"`;
+  return `<button class="cell l${e.lv}${fresh}" data-ch="${esc(ch)}" ${style} aria-label="${esc(ch)} ${esc(ROMA[ch]||'')}, level ${e.lv}"><span class="cl">${esc(ch)}</span><span class="cr">${esc(ROMA[ch]||'')}</span></button>`;
+}
+let wallView='wall',quiz=null;
+function renderWall(msg){
+  const body=$('#wallBody');
+  if(wallView==='quiz'&&quiz){return renderQuiz()}
+  const done=Wall.painted(),tot=Wall.total();
+  body.innerHTML=`<div class="wallhead"><div><b>${done}</b> <span class="en">of ${tot} painted</span></div>
+     <button class="btn pri" id="paint3">🎨 Paint 3 cells (3 min)</button></div>
+     <div class="bar"><i style="width:${done/tot*100}%"></i></div>
+     <div class="legend"><span><i></i>not yet</span><span><i style="background:color-mix(in srgb,#B45309 30%,var(--surface));border-color:#B45309"></i>seen</span><span><i style="background:#B45309;border-color:#B45309"></i>can read</span><span><i style="background:#F2C318;border-color:#B8920A"></i>remembered ⭐</span></div>
+     ${msg?`<div class="goal" role="status">${esc(msg)}</div>`:''}
+     <div class="wallgrid">${ROWS.map(r=>`<div class="wrow">${r[0]}</div>${r[3].map(c=>cellHtml(c,r)).join('')}`).join('')}</div>
+     <div class="wsec"><b>Extras</b></div>
+     <div class="wallgrid" style="grid-template-columns:repeat(7,1fr)">${EXTRA.map(c=>cellHtml(c,null)).join('')}</div>
+     <div id="wdetail"></div>`;
+  Wall.fresh={};
+  $('#paint3').onclick=startQuiz;
+  body.querySelectorAll('.cell[data-ch]').forEach(b=>b.onclick=()=>{
+    const ch=b.dataset.ch;speak(ch);
+    const img=Draw.data[ch];
+    $('#wdetail').innerHTML=`<div class="wdetail"><span class="jp">${esc(ch)}</span><span>${esc(ROMA[ch]||'')}</span><button class="btn ghost" data-h="${esc(ch)}">🔊 Hear it</button>${img?`<img src="${img}" alt="My hint for ${esc(ch)}">`:''}</div>`;
+    $('#wdetail').querySelectorAll('[data-h]').forEach(x=>x.onclick=()=>speak(x.dataset.h));
+  });
+}
+function startQuiz(){
+  const known=Object.keys(Wall.data).filter(c=>(Wall.data[c].lv||0)>=1&&(Wall.data[c].lv||0)<3&&!'ッーュ'.includes(c));
+  if(!known.length){renderWall('Play “Katakana café” first — then you can paint here!');return}
+  const picks=shuffle(known).slice(0,3);
+  const pool=Object.keys(Wall.data).filter(c=>(Wall.data[c].lv||0)>=1&&!'ッーュ'.includes(c));
+  quiz={i:0,items:picks,pool:pool.length>=3?pool:Object.keys(ROMA).filter(c=>!'ッーュ'.includes(c)),wrong:0,solved:false,painted:0,choices:null};
+  wallView='quiz';renderQuiz();
+}
+function quizChoices(c){
+  const bad=shuffle(quiz.pool.filter(x=>x!==c&&LOOK2[c]!==x&&LOOK2[x]!==c&&ROMA[x]!==ROMA[c])).slice(0,2);
+  const extra=shuffle(Object.keys(ROMA).filter(x=>!'ッーュ'.includes(x)&&x!==c&&!bad.includes(x)&&LOOK2[c]!==x&&LOOK2[x]!==c&&ROMA[x]!==ROMA[c]));
+  while(bad.length<2&&extra.length)bad.push(extra.shift());
+  return shuffle([c,...bad]);
+}
+function renderQuiz(){
+  const body=$('#wallBody'),q=quiz;
+  if(q.i>=q.items.length){
+    body.innerHTML=`<div class="chunkmsg"><div class="big">🎨</div><h2>${q.painted?`You painted ${q.painted} cell${q.painted>1?'s':''}!`:'Nice try! They will get painted next time.'}</h2>
+      <div class="row"><button class="btn pri" id="seeWall">See my wall</button></div></div>`;
+    $('#seeWall').onclick=()=>{wallView='wall';quiz=null;renderWall()};
+    burst(['🎨','🖌️','✨'],14);return}
+  const c=q.items[q.i];if(!q.choices)q.choices=quizChoices(c);
+  body.innerHTML=`<div class="en">Paint ${q.i+1} of ${q.items.length}</div>
+    <div class="card"><button class="btn pri" data-h="${esc(c)}">🔊 Listen</button>
+    ${q.solved?`<div class="ktiles"><div class="ktile k0"><span class="kk">${esc(c)}</span><span class="kr">${esc(ROMA[c])}</span></div></div><div class="en">Painted! 🖌️</div>`
+      :`<div class="prompt"><b>Which letter says “${esc(ROMA[c])}”?</b></div><div class="row">${q.choices.map((o,i)=>`<button class="btn kword" data-i="${i}">${esc(o)}</button>`).join('')}</div>${q.msg?`<div class="en" role="status">${esc(q.msg)}</div>`:''}`}</div>
+    ${q.solved?'<div class="row"><button class="btn good" id="qNext">Next →</button></div>':''}
+    <div class="row"><button class="btn ghost" id="qBack">Back to wall</button></div>`;
+  body.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>speak(b.dataset.h));
+  if(!q.solved)setTimeout(()=>speak(c),150);
+  body.querySelectorAll('.kword').forEach(b=>b.onclick=()=>{
+    if(q.choices[+b.dataset.i]===c){q.solved=true;q.msg='';
+      if(q.wrong===0){if(Wall.mark(c,'read'))q.painted++}else Wall.mark(c,'seen');
+      speak(c);burst(['🖌️','✨'],6);renderQuiz()}
+    else{q.wrong++;q.msg='Almost! Listen again 🙂';renderQuiz()}});
+  const nx=$('#qNext');if(nx)nx.onclick=()=>{q.i++;q.wrong=0;q.solved=false;q.choices=null;q.msg='';renderQuiz()};
+  $('#qBack').onclick=()=>{wallView='wall';quiz=null;renderWall()};
+}
+function openWall(){wallView='wall';quiz=null;$('#wallPanel').hidden=false;renderWall()}
+$('#wallBtn').onclick=openWall;
+$('#wallClose').onclick=()=>{$('#wallPanel').hidden=true};
+
 /* ---------- scene: katakana café (4 rounds: sounds+picture, picture only, hear→word, hear→letter) ---------- */
 const LETTERS=[['コ','ko','コーヒー','☕'],['ヒ','hi','コーヒー','☕'],['ケ','ke','ケーキ','🍰'],['キ','ki','ケーキ','🍰'],['ス','su','ジュース','🧃'],['ピ','pi','ピザ','🍕'],['ザ','za','ピザ','🍕'],['ク','ku','クッキー','🍪']];
 const LOOK={ク:'ケ',ケ:'ク',ヒ:'ピ',ピ:'ヒ'};
@@ -424,7 +543,8 @@ function renderKata(sc){
       st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>You read the café words!</h2>
         <p class="en">Coffee, cake, juice, pizza, cookie — all in katakana.</p></div>
         ${Object.keys(Draw.data).length?'<h3>My hints</h3>':''}${galleryHtml()}
-        <div class="row"><button class="btn" id="again">Play again</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div>${noteFor(sc.id)}</section>`;
+        <div class="row"><button class="btn good" id="seeW">🧱 See my wall</button><button class="btn" id="again">Play again</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div>${noteFor(sc.id)}</section>`;
+      $('#seeW').onclick=openWall;
       $('#again').onclick=()=>{phase=1;newRound();draw()};
       const g=$('#go');if(g)g.onclick=()=>{cur++;render()};
       state.done[sc.id]=true;saveState();renderSteps();return}
@@ -462,7 +582,8 @@ function renderKata(sc){
       ${noteFor(sc.id)}</section>`;
     st.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>speak(b.dataset.h));
     if(!solved&&phase>=3){const t=phase===3?c.jp:c[0];setTimeout(()=>speak(t),150)}
-    const correct=()=>{solved=true;msg='';if(phase<=2){speak(c.jp);burst([c.pic,'✨'],6)}else if(phase===3){speak(c.jp);burst([c.pic,'✨'],6)}else{burst(['✨',c[3]],6)}draw()};
+    const correct=()=>{solved=true;msg='';
+      if(phase<=2)Wall.markWord(c.jp,'seen');else if(phase===3)Wall.markWord(c.jp,wrong===0?'read':'seen');else Wall.mark(c[0],wrong===0?'read':'seen');if(phase<=2){speak(c.jp);burst([c.pic,'✨'],6)}else if(phase===3){speak(c.jp);burst([c.pic,'✨'],6)}else{burst(['✨',c[3]],6)}draw()};
     const wrongPick=()=>{wrong++;msg=phase===4?'Almost! Listen again and try 🙂':'Almost! Try again 🙂';draw()};
     st.querySelectorAll('.kopt').forEach(b=>b.onclick=()=>{choices[+b.dataset.i]===c?correct():wrongPick()});
     st.querySelectorAll('.kword').forEach(b=>b.onclick=()=>{choices[+b.dataset.i]===c?correct():wrongPick()});
@@ -567,6 +688,7 @@ function allGroups(){
   SCENES.forEach(s=>{if(s.cards){const arr=[];s.cards.forEach(c=>{arr.push(c.q);(Array.isArray(c.jp)?c.jp.map(a=>a.jp):[c.jp]).forEach(x=>arr.push(x))});grp(s.title,arr)}});
   grp('Check: hiragana & katakana',CAN.filter(c=>c[4]).flatMap(c=>c[4]));
   grp('Katakana letters',LETTERS.map(l=>l[0]));
+  grp('Katakana wall (other letters)',Object.keys(ROMA).filter(c=>!'ッーュ'.includes(c)));
   grp('Café: waiter',WAITER);
   grp('Café: menu & prices',MENU.map(menuSay));
   return G;
@@ -627,8 +749,8 @@ $('#resetBtn').onclick=()=>{
   if(!resetArmed){b.textContent='Tap again to reset (voice is kept)';b.classList.add('pri');
     resetArmed=setTimeout(()=>{resetArmed=null;b.textContent='↺ Reset lesson (keeps my voice)';b.classList.remove('pri')},4000);return}
   clearTimeout(resetArmed);resetArmed=null;
-  ['ruby1.state','ruby1.can','ruby1.can2','ruby1.draw','ruby1.notes','ruby1.free','ruby1.hint'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  state.done={};state.said=[];Draw.data={};Notes.items=[];Notes.render();$('#nbFree').value='';
+  ['ruby1.state','ruby1.can','ruby1.can2','ruby1.draw','ruby1.notes','ruby1.free','ruby1.hint','ruby1.wall'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  state.done={};state.said=[];Draw.data={};Wall.data={};Wall.fresh={};Notes.items=[];Notes.render();$('#nbFree').value='';
   cafeState={open:false,round:1,help:false,swap:false};cur=0;
   b.textContent='Reset ✓';b.classList.remove('pri');setTimeout(()=>{b.textContent='↺ Reset lesson (keeps my voice)'},2000);
   render();
