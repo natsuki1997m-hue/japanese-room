@@ -144,6 +144,10 @@ button.ktile{cursor:pointer}
 .wdetail{background:var(--soft);border-radius:12px;padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .wdetail img{width:96px;border:2px solid var(--ink);border-radius:10px;background:#fff}
 .wsec{margin-top:10px;font-size:.95rem}
+.rchips{display:flex;flex-wrap:wrap;gap:6px}
+.rchip{border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:4px 12px;min-height:38px;font-size:.85rem}
+.rchip[aria-selected="true"]{border-color:var(--accent);background:var(--soft)}
+.rchip:disabled{opacity:.45;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -291,7 +295,7 @@ const TN={
  intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「ペンキの せんせい」は本人の実際の仕事に合わせて変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
  like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
  cafe:['5枚が終わると「Open the café door」が出る。押すとベルの音とメニューが出る。メニューの絵・値段は小道具。ルビーさんはメニューを見ながら自然に注文できる。','会話は3回(Round 1→2→3)。1回目は同じ文、2回目は好きなものを選ぶ、3回目は役を交代(ルビーさんが店員)。ミスはその場で直さず、終わってから正しい形を言って聞かせる。','言えないときは「🆘 My lines」で文を見せる。先生の店員のセリフは「Waiter lines」。値段は「ろっぴゃくえんです」のように先生が言う。黄色の値段(300・600・800)は読み方が変わるので、ルビーさんに言ってもらう練習にもできる。タップすると読み上げ。'],
- kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。Round 3: 声を聞いて、文字の単語を3つから選ぶ(形ではなく文字を読む)。Round 4: 声を聞いて、文字を3つから選ぶ(1文字ずつ)。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','終わったら「My wall」(右上)でカタカナの壁を見せる。読めた文字がペンキで塗られていく(薄い=見た、色=読めた、金=別の日にも読めた)。似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): 「My wall」→「Paint 3 cells」(3分)。またはスマホのアプリ「Memory Hints」で3分。'],
+ kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','画面の上のラウンド選択(1〜4)で、好きなラウンドに飛べる。3・4は、ラウンド1を一度終えるまで押せない(当てずっぽう防止)。復習の日はここから3に飛ぶ。Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。Round 3: 声を聞いて、文字の単語を3つから選ぶ(形ではなく文字を読む)。Round 4: 声を聞いて、文字を3つから選ぶ(1文字ずつ)。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','終わったら「My wall」(右上)でカタカナの壁を見せる。読めた文字がペンキで塗られていく(薄い=見た、色=読めた、金=別の日にも読めた)。似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): 「My wall」→「Paint 3 cells」(3分)。またはスマホのアプリ「Memory Hints」で3分。'],
  wrap:['まず「Now」で、最初と同じ5つをもう一度。「Before →」の横に最初の結果が出るので、変わったところを見せて褒める。上達が見えるのが大事。その後「言えた文」を見て、1つだけ褒める。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
 };
 
@@ -532,18 +536,29 @@ function renderKata(sc){
   function tiles(c,show,clickable){
     return `<div class="ktiles">${c.pieces.map((p,i)=>`<${clickable?'button':'div'} class="ktile k${i%4}" ${clickable?`data-k="${esc(p[0])}" aria-label="Draw a hint for ${esc(p[0])}"`:''}><span class="kk">${esc(p[0])}</span>${show?`<span class="kr">${esc(p[1])}</span>`:''}</${clickable?'button':'div'}>`).join('')}</div>`;
   }
+  const unlocked=()=>!!store.get('ruby1.kataUnlock',false);
+  function chips(){
+    const names=['Sounds','Picture','Hear → word','Hear → letter'];
+    return `<div class="rchips" role="tablist" aria-label="Rounds">${names.map((nm,i)=>{const r=i+1,off=r>=3&&!unlocked();
+      return `<button class="rchip" role="tab" data-r="${r}" aria-selected="${r===phase}" ${off?'disabled title="Finish round 1 first"':''}><b>${r}</b> ${nm}</button>`}).join('')}</div>`;
+  }
+  function bindChips(){
+    st.querySelectorAll('.rchip').forEach(b=>b.onclick=()=>{const r=+b.dataset.r;if(r===phase&&stage==='play')return;phase=r;newRound();draw()});
+  }
   function wordBtn(o,i){return `<button class="btn kword" data-i="${i}" aria-label="Word ${i+1}">${esc(o.jp)}</button>`}
   function draw(){
     if(stage==='between'){
       const m=ROUND_MSG[phase+1];
-      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🌟</div><h2>${m[0]}</h2><p class="en">${m[1]}</p>
+      st.innerHTML=`<section class="panel">${chips()}<div class="chunkmsg"><div class="big">🌟</div><h2>${m[0]}</h2><p class="en">${m[1]}</p>
         <button class="btn pri" id="nextR">Start round ${phase+1} →</button></div>${noteFor(sc.id)}</section>`;
+      bindChips();
       $('#nextR').onclick=()=>{phase++;newRound();draw()};return}
     if(stage==='end'){
-      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>You read the café words!</h2>
+      st.innerHTML=`<section class="panel">${chips()}<div class="chunkmsg"><div class="big">🎉</div><h2>You read the café words!</h2>
         <p class="en">Coffee, cake, juice, pizza, cookie — all in katakana.</p></div>
         ${Object.keys(Draw.data).length?'<h3>My hints</h3>':''}${galleryHtml()}
         <div class="row"><button class="btn good" id="seeW">🧱 See my wall</button><button class="btn" id="again">Play again</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div>${noteFor(sc.id)}</section>`;
+      bindChips();
       $('#seeW').onclick=openWall;
       $('#again').onclick=()=>{phase=1;newRound();draw()};
       const g=$('#go');if(g)g.onclick=()=>{cur++;render()};
@@ -574,12 +589,14 @@ function renderKata(sc){
           ${msg?`<div class="en" role="status">${esc(msg)}</div>`:''}`;
     }
     st.innerHTML=`<section class="panel"><h2>${esc(sc.title)}</h2><div class="goal">${esc(sc.goal)}</div>
+      ${chips()}
       <div class="en">Round ${phase} of ${R} · ${phase===4?'letter':'word'} ${idx+1} of ${n}</div>
       <div class="dots">${dots}</div>
       <div class="card">${body}</div>
       ${drawKey?mineHtml(drawKey,true,drawKey):''}
       ${solved?(phase===4?`<div class="row"><button class="btn good" id="kNext">Next →</button></div>`:`<div class="row"><button class="btn good" id="kSaid">✓ Said it!</button><button class="btn" id="kAlmost">Almost</button></div>`):''}
       ${noteFor(sc.id)}</section>`;
+    bindChips();
     st.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>speak(b.dataset.h));
     if(!solved&&phase>=3){const t=phase===3?c.jp:c[0];setTimeout(()=>speak(t),150)}
     const correct=()=>{solved=true;msg='';
@@ -593,7 +610,7 @@ function renderKata(sc){
     const next=ok=>{
       if(ok&&phase<=3&&!state.said.includes(c.jp)){state.said.push(c.jp);saveState()}
       idx++;wrong=0;solved=false;hintOn=false;msg='';drawKey=null;
-      if(idx>=n){if(phase<R){stage='between'}else{stage='end';burst(['🎉','☕','🍰','🍕'],20)}}else{choices=pickChoices()}
+      if(idx>=n){if(phase===1)store.set('ruby1.kataUnlock',true);if(phase<R){stage='between'}else{stage='end';burst(['🎉','☕','🍰','🍕'],20)}}else{choices=pickChoices()}
       draw()};
     const sd=$('#kSaid');if(sd)sd.onclick=()=>next(true);
     const al=$('#kAlmost');if(al)al.onclick=()=>next(false);
@@ -749,7 +766,7 @@ $('#resetBtn').onclick=()=>{
   if(!resetArmed){b.textContent='Tap again to reset (voice is kept)';b.classList.add('pri');
     resetArmed=setTimeout(()=>{resetArmed=null;b.textContent='↺ Reset lesson (keeps my voice)';b.classList.remove('pri')},4000);return}
   clearTimeout(resetArmed);resetArmed=null;
-  ['ruby1.state','ruby1.can','ruby1.can2','ruby1.draw','ruby1.notes','ruby1.free','ruby1.hint','ruby1.wall'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  ['ruby1.state','ruby1.can','ruby1.can2','ruby1.draw','ruby1.notes','ruby1.free','ruby1.hint','ruby1.wall','ruby1.kataUnlock'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
   state.done={};state.said=[];Draw.data={};Wall.data={};Wall.fresh={};Notes.items=[];Notes.render();$('#nbFree').value='';
   cafeState={open:false,round:1,help:false,swap:false};cur=0;
   b.textContent='Reset ✓';b.classList.remove('pri');setTimeout(()=>{b.textContent='↺ Reset lesson (keeps my voice)'},2000);
