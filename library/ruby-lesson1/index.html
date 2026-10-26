@@ -452,7 +452,8 @@ function renderWall(msg){
   body.innerHTML=`<div class="wallhead"><div><b>${done}</b> <span class="en">of ${tot} painted</span></div>
      <button class="btn pri" id="paint3">🎨 Paint 3 cells (3 min)</button></div>
      <div class="bar"><i style="width:${done/tot*100}%"></i></div>
-     <div class="legend"><span><i></i>not yet</span><span><i style="background:color-mix(in srgb,#B45309 30%,var(--surface));border-color:#B45309"></i>seen</span><span><i style="background:#B45309;border-color:#B45309"></i>can read</span><span><i style="background:#F2C318;border-color:#B8920A"></i>remembered ⭐</span></div>
+     <div class="legend"><span><i></i>not yet</span><span><i style="background:color-mix(in srgb,#64748B 30%,var(--surface));border-color:#64748B"></i>seen (pale)</span><span><i style="background:#64748B;border-color:#64748B"></i>can read (solid)</span><span><i style="background:#F2C318;border-color:#B8920A"></i>remembered ⭐ (gold)</span></div>
+     <div class="en" style="margin:2px 0 6px">Each row has its own colour (カ行 = brown, ハ行 = blue…). Pale → solid → gold shows how well you know the letter.</div>
      <div class="en" style="margin:6px 0">① Play Katakana café → letters appear here (pale = seen). ② Paint 3 cells → a 3-question quiz on letters you have met. ③ Answer right → the cell is painted!</div>
      ${msg?`<div class="goal" role="status">${esc(msg)}</div>`:''}
      <div class="wallgrid">${ROWS.map(r=>`<div class="wrow">${r[0]}</div>${r[3].map(c=>cellHtml(c,r)).join('')}`).join('')}</div>
