@@ -104,6 +104,7 @@ textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:1
 .cafe-sign{background:var(--tape);color:var(--on-tape);border-radius:10px;padding:6px 12px;font-family:var(--f-disp);font-weight:700}
 .menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
 .menu-item{border:2px solid var(--ink);background:var(--bg);color:var(--ink);border-radius:14px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.mi-r{font-family:var(--f-disp);font-size:.95rem}.mi-r.irr{background:var(--tape);color:var(--on-tape);border-radius:6px;padding:0 6px;font-weight:700}
 .mi-pic{font-size:2rem}.mi-jp{font-family:var(--f-disp);font-weight:700;font-size:1.15rem}.mi-p{color:var(--muted);font-size:.9rem}
 </style>
 </head>
@@ -244,7 +245,7 @@ const TN={
  warm:['ルビーさんの写真を1枚見せてもらい、「これは なんですか？」「だれですか？」など、1文だけ。写真は右のボタンで画面に表示(保存されません)。','写真の話のあと、「いまのレベルチェック」を3分で。実際に聞いて、言えたかを先生が押す: 名前→好きなもの→カフェで注文→ひらがな・カタカナ(下の文字を見せて読んでもらう)。責めずに、楽しく。😀=自分で言えた 🙂=ヒントで言えた 😅=まだ。','言えなくても「ゆっくりでOK」と伝える。5秒待つ→最初の1文字→選択肢2つの順。'],
  intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「ペンキの せんせい」は本人の実際の仕事に合わせて変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
  like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
- cafe:['5枚が終わると「Open the café door」が出る。押すとベルの音とメニューが出る。メニューの絵・値段は小道具。ルビーさんはメニューを見ながら自然に注文できる。','会話は3回(Round 1→2→3)。1回目は同じ文、2回目は好きなものを選ぶ、3回目は役を交代(ルビーさんが店員)。ミスはその場で直さず、終わってから正しい形を言って聞かせる。','言えないときは「🆘 My lines」で文を見せる。先生の店員のセリフは「Waiter lines」。値段は「さんドルです」など簡単に言うだけでOK(ルビーさんは聞くだけ)。'],
+ cafe:['5枚が終わると「Open the café door」が出る。押すとベルの音とメニューが出る。メニューの絵・値段は小道具。ルビーさんはメニューを見ながら自然に注文できる。','会話は3回(Round 1→2→3)。1回目は同じ文、2回目は好きなものを選ぶ、3回目は役を交代(ルビーさんが店員)。ミスはその場で直さず、終わってから正しい形を言って聞かせる。','言えないときは「🆘 My lines」で文を見せる。先生の店員のセリフは「Waiter lines」。値段は「ろっぴゃくえんです」のように先生が言う。黄色の値段(300・600・800)は読み方が変わるので、ルビーさんに言ってもらう練習にもできる。タップすると読み上げ。'],
  kata:['1回5文字まで。文字の形は説明しすぎない。絵と単語で覚える。','「あいす」の「ア」が黄色くなっているのを見せる→「ア」だけ言う。','似た文字(シ/ツ、ソ/ン)はまだ出さない。後の回で。'],
  wrap:['まず「Now」で、最初と同じ5つをもう一度。「Before →」の横に最初の結果が出るので、変わったところを見せて褒める。上達が見えるのが大事。その後「言えた文」を見て、1つだけ褒める。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
 };
@@ -301,16 +302,19 @@ function renderWarm(s){
 }
 
 /* ---------- café scene (role-play stage) ---------- */
-const MENU=[['☕','コーヒー',4],['🍵','おちゃ',3],['🧃','ジュース',4],['🍰','ケーキ',5],['🍪','クッキー',3],['🥐','パン',4]];
+const MENU=[['☕','コーヒー',400],['🍵','おちゃ',300],['🧃','ジュース',500],['🍰','ケーキ',600],['🍪','クッキー',200],['🥪','サンドイッチ',800]];
+const HUNDRED={1:'ひゃく',2:'にひゃく',3:'さんびゃく',4:'よんひゃく',5:'ごひゃく',6:'ろっぴゃく',7:'ななひゃく',8:'はっぴゃく',9:'きゅうひゃく'};
+const IRREG=[3,6,8];
+const yenRead=n=>HUNDRED[n/100]+'えん';
 const WAITER=['いらっしゃいませ。','おのみものは？','ケーキは？','ありがとうございます。','また どうぞ。'];
 const RUBY_LINES=[['🙋','すみません。'],['☕','コーヒーを ください。'],['🍰','ケーキも ください。'],['💴','いくらですか？'],['😊','ありがとうございます。']];
 let cafeState={open:false,round:1,help:false,swap:false};
 function cafeHtml(){
   const c=cafeState;
-  if(!c.open)return `<div class="cafe-door"><p class="prompt">Next: a real café! ☕</p><button class="btn pri" id="cafeOpen">🚪 Open the café door</button></div>`;
+  if(!c.open)return `<div class="cafe-door"><p class="prompt">Next: a real café! ☕ Prices are in yen. The yellow ones sound different!</p><button class="btn pri" id="cafeOpen">🚪 Open the café door</button></div>`;
   return `<div class="cafe">
    <div class="cafe-sign">☕ Café Ruby &nbsp;·&nbsp; Round ${c.round} of 3 ${c.round===1?'(same words)':c.round===2?'(you choose!)':'(swap roles!)'}</div>
-   <div class="menu" aria-label="Menu">${MENU.map(m=>`<button class="menu-item" data-say="${esc(m[1])}"><span class="mi-pic">${m[0]}</span><span class="mi-jp">${esc(m[1])}</span><span class="mi-p">$${m[2]}</span></button>`).join('')}</div>
+   <div class="menu" aria-label="Menu">${MENU.map(m=>`<button class="menu-item" data-say="${esc(m[1]+'。'+yenRead(m[2])+'です。')}"><span class="mi-pic">${m[0]}</span><span class="mi-jp">${esc(m[1])}</span><span class="mi-p">${m[2]}円</span><span class="mi-r ${IRREG.includes(m[2]/100)?'irr':''}">${yenRead(m[2])}</span></button>`).join('')}</div>
    <div class="row" style="margin-top:6px">
      <button class="btn" id="cafeWaiter">${c.swap?'🧑‍🍳 You are the waiter':'🧑‍🍳 Waiter lines'}</button>
      <button class="btn" id="cafeHelp">${c.help?'Hide my lines':'🆘 My lines'}</button>
