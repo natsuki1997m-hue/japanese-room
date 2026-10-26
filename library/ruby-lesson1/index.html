@@ -91,6 +91,7 @@ textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:1
 @keyframes fly{from{transform:translate(0,0) scale(.6);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(1.2);opacity:0}}
 @media (prefers-reduced-motion:reduce){.burst{display:none}.btn:hover{transform:none}}
 .vpanel{position:fixed;inset:12px max(12px,env(safe-area-inset-right)) 12px max(12px,env(safe-area-inset-left));max-width:760px;margin:0 auto;z-index:30;background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:16px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.vh{margin-top:12px;font-size:1.05rem}
 .vrow{display:grid;grid-template-columns:1fr auto auto;gap:6px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
 .vrow .t{font-family:var(--f-disp);font-weight:700;font-size:1.1rem}
 .vslot{display:flex;gap:4px;align-items:center}
@@ -306,6 +307,7 @@ const MENU=[['☕','コーヒー',400],['🍵','おちゃ',300],['🧃','ジュ�
 const HUNDRED={1:'ひゃく',2:'にひゃく',3:'さんびゃく',4:'よんひゃく',5:'ごひゃく',6:'ろっぴゃく',7:'ななひゃく',8:'はっぴゃく',9:'きゅうひゃく'};
 const IRREG=[3,6,8];
 const yenRead=n=>HUNDRED[n/100]+'えん';
+const menuSay=m=>m[1]+'、'+yenRead(m[2])+'です。';
 const WAITER=['いらっしゃいませ。','おのみものは？','ケーキは？','ありがとうございます。','また どうぞ。'];
 const RUBY_LINES=[['🙋','すみません。'],['☕','コーヒーを ください。'],['🍰','ケーキも ください。'],['💴','いくらですか？'],['😊','ありがとうございます。']];
 let cafeState={open:false,round:1,help:false,swap:false};
@@ -314,7 +316,7 @@ function cafeHtml(){
   if(!c.open)return `<div class="cafe-door"><p class="prompt">Next: a real café! ☕ Prices are in yen. The yellow ones sound different!</p><button class="btn pri" id="cafeOpen">🚪 Open the café door</button></div>`;
   return `<div class="cafe">
    <div class="cafe-sign">☕ Café Ruby &nbsp;·&nbsp; Round ${c.round} of 3 ${c.round===1?'(same words)':c.round===2?'(you choose!)':'(swap roles!)'}</div>
-   <div class="menu" aria-label="Menu">${MENU.map(m=>`<button class="menu-item" data-say="${esc(m[1]+'。'+yenRead(m[2])+'です。')}"><span class="mi-pic">${m[0]}</span><span class="mi-jp">${esc(m[1])}</span><span class="mi-p">${m[2]}円</span><span class="mi-r ${IRREG.includes(m[2]/100)?'irr':''}">${yenRead(m[2])}</span></button>`).join('')}</div>
+   <div class="menu" aria-label="Menu">${MENU.map(m=>`<button class="menu-item" data-say="${esc(menuSay(m))}"><span class="mi-pic">${m[0]}</span><span class="mi-jp">${esc(m[1])}</span><span class="mi-p">${m[2]}円</span><span class="mi-r ${IRREG.includes(m[2]/100)?'irr':''}">${yenRead(m[2])}</span></button>`).join('')}</div>
    <div class="row" style="margin-top:6px">
      <button class="btn" id="cafeWaiter">${c.swap?'🧑‍🍳 You are the waiter':'🧑‍🍳 Waiter lines'}</button>
      <button class="btn" id="cafeHelp">${c.help?'Hide my lines':'🆘 My lines'}</button>
@@ -335,17 +337,17 @@ function bindCafe(){
 
 /* ---------- scene: deck ---------- */
 function renderDeck(s){
-  const CH=5;let queue=s.cards.map((c,i)=>({c,i})),pos=0,hintShown=false,revealed=false,got=0,retry=[],finished=false;
+  const CH=5;let queue=s.cards.map((c,i)=>({c,i})),pos=0,hintShown=false,revealed=false,got=0,retry=[],finished=false,skipped=false;
   const st=$('#stage');
   function draw(){
     const total=s.cards.length;
     if(finished){
-      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>${got} of ${total} said!</h2>
-       <p class="en">${retry.length?'The tricky ones will come back later. That is normal!':'Take a breath. You did it.'}</p>
+      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>${skipped?'Let’s go to the café!':got+' of '+total+' said!'}</h2>
+       <p class="en">${skipped?'':retry.length?'The tricky ones will come back later. That is normal!':'Take a breath. You did it.'}</p>
        ${s.role?cafeHtml():''}
        <div class="row"><button class="btn" id="again">Once more</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div></div>${noteFor(s.id)}</section>`;
       if(s.role)bindCafe();
-      $('#again').onclick=()=>{queue=s.cards.map((c,i)=>({c,i}));pos=0;got=0;retry=[];finished=false;hintShown=revealed=false;draw()};
+      $('#again').onclick=()=>{queue=s.cards.map((c,i)=>({c,i}));pos=0;got=0;retry=[];finished=false;skipped=false;hintShown=revealed=false;draw()};
       const g=$('#go');if(g)g.onclick=()=>{cur++;render()};
       state.done[s.id]=true;saveState();renderSteps();return;}
     const {c}=queue[pos];
@@ -369,7 +371,8 @@ function renderDeck(s){
      <div class="row">
        ${!revealed?`${!hintShown?'<button class="btn" id="hint">💡 Hint</button>':''}<button class="btn pri" id="show">Show answer</button>`
         :`<button class="btn" id="note">＋ Notebook</button><button class="btn good" id="said">✓ Said it!</button><button class="btn" id="almost">Almost</button>`}
-     </div>${noteFor(s.id)}</section>`;
+     </div>${s.role?'<div class="row"><button class="btn ghost" id="skipCards">Skip to the café →</button></div>':''}${noteFor(s.id)}</section>`;
+    const sk=$('#skipCards');if(sk)sk.onclick=()=>{skipped=true;finished=true;draw()};
     st.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>speak(b.dataset.h));
     const h=$('#hint');if(h)h.onclick=()=>{hintShown=true;draw()};
     const sh=$('#show');if(sh)sh.onclick=()=>{revealed=true;speak(answers[0].jp);draw()};
@@ -409,11 +412,16 @@ function renderWrap(s){
 }
 
 /* ---------- voice studio (teacher) ---------- */
-function allPhrases(){
-  const out=[];const add=t=>{if(t&&!out.includes(t))out.push(t)};
-  SCENES.forEach(s=>{if(s.cards)s.cards.forEach(c=>{add(c.q);(Array.isArray(c.jp)?c.jp.map(a=>a.jp):[c.jp]).forEach(add)})});
-  return out;
+function allGroups(){
+  const seen=new Set();const G=[];
+  const grp=(name,arr)=>{const a=arr.filter(t=>t&&!seen.has(t));a.forEach(t=>seen.add(t));if(a.length)G.push([name,a])};
+  SCENES.forEach(s=>{if(s.cards){const arr=[];s.cards.forEach(c=>{arr.push(c.q);(Array.isArray(c.jp)?c.jp.map(a=>a.jp):[c.jp]).forEach(x=>arr.push(x))});grp(s.title,arr)}});
+  grp('Check: hiragana & katakana',CAN.filter(c=>c[4]).flatMap(c=>c[4]));
+  grp('Café: waiter',WAITER);
+  grp('Café: menu & prices',MENU.map(menuSay));
+  return G;
 }
+function allPhrases(){return allGroups().flatMap(g=>g[1])}
 let recState=null;
 function vmsg(t){$('#voiceMsg').textContent=t}
 function renderVoice(){
@@ -427,7 +435,7 @@ function renderVoice(){
      <button class="btn" data-p="${esc(k)}" aria-label="Play ${label}" ${has(k)?'':'disabled'}>▶</button>
      <label class="btn" aria-label="Choose a file for ${label}">⬆<input type="file" accept="audio/*" data-f="${esc(k)}" hidden></label>
      <span class="${has(k)?'has':''}" aria-hidden="true">${has(k)?'✓':''}</span></div>`};
-  $('#voiceList').innerHTML=ph.map(t=>`<div class="vrow"><div class="t">${esc(t)}</div>${slot(t,'n','Normal')}${slot(t,'s','Slow')}</div>`).join('');
+  $('#voiceList').innerHTML=allGroups().map(g=>`<h3 class="vh">${esc(g[0])}</h3>`+g[1].map(t=>`<div class="vrow"><div class="t">${esc(t)}</div>${slot(t,'n','Normal')}${slot(t,'s','Slow')}</div>`).join('')).join('');
 }
 async function toggleRec(k){
   if(recState){recState.mr.stop();return}
