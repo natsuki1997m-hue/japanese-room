@@ -123,6 +123,7 @@ button.ktile{cursor:pointer}
 .ktile.k0{border-bottom-color:var(--accent)}.ktile.k1{border-bottom-color:var(--good)}.ktile.k2{border-bottom-color:var(--tape)}.ktile.k3{border-bottom-color:#2457D6}
 .kk{font-family:var(--f-disp);font-size:2.2rem;font-weight:700;line-height:1.2}
 .kr{font-size:1rem;color:var(--muted)}
+.kword{font-family:var(--f-disp);font-size:1.8rem;font-weight:700;min-width:88px;min-height:72px}
 .kopt{font-size:3rem;min-width:84px;min-height:84px;padding:6px 10px}
 </style>
 </head>
@@ -265,7 +266,7 @@ const TN={
  intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「ペンキの せんせい」は本人の実際の仕事に合わせて変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
  like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
  cafe:['5枚が終わると「Open the café door」が出る。押すとベルの音とメニューが出る。メニューの絵・値段は小道具。ルビーさんはメニューを見ながら自然に注文できる。','会話は3回(Round 1→2→3)。1回目は同じ文、2回目は好きなものを選ぶ、3回目は役を交代(ルビーさんが店員)。ミスはその場で直さず、終わってから正しい形を言って聞かせる。','言えないときは「🆘 My lines」で文を見せる。先生の店員のセリフは「Waiter lines」。値段は「ろっぴゃくえんです」のように先生が言う。黄色の値段(300・600・800)は読み方が変わるので、ルビーさんに言ってもらう練習にもできる。タップすると読み上げ。'],
- kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): スマホのアプリ「Memory Hints」で3分だけ見る。'],
+ kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。Round 3: 声を聞いて、文字の単語を3つから選ぶ(形ではなく文字を読む)。Round 4: 声を聞いて、文字を3つから選ぶ(1文字ずつ)。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): スマホのアプリ「Memory Hints」で3分だけ見る。'],
  wrap:['まず「Now」で、最初と同じ5つをもう一度。「Before →」の横に最初の結果が出るので、変わったところを見せて褒める。上達が見えるのが大事。その後「言えた文」を見て、1つだけ褒める。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
 };
 
@@ -385,65 +386,99 @@ function galleryHtml(){
 }
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-/* ---------- scene: katakana café (pick the picture, sound pieces, then no help) ---------- */
+/* ---------- scene: katakana café (4 rounds: sounds+picture, picture only, hear→word, hear→letter) ---------- */
+const LETTERS=[['コ','ko','コーヒー','☕'],['ヒ','hi','コーヒー','☕'],['ケ','ke','ケーキ','🍰'],['キ','ki','ケーキ','🍰'],['ス','su','ジュース','🧃'],['ピ','pi','ピザ','🍕'],['ザ','za','ピザ','🍕'],['ク','ku','クッキー','🍪']];
+const LOOK={ク:'ケ',ケ:'ク',ヒ:'ピ',ピ:'ヒ'};
+const ROUND_MSG={2:['Round 1 done!','Round 2: the sound hints are hidden. You know these now!'],
+  3:['Round 2 done!','Round 3: Listen! Pick the word you hear.'],
+  4:['Round 3 done!','Round 4: Just letters. Which letter says the sound?']};
 function renderKata(sc){
-  const st=$('#stage');const n=sc.cards.length;
-  let phase=1,order=shuffle(sc.cards),idx=0,wrong=0,solved=false,hintOn=false,msg='',drawKey=null,stage='play';
-  let choices=pickChoices();
-  function pickChoices(){const c=order[idx];return shuffle([c,...shuffle(sc.cards.filter(x=>x!==c)).slice(0,2)])}
+  const st=$('#stage');const R=4;
+  let phase=1,order,idx=0,wrong=0,solved=false,hintOn=false,msg='',drawKey=null,stage='play',choices;
+  function newRound(){
+    order=phase===4?shuffle(LETTERS).slice(0,5):shuffle(sc.cards);idx=0;wrong=0;solved=false;hintOn=false;msg='';drawKey=null;stage='play';choices=pickChoices();
+  }
+  function pickChoices(){
+    const c=order[idx];
+    if(phase===4){
+      const bad=shuffle(LETTERS.filter(x=>x[0]!==c[0]&&LOOK[c[0]]!==x[0]&&LOOK[x[0]]!==c[0]&&x[1]!==c[1])).slice(0,2);
+      return shuffle([c,...bad]);
+    }
+    if(phase===3){
+      const others=sc.cards.filter(x=>x!==c).map(x=>[x,Math.abs(x.jp.length-c.jp.length)+Math.random()*0.5]).sort((a,b)=>a[1]-b[1]).slice(0,2).map(x=>x[0]);
+      return shuffle([c,...others]);
+    }
+    return shuffle([c,...shuffle(sc.cards.filter(x=>x!==c)).slice(0,2)]);
+  }
   function tiles(c,show,clickable){
     return `<div class="ktiles">${c.pieces.map((p,i)=>`<${clickable?'button':'div'} class="ktile k${i%4}" ${clickable?`data-k="${esc(p[0])}" aria-label="Draw a hint for ${esc(p[0])}"`:''}><span class="kk">${esc(p[0])}</span>${show?`<span class="kr">${esc(p[1])}</span>`:''}</${clickable?'button':'div'}>`).join('')}</div>`;
   }
+  function wordBtn(o,i){return `<button class="btn kword" data-i="${i}" aria-label="Word ${i+1}">${esc(o.jp)}</button>`}
   function draw(){
     if(stage==='between'){
-      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🌟</div><h2>Round 1 done!</h2>
-        <p class="en">Round 2: the sound hints are hidden. You know these now!</p>
-        <button class="btn pri" id="r2">Start round 2 →</button></div>${noteFor(sc.id)}</section>`;
-      $('#r2').onclick=()=>{phase=2;order=shuffle(sc.cards);idx=0;wrong=0;solved=false;hintOn=false;msg='';stage='play';choices=pickChoices();draw()};return}
+      const m=ROUND_MSG[phase+1];
+      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🌟</div><h2>${m[0]}</h2><p class="en">${m[1]}</p>
+        <button class="btn pri" id="nextR">Start round ${phase+1} →</button></div>${noteFor(sc.id)}</section>`;
+      $('#nextR').onclick=()=>{phase++;newRound();draw()};return}
     if(stage==='end'){
       st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>You read the café words!</h2>
         <p class="en">Coffee, cake, juice, pizza, cookie — all in katakana.</p></div>
         ${Object.keys(Draw.data).length?'<h3>My hints</h3>':''}${galleryHtml()}
         <div class="row"><button class="btn" id="again">Play again</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div>${noteFor(sc.id)}</section>`;
-      $('#again').onclick=()=>{phase=1;order=shuffle(sc.cards);idx=0;wrong=0;solved=false;hintOn=false;msg='';stage='play';choices=pickChoices();draw()};
+      $('#again').onclick=()=>{phase=1;newRound();draw()};
       const g=$('#go');if(g)g.onclick=()=>{cur++;render()};
       state.done[sc.id]=true;saveState();renderSteps();return}
-    const c=order[idx];
+    const c=order[idx],n=order.length;
     const dots=order.map((q,k)=>`<span class="dot ${k<idx?'on':k===idx?'cur':''}"></span>`).join('');
     const showPieces=phase===1||hintOn||wrong>0||solved;
-    st.innerHTML=`<section class="panel"><h2>${esc(sc.title)}</h2><div class="goal">${esc(sc.goal)}</div>
-      <div class="en">Round ${phase} of 2 · word ${idx+1} of ${n}</div>
-      <div class="dots">${dots}</div>
-      <div class="card">
-        ${tiles(c,showPieces,solved)}
+    let body='';
+    if(phase<=2){
+      body=`${tiles(c,showPieces,solved)}
         ${solved?`<div class="pic" aria-hidden="true">${c.pic}</div><div class="en">${esc(c.en)} · ${esc(c.read)}</div><div class="prompt"><b>Say it!</b></div>
-          <button class="btn ghost" data-h="${esc(c.jp)}">🔊 Hear it</button>
-          <div class="en">Hard letter? Tap it to draw your own hint ✏️</div>`
+          <button class="btn ghost" data-h="${esc(c.jp)}">🔊 Hear it</button><div class="en">Hard letter? Tap it to draw your own hint ✏️</div>`
         :`<div class="prompt"><b>${phase===1?'Read the sounds. Which picture is it?':'Which picture is it?'}</b></div>
           <div class="row">${choices.map((o,i)=>`<button class="btn kopt" data-i="${i}" aria-label="Picture ${i+1}">${o.pic}</button>`).join('')}</div>
           ${msg?`<div class="en" role="status">${esc(msg)}</div>`:''}
-          ${phase===2&&!showPieces?'<button class="btn ghost" id="kHint">💡 Show sounds</button>':''}`}
-      </div>
+          ${phase===2&&!showPieces?'<button class="btn ghost" id="kHint">💡 Show sounds</button>':''}`}`;
+    }else if(phase===3){
+      body=solved?`${tiles(c,true,false)}<div class="pic" aria-hidden="true">${c.pic}</div><div class="en">${esc(c.en)}</div><div class="prompt"><b>Say it!</b></div><button class="btn ghost" data-h="${esc(c.jp)}">🔊 Hear it</button>`
+        :`<button class="btn pri" data-h="${esc(c.jp)}">🔊 Listen</button>
+          <div class="prompt"><b>Which word did you hear?</b></div>
+          <div class="row">${choices.map(wordBtn).join('')}</div>
+          ${msg?`<div class="en" role="status">${esc(msg)}</div>`:''}`;
+    }else{
+      body=solved?`<div class="ktiles"><div class="ktile k0"><span class="kk">${esc(c[0])}</span><span class="kr">${esc(c[1])}</span></div></div><div class="pic" aria-hidden="true">${c[3]}</div><div class="en">${esc(c[1])} as in ${esc(c[2])}</div><button class="btn ghost" data-h="${esc(c[0])}">🔊 Hear it</button>`
+        :`<button class="btn pri" data-h="${esc(c[0])}">🔊 Listen</button>
+          <div class="prompt"><b>Which letter says “${esc(c[1])}”?</b></div>
+          <div class="row">${choices.map((o,i)=>`<button class="btn kword" data-i="${i}" aria-label="Letter ${i+1}">${esc(o[0])}</button>`).join('')}</div>
+          ${msg?`<div class="en" role="status">${esc(msg)}</div>`:''}`;
+    }
+    st.innerHTML=`<section class="panel"><h2>${esc(sc.title)}</h2><div class="goal">${esc(sc.goal)}</div>
+      <div class="en">Round ${phase} of ${R} · ${phase===4?'letter':'word'} ${idx+1} of ${n}</div>
+      <div class="dots">${dots}</div>
+      <div class="card">${body}</div>
       ${drawKey?mineHtml(drawKey,true,drawKey):''}
-      ${solved?`<div class="row"><button class="btn good" id="kSaid">✓ Said it!</button><button class="btn" id="kAlmost">Almost</button></div>`:''}
+      ${solved?(phase===4?`<div class="row"><button class="btn good" id="kNext">Next →</button></div>`:`<div class="row"><button class="btn good" id="kSaid">✓ Said it!</button><button class="btn" id="kAlmost">Almost</button></div>`):''}
       ${noteFor(sc.id)}</section>`;
     st.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>speak(b.dataset.h));
-    st.querySelectorAll('.kopt').forEach(b=>b.onclick=()=>{
-      const o=choices[+b.dataset.i];
-      if(o===c){solved=true;msg='';speak(c.jp);burst([c.pic,'✨'],6);draw()}
-      else{wrong++;msg='Almost! Look at the sounds and try again 🙂';draw()}});
+    if(!solved&&phase>=3){const t=phase===3?c.jp:c[0];setTimeout(()=>speak(t),150)}
+    const correct=()=>{solved=true;msg='';if(phase<=2){speak(c.jp);burst([c.pic,'✨'],6)}else if(phase===3){speak(c.jp);burst([c.pic,'✨'],6)}else{burst(['✨',c[3]],6)}draw()};
+    const wrongPick=()=>{wrong++;msg=phase===4?'Almost! Listen again and try 🙂':'Almost! Try again 🙂';draw()};
+    st.querySelectorAll('.kopt').forEach(b=>b.onclick=()=>{choices[+b.dataset.i]===c?correct():wrongPick()});
+    st.querySelectorAll('.kword').forEach(b=>b.onclick=()=>{choices[+b.dataset.i]===c?correct():wrongPick()});
     const kh=$('#kHint');if(kh)kh.onclick=()=>{hintOn=true;draw()};
     st.querySelectorAll('.ktile[data-k]').forEach(b=>b.onclick=()=>{drawKey=b.dataset.k;draw();const p=$('#pad');if(p)p.scrollIntoView({block:'center'})});
     if(drawKey)bindPad(drawKey,drawKey,()=>{drawKey=null;draw()});
     const next=ok=>{
-      if(ok&&!state.said.includes(c.jp)){state.said.push(c.jp);saveState()}
+      if(ok&&phase<=3&&!state.said.includes(c.jp)){state.said.push(c.jp);saveState()}
       idx++;wrong=0;solved=false;hintOn=false;msg='';drawKey=null;
-      if(idx>=n){if(phase===1){stage='between'}else{stage='end';burst(['🎉','☕','🍰','🍕'],20)}}else{choices=pickChoices()}
+      if(idx>=n){if(phase<R){stage='between'}else{stage='end';burst(['🎉','☕','🍰','🍕'],20)}}else{choices=pickChoices()}
       draw()};
     const sd=$('#kSaid');if(sd)sd.onclick=()=>next(true);
     const al=$('#kAlmost');if(al)al.onclick=()=>next(false);
+    const nx=$('#kNext');if(nx)nx.onclick=()=>next(true);
   }
-  draw();
+  newRound();draw();
 }
 
 /* ---------- scene: deck ---------- */
@@ -531,6 +566,7 @@ function allGroups(){
   const grp=(name,arr)=>{const a=arr.filter(t=>t&&!seen.has(t));a.forEach(t=>seen.add(t));if(a.length)G.push([name,a])};
   SCENES.forEach(s=>{if(s.cards){const arr=[];s.cards.forEach(c=>{arr.push(c.q);(Array.isArray(c.jp)?c.jp.map(a=>a.jp):[c.jp]).forEach(x=>arr.push(x))});grp(s.title,arr)}});
   grp('Check: hiragana & katakana',CAN.filter(c=>c[4]).flatMap(c=>c[4]));
+  grp('Katakana letters',LETTERS.map(l=>l[0]));
   grp('Café: waiter',WAITER);
   grp('Café: menu & prices',MENU.map(menuSay));
   return G;
