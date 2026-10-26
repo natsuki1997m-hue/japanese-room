@@ -128,6 +128,7 @@ textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:1
       <label class="btn ghost"><input type="checkbox" id="optBig"> Big text</label>
       <button class="btn ghost" id="teacherBtn" aria-pressed="false">Teacher notes</button>
       <button class="btn ghost" id="voiceBtn" hidden>🎙 My voice</button>
+      <button class="btn ghost" id="resetBtn" hidden>↺ Reset lesson (keeps my voice)</button>
     </div>
   </header>
   <nav class="steps" id="steps" aria-label="Lesson steps"></nav>
@@ -270,11 +271,11 @@ let cur=0, showTeacher=false;
 function renderSteps(){
   $('#steps').innerHTML=SCENES.map((s,i)=>`<button class="step ${state.done[s.id]?'done':''}" data-i="${i}" ${i===cur?'aria-current="true"':''}><b>${i+1}. ${esc(s.title)}</b><span>${s.min} min</span></button>`).join('');}
 $('#steps').onclick=e=>{const b=e.target.closest('.step');if(b){cur=+b.dataset.i;render()}};
-$('#teacherBtn').onclick=()=>{showTeacher=!showTeacher;$('#teacherBtn').setAttribute('aria-pressed',String(showTeacher));$('#voiceBtn').hidden=!showTeacher;$('#teacherBtn').textContent=showTeacher?'Hide teacher notes':'Teacher notes';render()};
+$('#teacherBtn').onclick=()=>{showTeacher=!showTeacher;$('#teacherBtn').setAttribute('aria-pressed',String(showTeacher));$('#voiceBtn').hidden=!showTeacher;$('#resetBtn').hidden=!showTeacher;$('#teacherBtn').textContent=showTeacher?'Hide teacher notes':'Teacher notes';render()};
 
 function noteFor(id){return showTeacher?`<details class="note" open><summary>先生メモ</summary><ul>${TN[id].map(t=>`<li>${esc(t)}</li>`).join('')}</ul></details>`:''}
 function navBtns(){return `<div class="row">${cur>0?'<button class="btn ghost" id="prev">← Back</button>':''}${cur<SCENES.length-1?'<button class="btn" id="next">Next step →</button>':''}</div>`}
-function bindNav(){const p=$('#prev'),n=$('#next');if(p)p.onclick=()=>{cur--;render()};if(n)n.onclick=()=>{cur++;render()}}
+function bindNav(){const p=$('#prev'),n=$('#next');if(p)p.onclick=()=>{cur--;render()};if(n)n.onclick=()=>{state.done[SCENES[cur].id]=true;saveState();cur++;render()}}
 
 /* ---------- scene: warm-up ---------- */
 const CAN=[
@@ -309,7 +310,7 @@ function renderWarm(s){
   $('#photoIn').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();
     r.onload=()=>{$('#photo').innerHTML=`<img alt="Ruby's photo" src="${r.result}">`};r.readAsDataURL(f)};
   bindCheck(st,can,'ruby1.can');
-  state.done.warm=true;saveState();bindNav();
+  bindNav();
 }
 
 /* ---------- café scene (role-play stage) ---------- */
@@ -513,6 +514,20 @@ $('#voiceExport').onclick=async()=>{
 $('#voiceBtn').onclick=()=>{$('#voicePanel').hidden=false;renderVoice()};
 $('#voiceClose').onclick=()=>{if(recState)recState.mr.stop();$('#voicePanel').hidden=true};
 Local.open().then(()=>Local.loadAll());
+
+/* ---------- reset (keeps voice recordings and settings) ---------- */
+let resetArmed=null;
+$('#resetBtn').onclick=()=>{
+  const b=$('#resetBtn');
+  if(!resetArmed){b.textContent='Tap again to reset (voice is kept)';b.classList.add('pri');
+    resetArmed=setTimeout(()=>{resetArmed=null;b.textContent='↺ Reset lesson (keeps my voice)';b.classList.remove('pri')},4000);return}
+  clearTimeout(resetArmed);resetArmed=null;
+  ['ruby1.state','ruby1.can','ruby1.can2','ruby1.draw','ruby1.notes','ruby1.free','ruby1.hint'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  state.done={};state.said=[];Draw.data={};Notes.items=[];Notes.render();$('#nbFree').value='';
+  cafeState={open:false,round:1,help:false,swap:false};cur=0;
+  b.textContent='Reset ✓';b.classList.remove('pri');setTimeout(()=>{b.textContent='↺ Reset lesson (keeps my voice)'},2000);
+  render();
+};
 
 function render(){
   renderSteps();const s=SCENES[cur];
