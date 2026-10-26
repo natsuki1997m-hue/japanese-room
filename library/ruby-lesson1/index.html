@@ -117,6 +117,13 @@ textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:1
 .gallery figure{margin:0;text-align:center}
 .gallery img{width:100%;border:2px solid var(--ink);border-radius:12px;background:#fff}
 .gallery figcaption{font-family:var(--f-disp);font-weight:700}
+.ktiles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.ktile{background:var(--surface);color:var(--ink);border:3px solid var(--ink);border-bottom-width:8px;border-radius:14px;min-width:56px;padding:4px 8px;display:flex;flex-direction:column;align-items:center}
+button.ktile{cursor:pointer}
+.ktile.k0{border-bottom-color:var(--accent)}.ktile.k1{border-bottom-color:var(--good)}.ktile.k2{border-bottom-color:var(--tape)}.ktile.k3{border-bottom-color:#2457D6}
+.kk{font-family:var(--f-disp);font-size:2.2rem;font-weight:700;line-height:1.2}
+.kr{font-size:1rem;color:var(--muted)}
+.kopt{font-size:3rem;min-width:84px;min-height:84px;padding:6px 10px}
 </style>
 </head>
 <body>
@@ -242,13 +249,13 @@ const SCENES=[
    {pic:'🍰',en:'A cake, too, please.',prompt:'Order a cake too.',jp:'ケーキも ください。',hint:'ケーキも…'},
    {pic:'💴',en:'How much is it?',prompt:'Ask the price.',jp:'いくらですか？',hint:'い…'},
    {pic:'😊',en:'Thank you very much.',prompt:'Say thanks.',jp:'ありがとうございます。',hint:'あり…'}]},
- {id:'kata',title:'Katakana pictures',min:'37–45',goal:'Five new letters, each hiding inside a word you already know.',kind:'deck',kata:true,
+ {id:'kata',title:'Katakana café',min:'37–45',goal:'Café words in katakana are English words in disguise. Find the picture!',kind:'kata2',
   cards:[
-   {pic:'🍦',en:'ice cream',prompt:'Say the word. Which letter does it start with?',jp:'アイス',hl:'ア',read:'あいす',hint:'ア…'},
-   {pic:'🎧',en:'earphones',prompt:'Say the word. First letter?',jp:'イヤホン',hl:'イ',read:'いやほん',hint:'イ…'},
-   {pic:'🌭',en:'sausage',prompt:'Say the word. First letter?',jp:'ウインナー',hl:'ウ',read:'ういんなー',hint:'ウ…'},
-   {pic:'❄️',en:'air conditioner',prompt:'Say the word. First letter?',jp:'エアコン',hl:'エ',read:'えあこん',hint:'エ…'},
-   {pic:'🍊',en:'orange',prompt:'Say the word. First letter?',jp:'オレンジ',hl:'オ',read:'おれんじ',hint:'オ…'}]},
+   {pic:'☕',en:'coffee',jp:'コーヒー',read:'こーひー',pieces:[['コ','ko'],['ー','–'],['ヒ','hi'],['ー','–']]},
+   {pic:'🍰',en:'cake',jp:'ケーキ',read:'けーき',pieces:[['ケ','ke'],['ー','–'],['キ','ki']]},
+   {pic:'🧃',en:'juice',jp:'ジュース',read:'じゅーす',pieces:[['ジュ','ju'],['ー','–'],['ス','su']]},
+   {pic:'🍕',en:'pizza',jp:'ピザ',read:'ぴざ',pieces:[['ピ','pi'],['ザ','za']]},
+   {pic:'🍪',en:'cookie',jp:'クッキー',read:'くっきー',pieces:[['ク','ku'],['ッ','·'],['キ','ki'],['ー','–']]}]},
  {id:'wrap',title:'What I can say',min:'45–50',goal:'See what you said today. Then you’re done!',kind:'wrap'}
 ];
 
@@ -258,7 +265,7 @@ const TN={
  intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「ペンキの せんせい」は本人の実際の仕事に合わせて変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
  like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
  cafe:['5枚が終わると「Open the café door」が出る。押すとベルの音とメニューが出る。メニューの絵・値段は小道具。ルビーさんはメニューを見ながら自然に注文できる。','会話は3回(Round 1→2→3)。1回目は同じ文、2回目は好きなものを選ぶ、3回目は役を交代(ルビーさんが店員)。ミスはその場で直さず、終わってから正しい形を言って聞かせる。','言えないときは「🆘 My lines」で文を見せる。先生の店員のセリフは「Waiter lines」。値段は「ろっぴゃくえんです」のように先生が言う。黄色の値段(300・600・800)は読み方が変わるので、ルビーさんに言ってもらう練習にもできる。タップすると読み上げ。'],
- kata:['1回5文字まで。文字の形は説明しすぎない。絵と単語で覚える。','「あいす」の「ア」が黄色くなっているのを見せる→「ア」だけ言う。','答えを出したあと「Draw my own hint」で、ルビーさんが自分でその文字の絵を描く(指やマウスでOK)。自分で作ったヒントのほうが覚えやすい。描いた絵は終わりの画面に並ぶ。似た文字(シ/ツ、ソ/ン)はまだ出さない。', '宿題(任意): スマホのアプリ「Memory Hints」でア〜オを3分だけ見る。'],
+ kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): スマホのアプリ「Memory Hints」で3分だけ見る。'],
  wrap:['まず「Now」で、最初と同じ5つをもう一度。「Before →」の横に最初の結果が出るので、変わったところを見せて褒める。上達が見えるのが大事。その後「言えた文」を見て、1つだけ褒める。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
 };
 
@@ -371,10 +378,72 @@ function bindPad(k,letter,done){
   $('#drawSave').onclick=()=>{try{Draw.save(k,cv.toDataURL('image/png'))}catch(e){}done(true)};
   $('#drawCancel').onclick=()=>done(false);
 }
-function galleryHtml(s){
-  const items=s.cards.filter(c=>Draw.data[c.hl]);
+function galleryHtml(){
+  const items=Object.entries(Draw.data);
   if(!items.length)return '';
-  return `<div class="gallery">${items.map(c=>`<figure><img src="${Draw.data[c.hl]}" alt="My hint for ${esc(c.hl)}"><figcaption>${esc(c.hl)} ${c.pic}</figcaption></figure>`).join('')}</div>`;
+  return `<div class="gallery">${items.map(([k,u])=>`<figure><img src="${u}" alt="My hint for ${esc(k)}"><figcaption>${esc(k)}</figcaption></figure>`).join('')}</div>`;
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* ---------- scene: katakana café (pick the picture, sound pieces, then no help) ---------- */
+function renderKata(sc){
+  const st=$('#stage');const n=sc.cards.length;
+  let phase=1,order=shuffle(sc.cards),idx=0,wrong=0,solved=false,hintOn=false,msg='',drawKey=null,stage='play';
+  let choices=pickChoices();
+  function pickChoices(){const c=order[idx];return shuffle([c,...shuffle(sc.cards.filter(x=>x!==c)).slice(0,2)])}
+  function tiles(c,show,clickable){
+    return `<div class="ktiles">${c.pieces.map((p,i)=>`<${clickable?'button':'div'} class="ktile k${i%4}" ${clickable?`data-k="${esc(p[0])}" aria-label="Draw a hint for ${esc(p[0])}"`:''}><span class="kk">${esc(p[0])}</span>${show?`<span class="kr">${esc(p[1])}</span>`:''}</${clickable?'button':'div'}>`).join('')}</div>`;
+  }
+  function draw(){
+    if(stage==='between'){
+      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🌟</div><h2>Round 1 done!</h2>
+        <p class="en">Round 2: the sound hints are hidden. You know these now!</p>
+        <button class="btn pri" id="r2">Start round 2 →</button></div>${noteFor(sc.id)}</section>`;
+      $('#r2').onclick=()=>{phase=2;order=shuffle(sc.cards);idx=0;wrong=0;solved=false;hintOn=false;msg='';stage='play';choices=pickChoices();draw()};return}
+    if(stage==='end'){
+      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>You read the café words!</h2>
+        <p class="en">Coffee, cake, juice, pizza, cookie — all in katakana.</p></div>
+        ${Object.keys(Draw.data).length?'<h3>My hints</h3>':''}${galleryHtml()}
+        <div class="row"><button class="btn" id="again">Play again</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div>${noteFor(sc.id)}</section>`;
+      $('#again').onclick=()=>{phase=1;order=shuffle(sc.cards);idx=0;wrong=0;solved=false;hintOn=false;msg='';stage='play';choices=pickChoices();draw()};
+      const g=$('#go');if(g)g.onclick=()=>{cur++;render()};
+      state.done[sc.id]=true;saveState();renderSteps();return}
+    const c=order[idx];
+    const dots=order.map((q,k)=>`<span class="dot ${k<idx?'on':k===idx?'cur':''}"></span>`).join('');
+    const showPieces=phase===1||hintOn||wrong>0||solved;
+    st.innerHTML=`<section class="panel"><h2>${esc(sc.title)}</h2><div class="goal">${esc(sc.goal)}</div>
+      <div class="en">Round ${phase} of 2 · word ${idx+1} of ${n}</div>
+      <div class="dots">${dots}</div>
+      <div class="card">
+        ${tiles(c,showPieces,solved)}
+        ${solved?`<div class="pic" aria-hidden="true">${c.pic}</div><div class="en">${esc(c.en)} · ${esc(c.read)}</div><div class="prompt"><b>Say it!</b></div>
+          <button class="btn ghost" data-h="${esc(c.jp)}">🔊 Hear it</button>
+          <div class="en">Hard letter? Tap it to draw your own hint ✏️</div>`
+        :`<div class="prompt"><b>${phase===1?'Read the sounds. Which picture is it?':'Which picture is it?'}</b></div>
+          <div class="row">${choices.map((o,i)=>`<button class="btn kopt" data-i="${i}" aria-label="Picture ${i+1}">${o.pic}</button>`).join('')}</div>
+          ${msg?`<div class="en" role="status">${esc(msg)}</div>`:''}
+          ${phase===2&&!showPieces?'<button class="btn ghost" id="kHint">💡 Show sounds</button>':''}`}
+      </div>
+      ${drawKey?mineHtml(drawKey,true,drawKey):''}
+      ${solved?`<div class="row"><button class="btn good" id="kSaid">✓ Said it!</button><button class="btn" id="kAlmost">Almost</button></div>`:''}
+      ${noteFor(sc.id)}</section>`;
+    st.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>speak(b.dataset.h));
+    st.querySelectorAll('.kopt').forEach(b=>b.onclick=()=>{
+      const o=choices[+b.dataset.i];
+      if(o===c){solved=true;msg='';speak(c.jp);burst([c.pic,'✨'],6);draw()}
+      else{wrong++;msg='Almost! Look at the sounds and try again 🙂';draw()}});
+    const kh=$('#kHint');if(kh)kh.onclick=()=>{hintOn=true;draw()};
+    st.querySelectorAll('.ktile[data-k]').forEach(b=>b.onclick=()=>{drawKey=b.dataset.k;draw();const p=$('#pad');if(p)p.scrollIntoView({block:'center'})});
+    if(drawKey)bindPad(drawKey,drawKey,()=>{drawKey=null;draw()});
+    const next=ok=>{
+      if(ok&&!state.said.includes(c.jp)){state.said.push(c.jp);saveState()}
+      idx++;wrong=0;solved=false;hintOn=false;msg='';drawKey=null;
+      if(idx>=n){if(phase===1){stage='between'}else{stage='end';burst(['🎉','☕','🍰','🍕'],20)}}else{choices=pickChoices()}
+      draw()};
+    const sd=$('#kSaid');if(sd)sd.onclick=()=>next(true);
+    const al=$('#kAlmost');if(al)al.onclick=()=>next(false);
+  }
+  draw();
 }
 
 /* ---------- scene: deck ---------- */
@@ -386,7 +455,7 @@ function renderDeck(s){
     if(finished){
       st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>${skipped?'Let’s go to the café!':got+' of '+total+' said!'}</h2>
        <p class="en">${skipped?'':retry.length?'The tricky ones will come back later. That is normal!':'Take a breath. You did it.'}</p>
-       ${s.role?cafeHtml():''}${s.kata?galleryHtml(s):''}
+       ${s.role?cafeHtml():''}
        <div class="row"><button class="btn" id="again">Once more</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div></div>${noteFor(s.id)}</section>`;
       if(s.role)bindCafe();
       $('#again').onclick=()=>{queue=s.cards.map((c,i)=>({c,i}));pos=0;got=0;retry=[];finished=false;skipped=false;hintShown=revealed=false;draw()};
@@ -531,7 +600,7 @@ $('#resetBtn').onclick=()=>{
 
 function render(){
   renderSteps();const s=SCENES[cur];
-  if(s.kind==='warm')renderWarm(s);else if(s.kind==='wrap')renderWrap(s);else renderDeck(s);
+  if(s.kind==='warm')renderWarm(s);else if(s.kind==='wrap')renderWrap(s);else if(s.kind==='kata2')renderKata(s);else renderDeck(s);
   window.scrollTo({top:0});
 }
 render();
