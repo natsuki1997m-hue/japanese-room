@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ruby's Lesson 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+:root{
+  --bg:#FBF6EC; --surface:#FFFFFF; --ink:#2B2620; --muted:#6E655A; --line:#E6DCCB;
+  --accent:#E0572F; --on-accent:#FFFFFF; --soft:#FCE4DA;
+  --good:#1F8A5B; --good-soft:#D8F1E5; --tape:#F2C318; --on-tape:#2A2200;
+  --f-disp:'Zen Maru Gothic','Hiragino Maru Gothic ProN','Yu Gothic',sans-serif;
+  --f-body:'Lexend','Hiragino Sans','Yu Gothic','Meiryo',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1A1612; --surface:#26211B; --ink:#F4EDE2; --muted:#B7AA98; --line:#3A3228;
+  --accent:#FF8A63; --on-accent:#1A1612; --soft:#4A2A1D; --good:#5FD3A0; --good-soft:#143A2A; color-scheme:dark;}}
+:root[data-theme="dark"]{--bg:#1A1612; --surface:#26211B; --ink:#F4EDE2; --muted:#B7AA98; --line:#3A3228;
+  --accent:#FF8A63; --on-accent:#1A1612; --soft:#4A2A1D; --good:#5FD3A0; --good-soft:#143A2A; color-scheme:dark;}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{font-size:16px}
+html[data-big="1"]{font-size:19px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);line-height:1.6;
+  padding:20px max(16px,env(safe-area-inset-right)) 110px max(16px,env(safe-area-inset-left))}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-disp);margin:0;line-height:1.3;text-wrap:balance}
+h1{font-size:1.7rem} h2{font-size:1.35rem}
+button{font:inherit;cursor:pointer}
+.btn{border:2px solid var(--ink);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px 16px;min-height:44px;font-weight:500}
+.btn:hover{transform:translateY(-1px)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:700}
+.btn.good{background:var(--good);border-color:var(--good);color:#fff;font-weight:700}
+.btn.ghost{border-color:var(--line);color:var(--muted);min-height:38px;padding:6px 12px}
+.btn:focus-visible,summary:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.top{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
+.sub{color:var(--muted);font-size:.95rem}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.step{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:8px 10px;text-align:left;color:var(--ink)}
+.step b{display:block;font-family:var(--f-disp);font-size:.95rem}
+.step span{font-size:.78rem;color:var(--muted)}
+.step[aria-current="true"]{border-color:var(--accent);background:var(--soft)}
+.step.done b::after{content:" ✓";color:var(--good)}
+.panel{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.goal{background:var(--soft);border-radius:12px;padding:10px 14px;font-size:.95rem}
+.card{border:2px solid var(--ink);border-radius:20px;padding:22px 18px;text-align:center;background:var(--bg);display:flex;flex-direction:column;gap:10px;align-items:center;min-height:250px;justify-content:center}
+.pic{font-size:4.2rem;line-height:1.1}
+.en{color:var(--muted)}
+.prompt{font-size:1.05rem}
+.jp{font-family:var(--f-disp);font-size:1.9rem;font-weight:700;line-height:1.5}
+.jp small{display:block;font-size:1rem;color:var(--muted);font-weight:500}
+.jp mark{background:var(--tape);color:var(--on-tape);border-radius:6px;padding:0 4px}
+.hint{font-family:var(--f-disp);font-size:1.4rem;color:var(--accent);letter-spacing:.05em}
+.row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.dots{display:flex;gap:8px;justify-content:center}
+.dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--ink);background:transparent}
+.dot.on{background:var(--good);border-color:var(--good)}
+.dot.cur{background:var(--tape);border-color:var(--ink)}
+.chunkmsg{text-align:center;display:flex;flex-direction:column;gap:12px;align-items:center;padding:16px 0}
+.chunkmsg .big{font-size:3rem}
+.note{border:2px dashed var(--line);border-radius:14px;padding:10px 14px;font-size:.9rem;background:var(--bg)}
+.note summary{cursor:pointer;color:var(--muted);font-weight:500}
+.note ul{margin:8px 0 0;padding-left:1.2em}
+.note li{margin:4px 0}
+.nbfab{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:16px;z-index:5;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+.nbpanel{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:70px;width:min(420px,calc(100vw - 32px));max-height:70vh;overflow:auto;z-index:6;background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:14px}
+.nbpanel ul{list-style:none;margin:8px 0;padding:0}
+.nbpanel li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:12px;padding:10px;font:inherit;background:var(--bg);color:var(--ink)}
+.cando{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+.cando .opts{display:flex;gap:6px}
+.opt{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;min-height:40px;font-size:1.2rem}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
+.photo{border:2px dashed var(--line);border-radius:16px;min-height:160px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted);text-align:center;padding:10px}
+.photo img{max-width:100%;max-height:340px;border-radius:12px}
+.frames{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.frames span{background:var(--tape);color:var(--on-tape);padding:6px 12px;border-radius:10px;font-family:var(--f-disp);font-weight:700}
+.said{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.said li{background:var(--good-soft);border-radius:10px;padding:6px 12px;font-family:var(--f-disp)}
+.bar{height:12px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--good)}
+.burst{position:fixed;pointer-events:none;font-size:1.8rem;z-index:20;animation:fly 1.1s ease-out forwards}
+@keyframes fly{from{transform:translate(0,0) scale(.6);opacity:1}to{transform:translate(var(--dx),var(--dy)) scale(1.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.burst{display:none}.btn:hover{transform:none}}
+.vpanel{position:fixed;inset:12px max(12px,env(safe-area-inset-right)) 12px max(12px,env(safe-area-inset-left));max-width:760px;margin:0 auto;z-index:30;background:var(--surface);border:2px solid var(--ink);border-radius:18px;padding:16px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.vrow{display:grid;grid-template-columns:1fr auto auto;gap:6px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.vrow .t{font-family:var(--f-disp);font-weight:700;font-size:1.1rem}
+.vslot{display:flex;gap:4px;align-items:center}
+.vslot small{color:var(--muted);width:3.2em}
+.vslot .btn{min-height:38px;padding:4px 10px}
+.vslot .has{color:var(--good);font-weight:700}
+.vslot .recording{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+@media (max-width:560px){.vrow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><h1>Ruby's Lesson 1</h1><div class="sub">Nice to meet you again 👋 &nbsp;·&nbsp; 50 min &nbsp;·&nbsp; 5 things at a time</div></div>
+    <div class="row">
+      <label class="btn ghost"><input type="checkbox" id="optSlow"> Slow voice</label>
+      <label class="btn ghost"><input type="checkbox" id="optBig"> Big text</label>
+      <button class="btn ghost" id="teacherBtn" aria-pressed="false">Teacher notes</button>
+      <button class="btn ghost" id="voiceBtn" hidden>🎙 My voice</button>
+    </div>
+  </header>
+  <nav class="steps" id="steps" aria-label="Lesson steps"></nav>
+  <main id="stage"></main>
+</div>
+<button class="btn pri nbfab" id="nbBtn" aria-expanded="false">📓 Notebook <span id="nbCount">0</span></button>
+<aside class="nbpanel" id="nbPanel" hidden role="dialog" aria-label="Notebook">
+  <b>My notebook</b>
+  <ul id="nbList"></ul>
+  <textarea id="nbFree" placeholder="Anything else you want to remember…"></textarea>
+  <div class="row" style="margin-top:8px"><button class="btn ghost" id="nbClear">Clear</button><button class="btn" id="nbClose">Close</button></div>
+</aside>
+
+<aside class="vpanel" id="voicePanel" hidden role="dialog" aria-label="Record my voice">
+  <div class="top"><b>🎙 Record my voice</b><button class="btn" id="voiceClose">Close</button></div>
+  <p class="sub" id="voiceStat"></p>
+  <p class="sub">Tap 🎙 to start, tap again to stop. Normal speed first; the slow version is optional. If the microphone is blocked, use ⬆ to choose a recording file instead. When you are done, press “Save voice file” and send me the file.</p>
+  <div class="row" style="justify-content:flex-start"><button class="btn pri" id="voiceExport">Save voice file</button></div>
+  <div id="voiceList"></div>
+  <p class="sub" id="voiceMsg" role="status"></p>
+</aside>
+
+<script>
+(function(){
+'use strict';
+/* ---------- storage (always guarded) ---------- */
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=(s,r=document)=>r.querySelector(s);
+
+/* ---------- settings ---------- */
+const settings=Object.assign({slow:false,big:false},store.get('ruby1.settings',{}));
+function applySettings(){document.documentElement.dataset.big=settings.big?'1':'0';
+  $('#optSlow').checked=settings.slow;$('#optBig').checked=settings.big;store.set('ruby1.settings',settings);}
+$('#optSlow').onchange=e=>{settings.slow=e.target.checked;applySettings()};
+$('#optBig').onchange=e=>{settings.big=e.target.checked;applySettings()};
+applySettings();
+
+/* ---------- voice: teacher recordings first, machine voice as the fallback ---------- */
+const VOICE={}; /*VOICE-DATA-START*//*VOICE-DATA-END*/
+const localBlobs={};
+const Local={db:null,
+  open(){return new Promise(res=>{try{const r=indexedDB.open('ruby1.voice',1);r.onupgradeneeded=()=>r.result.createObjectStore('v');
+    r.onsuccess=()=>{this.db=r.result;res(true)};r.onerror=()=>res(false)}catch(e){res(false)}})},
+  put(k,b){return new Promise(res=>{if(!this.db)return res(false);try{const t=this.db.transaction('v','readwrite');t.objectStore('v').put(b,k);t.oncomplete=()=>res(true);t.onerror=()=>res(false)}catch(e){res(false)}})},
+  loadAll(){return new Promise(res=>{if(!this.db)return res();try{const st=this.db.transaction('v').objectStore('v');const q=st.openCursor();
+    q.onsuccess=()=>{const c=q.result;if(c){localBlobs[c.key]=c.value;c.continue()}else res()};q.onerror=()=>res()}catch(e){res()}})}};
+let player=null;
+function playUrl(u){try{if(player)player.pause();player=new Audio(u);player.play().catch(()=>{});return true}catch(e){return false}}
+function playRecorded(t){
+  const order=settings.slow?[t+'|s',t+'|n']:[t+'|n'];
+  for(const k of order){
+    if(VOICE[k])return playUrl(VOICE[k]);
+    if(localBlobs[k])return playUrl(URL.createObjectURL(localBlobs[k]));
+  }
+  return false;
+}
+const canSpeak=true;
+function speak(t){
+  if(playRecorded(t))return;
+  if(!('speechSynthesis' in window))return;
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=settings.slow?0.55:0.85;speechSynthesis.speak(u)}catch(e){}
+}
+
+/* ---------- notebook ---------- */
+const Notes={items:store.get('ruby1.notes',[]),
+  add(jp,en){if(!this.items.some(n=>n.jp===jp)){this.items.push({jp,en});store.set('ruby1.notes',this.items);this.render()}},
+  render(){$('#nbCount').textContent=this.items.length;
+    $('#nbList').innerHTML=this.items.length?this.items.map((n,i)=>`<li><span><b>${esc(n.jp)}</b> <span class="en">${esc(n.en||'')}</span></span><span><button class="btn ghost" data-h="${i}" aria-label="Hear it">🔊</button><button class="btn ghost" data-d="${i}" aria-label="Remove">✕</button></span></li>`).join(''):'<li class="en">Tap “＋ Notebook” on a card to save it here.</li>';}};
+$('#nbList').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.h!=null)speak(Notes.items[+b.dataset.h].jp);
+  if(b.dataset.d!=null){Notes.items.splice(+b.dataset.d,1);store.set('ruby1.notes',Notes.items);Notes.render()}};
+$('#nbBtn').onclick=()=>{const p=$('#nbPanel');p.hidden=!p.hidden;$('#nbBtn').setAttribute('aria-expanded',String(!p.hidden))};
+$('#nbClose').onclick=()=>{$('#nbPanel').hidden=true;$('#nbBtn').setAttribute('aria-expanded','false')};
+$('#nbClear').onclick=()=>{Notes.items=[];store.set('ruby1.notes',[]);Notes.render()};
+$('#nbFree').value=store.get('ruby1.free','');$('#nbFree').oninput=e=>store.set('ruby1.free',e.target.value);
+Notes.render();
+
+/* ---------- little celebration ---------- */
+function burst(emojis,n){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const cx=innerWidth/2,cy=innerHeight/2;
+  for(let i=0;i<n;i++){const s=document.createElement('span');s.className='burst';
+    s.textContent=emojis[i%emojis.length];const a=Math.random()*6.28,d=100+Math.random()*180;
+    s.style.left=cx+'px';s.style.top=cy+'px';s.style.setProperty('--dx',Math.cos(a)*d+'px');s.style.setProperty('--dy',Math.sin(a)*d+'px');
+    document.body.appendChild(s);setTimeout(()=>s.remove(),1200);}}
+
+/* ---------- DATA ---------- */
+/* card: pic, en (meaning / situation), prompt (what Ruby does), jp (answer, may be array of {jp,en}), hint */
+const SCENES=[
+ {id:'warm',title:'Say hi',min:'0–5',goal:'Warm up your mouth with one sentence about your week.',kind:'warm'},
+ {id:'intro',title:'Who am I?',min:'5–15',goal:'Say who you are and ask me two questions.',kind:'deck',
+  cards:[
+   {pic:'👋',en:'Nice to meet you (first time)',prompt:'What do you say when you meet someone?',jp:'はじめまして。',hint:'は…'},
+   {pic:'🙋‍♀️',en:'I am Ruby.',prompt:'Say your name.',jp:'わたしは ルビーです。',hint:'わたしは…'},
+   {pic:'🎨',en:'My job is a house-painting teacher.',prompt:'Say your job.',jp:'しごとは とそうの せんせいです。',hint:'しごとは…'},
+   {pic:'🏠',en:'Ask me: Where do you live?',prompt:'Ask me!',jp:'どこに すんでいますか？',hint:'どこに…'},
+   {pic:'🙇‍♀️',en:'Please treat me well. (said at the end)',prompt:'What do you say at the end?',jp:'よろしく おねがいします。',hint:'よろしく…'}]},
+ {id:'like',title:'Like it?',min:'15–27',goal:'Tell me what you like. Both answers are fine!',kind:'deck',
+  cards:[
+   {pic:'🐟',en:'fish',q:'さかなは すきですか？',prompt:'I ask: Do you like fish? Answer for real!',jp:[{jp:'さかなは すきです。',en:'I like fish.'},{jp:'さかなは すきじゃないです。',en:"I don't like fish."}],hint:'さかなは す…'},
+   {pic:'🥩',en:'meat',q:'にくは すきですか？',prompt:'Do you like meat?',jp:[{jp:'にくは すきです。',en:'I like meat.'},{jp:'にくは すきじゃないです。',en:"I don't like meat."}],hint:'にくは す…'},
+   {pic:'🥦',en:'vegetables',q:'やさいは すきですか？',prompt:'Do you like vegetables?',jp:[{jp:'やさいは すきです。',en:'I like vegetables.'},{jp:'やさいは すきじゃないです。',en:"I don't like vegetables."}],hint:'やさいは す…'},
+   {pic:'🍰',en:'cake',q:'ケーキは すきですか？',prompt:'Do you like cake?',jp:[{jp:'ケーキは すきです。',en:'I like cake.'},{jp:'ケーキは すきじゃないです。',en:"I don't like cake."}],hint:'ケーキは す…'},
+   {pic:'☕',en:'coffee',q:'コーヒーは すきですか？',prompt:'Do you like coffee?',jp:[{jp:'コーヒーは すきです。',en:'I like coffee.'},{jp:'コーヒーは すきじゃないです。',en:"I don't like coffee."}],hint:'コーヒーは す…'}]},
+ {id:'cafe',title:'Café',min:'27–37',goal:'Order a coffee and a cake. Then we play café!',kind:'deck',role:true,
+  cards:[
+   {pic:'🙋',en:'Excuse me.',prompt:'Get the waiter’s attention.',jp:'すみません。',hint:'す…'},
+   {pic:'☕',en:'A coffee, please.',prompt:'Order a coffee.',jp:'コーヒーを ください。',hint:'コーヒーを…'},
+   {pic:'🍰',en:'A cake, too, please.',prompt:'Order a cake too.',jp:'ケーキも ください。',hint:'ケーキも…'},
+   {pic:'💴',en:'How much is it?',prompt:'Ask the price.',jp:'いくらですか？',hint:'い…'},
+   {pic:'😊',en:'Thank you very much.',prompt:'Say thanks.',jp:'ありがとうございます。',hint:'あり…'}]},
+ {id:'kata',title:'Katakana pictures',min:'37–45',goal:'Five new letters, each hiding inside a word you already know.',kind:'deck',kata:true,
+  cards:[
+   {pic:'🍦',en:'ice cream',prompt:'Say the word. Which letter does it start with?',jp:'アイス',hl:'ア',read:'あいす',hint:'ア…'},
+   {pic:'🎧',en:'earphones',prompt:'Say the word. First letter?',jp:'イヤホン',hl:'イ',read:'いやほん',hint:'イ…'},
+   {pic:'🌭',en:'sausage',prompt:'Say the word. First letter?',jp:'ウインナー',hl:'ウ',read:'ういんなー',hint:'ウ…'},
+   {pic:'❄️',en:'air conditioner',prompt:'Say the word. First letter?',jp:'エアコン',hl:'エ',read:'えあこん',hint:'エ…'},
+   {pic:'🍊',en:'orange',prompt:'Say the word. First letter?',jp:'オレンジ',hl:'オ',read:'おれんじ',hint:'オ…'}]},
+ {id:'wrap',title:'What I can say',min:'45–50',goal:'See what you said today. Then you’re done!',kind:'wrap'}
+];
+
+/* teacher-only notes (Japanese) */
+const TN={
+ warm:['ルビーさんの写真を1枚見せてもらい、「これは なんですか？」「だれですか？」など、1文だけ。写真は右のボタンで画面に表示(保存されません)。','先に「はじめに、できるかチェック」を3分で。「忘れたこと」を責めないのがポイント。','言えなくても「ゆっくりでOK」と伝える。5秒待つ→最初の1文字→選択肢2つの順。'],
+ intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「とそうの せんせい」は本人の実際の仕事に変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
+ like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
+ cafe:['5枚→言えたら、先生が店員、ルビーさんがお客さんでミニ会話。','時間は3回で十分。ミスはその場で直さず、最後に正しい形をもう一度言って聞かせる。','2回目からは、メニューを自分で選んでOK。'],
+ kata:['1回5文字まで。文字の形は説明しすぎない。絵と単語で覚える。','「あいす」の「ア」が黄色くなっているのを見せる→「ア」だけ言う。','似た文字(シ/ツ、ソ/ン)はまだ出さない。後の回で。'],
+ wrap:['「言えた文」を見て、1つだけ褒める。上達が見えるのが大事。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
+};
+
+/* ---------- state ---------- */
+const state=store.get('ruby1.state',{done:{},said:[]});
+function saveState(){store.set('ruby1.state',state)}
+let cur=0, showTeacher=false;
+
+/* ---------- steps nav ---------- */
+function renderSteps(){
+  $('#steps').innerHTML=SCENES.map((s,i)=>`<button class="step ${state.done[s.id]?'done':''}" data-i="${i}" ${i===cur?'aria-current="true"':''}><b>${i+1}. ${esc(s.title)}</b><span>${s.min} min</span></button>`).join('');}
+$('#steps').onclick=e=>{const b=e.target.closest('.step');if(b){cur=+b.dataset.i;render()}};
+$('#teacherBtn').onclick=()=>{showTeacher=!showTeacher;$('#teacherBtn').setAttribute('aria-pressed',String(showTeacher));$('#voiceBtn').hidden=!showTeacher;$('#teacherBtn').textContent=showTeacher?'Hide teacher notes':'Teacher notes';render()};
+
+function noteFor(id){return showTeacher?`<details class="note" open><summary>先生メモ</summary><ul>${TN[id].map(t=>`<li>${esc(t)}</li>`).join('')}</ul></details>`:''}
+function navBtns(){return `<div class="row">${cur>0?'<button class="btn ghost" id="prev">← Back</button>':''}${cur<SCENES.length-1?'<button class="btn" id="next">Next step →</button>':''}</div>`}
+function bindNav(){const p=$('#prev'),n=$('#next');if(p)p.onclick=()=>{cur--;render()};if(n)n.onclick=()=>{cur++;render()}}
+
+/* ---------- scene: warm-up ---------- */
+const CAN=[['intro','🙋‍♀️','Say who I am'],['like','🍕','Say what I like'],['cafe','☕','Order at a café'],['hira','あ','Read hiragana'],['kata','ア','Read katakana']];
+function renderWarm(s){
+  const can=store.get('ruby1.can',{});
+  const st=$('#stage');
+  st.innerHTML=`<section class="panel"><h2>${esc(s.title)}</h2><div class="goal">${esc(s.goal)}</div>
+   <h3>1. Picture of my week</h3>
+   <div class="photo" id="photo">Tap “Choose a photo” to show a picture from your week.<br>(It stays on this screen only.)</div>
+   <div class="row"><label class="btn">Choose a photo<input type="file" accept="image/*" id="photoIn" hidden></label></div>
+   <div class="frames"><span>これは ___ です。</span><span>___が すきです。</span><span>___に いきました。</span></div>
+   <h3>2. How is it going? <span class="en">(just for me — no right answers)</span></h3>
+   <div class="cando">${CAN.map(c=>`<div>${c[1]} ${esc(c[2])}</div><div class="opts" data-k="${c[0]}">${[['😀','Easy'],['🙂','So-so'],['😅','Forgot']].map(o=>`<button class="opt" aria-label="${o[1]}" aria-pressed="${can[c[0]]===o[1]}" data-v="${o[1]}">${o[0]}</button>`).join('')}</div>`).join('')}</div>
+   ${noteFor(s.id)}${navBtns()}</section>`;
+  $('#photoIn').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();
+    r.onload=()=>{$('#photo').innerHTML=`<img alt="Ruby's photo" src="${r.result}">`};r.readAsDataURL(f)};
+  st.querySelectorAll('.opts').forEach(o=>o.onclick=e=>{const b=e.target.closest('.opt');if(!b)return;
+    can[o.dataset.k]=b.dataset.v;store.set('ruby1.can',can);o.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+  state.done.warm=true;saveState();bindNav();
+}
+
+/* ---------- scene: deck ---------- */
+function renderDeck(s){
+  const CH=5;let queue=s.cards.map((c,i)=>({c,i})),pos=0,hintShown=false,revealed=false,got=0,retry=[],finished=false;
+  const st=$('#stage');
+  function draw(){
+    const total=s.cards.length;
+    if(finished){
+      st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>${got} of ${total} said!</h2>
+       <p class="en">${retry.length?'The tricky ones will come back later. That is normal!':'Take a breath. You did it.'}</p>
+       ${s.role?'<div class="goal">Now we play: I’m the waiter, you’re the customer! ☕🍰</div>':''}
+       <div class="row"><button class="btn" id="again">Once more</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div></div>${noteFor(s.id)}</section>`;
+      $('#again').onclick=()=>{queue=s.cards.map((c,i)=>({c,i}));pos=0;got=0;retry=[];finished=false;hintShown=revealed=false;draw()};
+      const g=$('#go');if(g)g.onclick=()=>{cur++;render()};
+      state.done[s.id]=true;saveState();renderSteps();return;}
+    const {c}=queue[pos];
+    const dots=queue.map((q,k)=>`<span class="dot ${k<pos?'on':k===pos?'cur':''}"></span>`).join('');
+    const answers=Array.isArray(c.jp)?c.jp:[{jp:c.jp,en:c.en}];
+    let ans='';
+    if(revealed){
+      ans=answers.map(a=>{
+        let t=esc(a.jp);
+        if(s.kata&&c.hl){t=esc(a.jp).replace(esc(c.hl),`<mark>${esc(c.hl)}</mark>`);t+=`<small>${esc(c.read)}</small>`;}
+        return `<div class="jp">${t}${a.en&&!s.kata?`<small>${esc(a.en)}</small>`:''}<button class="btn ghost" data-h="${esc(a.jp)}">🔊 Hear it</button></div>`}).join('');
+    }
+    st.innerHTML=`<section class="panel"><h2>${esc(s.title)}</h2><div class="goal">${esc(s.goal)}</div>
+     <div class="dots" aria-label="Card ${pos+1} of ${queue.length}">${dots}</div>
+     <div class="card"><div class="pic" aria-hidden="true">${c.pic}</div>
+       <div class="en">${esc(c.en)}</div>
+       ${c.q?`<div class="jp"><small>I ask:</small>${esc(c.q)}<button class="btn ghost" data-h="${esc(c.q)}">🔊 Hear it</button></div>`:''}
+       <div class="prompt"><b>${esc(c.prompt)}</b></div>
+       ${hintShown&&!revealed?`<div class="hint">${esc(c.hint)}</div>`:''}
+       ${ans}</div>
+     <div class="row">
+       ${!revealed?`${!hintShown?'<button class="btn" id="hint">💡 Hint</button>':''}<button class="btn pri" id="show">Show answer</button>`
+        :`<button class="btn" id="note">＋ Notebook</button><button class="btn good" id="said">✓ Said it!</button><button class="btn" id="almost">Almost</button>`}
+     </div>${noteFor(s.id)}</section>`;
+    st.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>speak(b.dataset.h));
+    const h=$('#hint');if(h)h.onclick=()=>{hintShown=true;draw()};
+    const sh=$('#show');if(sh)sh.onclick=()=>{revealed=true;speak(answers[0].jp);draw()};
+    const nb=$('#note');if(nb)nb.onclick=()=>{answers.forEach(a=>Notes.add(a.jp,a.en||c.en));nb.textContent='In notebook ✓';nb.disabled=true};
+    const next=ok=>{
+      if(ok){got++;const t=answers[0].jp;if(!state.said.includes(t)){state.said.push(t);saveState()}}else{retry.push(queue[pos])}
+      pos++;hintShown=revealed=false;
+      if(pos>=queue.length){ if(retry.length&&queue.length<=total+3){queue=queue.concat(retry);retry=[];}
+        if(pos>=queue.length){finished=true;burst(s.kata?['🎊','✨','🔤']:['🎉','✨','⭐'],18)} }
+      draw()};
+    const sd=$('#said');if(sd)sd.onclick=()=>{ok=true;next(true)};
+    const al=$('#almost');if(al)al.onclick=()=>next(false);
+  }
+  var ok;draw();
+}
+
+/* ---------- scene: wrap-up ---------- */
+function renderWrap(s){
+  const can=store.get('ruby1.can',{}),hintUsed=store.get('ruby1.hint','');
+  const said=state.said;
+  const st=$('#stage');
+  st.innerHTML=`<section class="panel"><h2>${esc(s.title)}</h2><div class="goal">${esc(s.goal)}</div>
+   <h3>Sentences you said today</h3>
+   ${said.length?`<ul class="said">${said.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<p class="en">Say a few cards and they will show up here.</p>'}
+   <div><b>${said.length}</b> <span class="en">of 20 cards</span><div class="bar"><i style="width:${Math.min(100,said.length/20*100)}%"></i></div></div>
+   <div class="goal">Optional homework (3 minutes): send me one photo from your day 📷</div>
+   <h3 class="en" style="font-size:1rem">For the teacher: which hint helped today?</h3>
+   <div class="row" id="hintLog">${['Waiting 5 sec','First letter','Two choices'].map(h=>`<button class="btn ghost" aria-pressed="${hintUsed===h}" data-v="${h}">${h}</button>`).join('')}</div>
+   ${noteFor(s.id)}${navBtns()}</section>`;
+  $('#hintLog').onclick=e=>{const b=e.target.closest('button');if(!b)return;store.set('ruby1.hint',b.dataset.v);
+    $('#hintLog').querySelectorAll('button').forEach(x=>x.style.borderColor=x===b?'var(--accent)':'')};
+  burst(['🌸','⭐','🎉'],12);
+  state.done.wrap=true;saveState();bindNav();
+}
+
+/* ---------- voice studio (teacher) ---------- */
+function allPhrases(){
+  const out=[];const add=t=>{if(t&&!out.includes(t))out.push(t)};
+  SCENES.forEach(s=>{if(s.cards)s.cards.forEach(c=>{add(c.q);(Array.isArray(c.jp)?c.jp.map(a=>a.jp):[c.jp]).forEach(add)})});
+  return out;
+}
+let recState=null;
+function vmsg(t){$('#voiceMsg').textContent=t}
+function renderVoice(){
+  const ph=allPhrases();
+  const has=k=>!!(localBlobs[k]||VOICE[k]);
+  const n=ph.filter(t=>has(t+'|n')).length,sl=ph.filter(t=>has(t+'|s')).length;
+  $('#voiceStat').textContent=`Normal speed: ${n} of ${ph.length} · Slow: ${sl} of ${ph.length} (optional)`;
+  const slot=(t,sp,label)=>{const k=t+'|'+sp;const rec=recState&&recState.k===k;
+    return `<div class="vslot"><small>${label}</small>
+     <button class="btn ${rec?'recording':''}" data-r="${esc(k)}" aria-label="${rec?'Stop recording':'Record '+label}">${rec?'■ Stop':'🎙'}</button>
+     <button class="btn" data-p="${esc(k)}" aria-label="Play ${label}" ${has(k)?'':'disabled'}>▶</button>
+     <label class="btn" aria-label="Choose a file for ${label}">⬆<input type="file" accept="audio/*" data-f="${esc(k)}" hidden></label>
+     <span class="${has(k)?'has':''}" aria-hidden="true">${has(k)?'✓':''}</span></div>`};
+  $('#voiceList').innerHTML=ph.map(t=>`<div class="vrow"><div class="t">${esc(t)}</div>${slot(t,'n','Normal')}${slot(t,'s','Slow')}</div>`).join('');
+}
+async function toggleRec(k){
+  if(recState){recState.mr.stop();return}
+  if(!navigator.mediaDevices||!window.MediaRecorder){vmsg('Recording is not available here. Use ⬆ to choose a recording file.');return}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const mr=new MediaRecorder(stream),chunks=[];
+    mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    mr.onstop=async()=>{stream.getTracks().forEach(t=>t.stop());
+      const b=new Blob(chunks,{type:mr.mimeType||'audio/webm'});recState=null;
+      if(b.size){localBlobs[k]=b;await Local.put(k,b);vmsg('Saved on this device. ✓')}
+      renderVoice()};
+    recState={k,mr};mr.start();renderVoice();vmsg('Recording… tap ■ Stop when you are done.');
+  }catch(e){recState=null;renderVoice();vmsg('The microphone is blocked. Use ⬆ to choose a recording file, or allow the microphone in this page’s permissions.')}
+}
+$('#voiceList').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.r)toggleRec(b.dataset.r);
+  if(b.dataset.p){const k=b.dataset.p;if(VOICE[k]&&!localBlobs[k])playUrl(VOICE[k]);else if(localBlobs[k])playUrl(URL.createObjectURL(localBlobs[k]))}};
+$('#voiceList').onchange=async e=>{const f=e.target.files&&e.target.files[0];const k=e.target.dataset&&e.target.dataset.f;
+  if(!f||!k)return;localBlobs[k]=f;await Local.put(k,f);vmsg('File added. ✓');renderVoice()};
+function toDataUrl(b){return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(b)})}
+$('#voiceExport').onclick=async()=>{
+  const keys=Object.keys(localBlobs);if(!keys.length){vmsg('Nothing recorded yet.');return}
+  const pack={};for(const k of keys)pack[k]=await toDataUrl(localBlobs[k]);
+  const json=JSON.stringify(pack),name='ruby-lesson1-voices.json';
+  try{const dl=await claude.use('downloads');
+    if(dl){await dl.save({filename:name,data:json});vmsg('Voice file ready — please send it to me.');return}}catch(e){}
+  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([json],{type:'application/json'}));a.download=name;document.body.appendChild(a);a.click();a.remove();vmsg('Voice file downloaded — please send it to me.')}
+  catch(e){vmsg('Could not save the file here.')}
+};
+$('#voiceBtn').onclick=()=>{$('#voicePanel').hidden=false;renderVoice()};
+$('#voiceClose').onclick=()=>{if(recState)recState.mr.stop();$('#voicePanel').hidden=true};
+Local.open().then(()=>Local.loadAll());
+
+function render(){
+  renderSteps();const s=SCENES[cur];
+  if(s.kind==='warm')renderWarm(s);else if(s.kind==='wrap')renderWrap(s);else renderDeck(s);
+  window.scrollTo({top:0});
+}
+render();
+})();
+</script>
+</body>
+</html>
