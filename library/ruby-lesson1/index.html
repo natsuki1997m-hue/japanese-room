@@ -107,6 +107,16 @@ textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:1
 .menu-item{border:2px solid var(--ink);background:var(--bg);color:var(--ink);border-radius:14px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px}
 .mi-r{font-family:var(--f-disp);font-size:.95rem}.mi-r.irr{background:var(--tape);color:var(--on-tape);border-radius:6px;padding:0 6px;font-weight:700}
 .mi-pic{font-size:2rem}.mi-jp{font-family:var(--f-disp);font-weight:700;font-size:1.15rem}.mi-p{color:var(--muted);font-size:.9rem}
+.mine{width:100%;display:flex;flex-direction:column;gap:8px;align-items:center}
+.mine img{width:min(100%,300px);border:2px solid var(--ink);border-radius:14px;background:#fff}
+.pad{border:2px solid var(--ink);border-radius:14px;background:#fff;touch-action:none;width:min(100%,320px);aspect-ratio:3/2;cursor:crosshair}
+.swatches{display:flex;gap:8px;align-items:center;justify-content:center}
+.sw{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);padding:0}
+.sw[aria-pressed="true"]{border-color:var(--ink)}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;width:100%}
+.gallery figure{margin:0;text-align:center}
+.gallery img{width:100%;border:2px solid var(--ink);border-radius:12px;background:#fff}
+.gallery figcaption{font-family:var(--f-disp);font-weight:700}
 </style>
 </head>
 <body>
@@ -247,7 +257,7 @@ const TN={
  intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「ペンキの せんせい」は本人の実際の仕事に合わせて変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
  like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
  cafe:['5枚が終わると「Open the café door」が出る。押すとベルの音とメニューが出る。メニューの絵・値段は小道具。ルビーさんはメニューを見ながら自然に注文できる。','会話は3回(Round 1→2→3)。1回目は同じ文、2回目は好きなものを選ぶ、3回目は役を交代(ルビーさんが店員)。ミスはその場で直さず、終わってから正しい形を言って聞かせる。','言えないときは「🆘 My lines」で文を見せる。先生の店員のセリフは「Waiter lines」。値段は「ろっぴゃくえんです」のように先生が言う。黄色の値段(300・600・800)は読み方が変わるので、ルビーさんに言ってもらう練習にもできる。タップすると読み上げ。'],
- kata:['1回5文字まで。文字の形は説明しすぎない。絵と単語で覚える。','「あいす」の「ア」が黄色くなっているのを見せる→「ア」だけ言う。','似た文字(シ/ツ、ソ/ン)はまだ出さない。後の回で。'],
+ kata:['1回5文字まで。文字の形は説明しすぎない。絵と単語で覚える。','「あいす」の「ア」が黄色くなっているのを見せる→「ア」だけ言う。','答えを出したあと「Draw my own hint」で、ルビーさんが自分でその文字の絵を描く(指やマウスでOK)。自分で作ったヒントのほうが覚えやすい。描いた絵は終わりの画面に並ぶ。似た文字(シ/ツ、ソ/ン)はまだ出さない。', '宿題(任意): スマホのアプリ「Memory Hints」でア〜オを3分だけ見る。'],
  wrap:['まず「Now」で、最初と同じ5つをもう一度。「Before →」の横に最初の結果が出るので、変わったところを見せて褒める。上達が見えるのが大事。その後「言えた文」を見て、1つだけ褒める。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
 };
 
@@ -335,16 +345,47 @@ function bindCafe(){
   const n=$('#cafeNext');if(n)n.onclick=()=>{if(cafeState.round<3){cafeState.round++;cafeState.swap=cafeState.round===3;cafeState.help=false;redraw()}else{burst(['🎉','☕','🍰'],16);n.textContent='Great café! 🎉';n.disabled=true}};
 }
 
+/* ---------- my own hint drawings (katakana) ---------- */
+const Draw={data:store.get('ruby1.draw',{}),save(k,u){this.data[k]=u;store.set('ruby1.draw',this.data)},del(k){delete this.data[k];store.set('ruby1.draw',this.data)}};
+const PEN=['#2B2620','#E0572F','#1F8A5B','#2457D6'];
+function mineHtml(k,open,letter){
+  const img=Draw.data[k];
+  if(!open)return `<div class="mine">${img?`<img src="${img}" alt="My hint for ${esc(letter)}">`:''}<button class="btn" id="drawOpen">${img?'✏️ Draw it again':'✏️ Draw my own hint'}</button></div>`;
+  return `<div class="mine"><p class="prompt"><b>What does <span class="jp" style="display:inline">${esc(letter)}</span> look like to you?</b><br><span class="en">A person? An animal? Anything you like!</span></p>
+   <canvas class="pad" id="pad" width="600" height="400" aria-label="Drawing area"></canvas>
+   <div class="swatches">${PEN.map((c,i)=>`<button class="sw" data-c="${c}" aria-label="Colour ${i+1}" aria-pressed="${i===0}" style="background:${c}"></button>`).join('')}<button class="btn ghost" id="drawClear">Clear</button></div>
+   <div class="row"><button class="btn good" id="drawSave">Save my hint</button><button class="btn ghost" id="drawCancel">Cancel</button></div></div>`;
+}
+function bindPad(k,letter,done){
+  const cv=$('#pad');if(!cv)return;const g=cv.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);
+  g.lineCap='round';g.lineJoin='round';g.lineWidth=12;g.strokeStyle=PEN[0];
+  g.font='bold 120px sans-serif';g.fillStyle='rgba(0,0,0,.08)';g.textAlign='center';g.textBaseline='middle';g.fillText(letter,cv.width/2,cv.height/2);
+  let down=false,last=null;
+  const pos=e=>{const r=cv.getBoundingClientRect();return [(e.clientX-r.left)*cv.width/r.width,(e.clientY-r.top)*cv.height/r.height]};
+  cv.onpointerdown=e=>{down=true;last=pos(e);try{cv.setPointerCapture(e.pointerId)}catch(x){}g.beginPath();g.moveTo(last[0],last[1]);g.lineTo(last[0]+.1,last[1]);g.stroke();e.preventDefault()};
+  cv.onpointermove=e=>{if(!down)return;const p=pos(e);g.beginPath();g.moveTo(last[0],last[1]);g.lineTo(p[0],p[1]);g.stroke();last=p;e.preventDefault()};
+  cv.onpointerup=cv.onpointercancel=()=>{down=false};
+  document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{g.strokeStyle=b.dataset.c;document.querySelectorAll('.sw').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+  $('#drawClear').onclick=()=>{g.fillStyle='#fff';g.fillRect(0,0,cv.width,cv.height);g.fillStyle='rgba(0,0,0,.08)';g.fillText(letter,cv.width/2,cv.height/2)};
+  $('#drawSave').onclick=()=>{try{Draw.save(k,cv.toDataURL('image/png'))}catch(e){}done(true)};
+  $('#drawCancel').onclick=()=>done(false);
+}
+function galleryHtml(s){
+  const items=s.cards.filter(c=>Draw.data[c.hl]);
+  if(!items.length)return '';
+  return `<div class="gallery">${items.map(c=>`<figure><img src="${Draw.data[c.hl]}" alt="My hint for ${esc(c.hl)}"><figcaption>${esc(c.hl)} ${c.pic}</figcaption></figure>`).join('')}</div>`;
+}
+
 /* ---------- scene: deck ---------- */
 function renderDeck(s){
-  const CH=5;let queue=s.cards.map((c,i)=>({c,i})),pos=0,hintShown=false,revealed=false,got=0,retry=[],finished=false,skipped=false;
+  const CH=5;let queue=s.cards.map((c,i)=>({c,i})),pos=0,hintShown=false,revealed=false,got=0,retry=[],finished=false,skipped=false,drawing=false;
   const st=$('#stage');
   function draw(){
     const total=s.cards.length;
     if(finished){
       st.innerHTML=`<section class="panel"><div class="chunkmsg"><div class="big">🎉</div><h2>${skipped?'Let’s go to the café!':got+' of '+total+' said!'}</h2>
        <p class="en">${skipped?'':retry.length?'The tricky ones will come back later. That is normal!':'Take a breath. You did it.'}</p>
-       ${s.role?cafeHtml():''}
+       ${s.role?cafeHtml():''}${s.kata?galleryHtml(s):''}
        <div class="row"><button class="btn" id="again">Once more</button>${cur<SCENES.length-1?'<button class="btn pri" id="go">Next step →</button>':''}</div></div>${noteFor(s.id)}</section>`;
       if(s.role)bindCafe();
       $('#again').onclick=()=>{queue=s.cards.map((c,i)=>({c,i}));pos=0;got=0;retry=[];finished=false;skipped=false;hintShown=revealed=false;draw()};
@@ -360,6 +401,7 @@ function renderDeck(s){
         if(s.kata&&c.hl){t=esc(a.jp).replace(esc(c.hl),`<mark>${esc(c.hl)}</mark>`);t+=`<small>${esc(c.read)}</small>`;}
         return `<div class="jp">${t}${a.en&&!s.kata?`<small>${esc(a.en)}</small>`:''}<button class="btn ghost" data-h="${esc(a.jp)}">🔊 Hear it</button></div>`}).join('');
     }
+    const mine=(s.kata&&revealed)?mineHtml(c.hl,drawing,c.hl):'';
     st.innerHTML=`<section class="panel"><h2>${esc(s.title)}</h2><div class="goal">${esc(s.goal)}</div>
      <div class="dots" aria-label="Card ${pos+1} of ${queue.length}">${dots}</div>
      <div class="card"><div class="pic" aria-hidden="true">${c.pic}</div>
@@ -367,11 +409,13 @@ function renderDeck(s){
        ${c.q?`<div class="jp"><small>I ask:</small>${esc(c.q)}<button class="btn ghost" data-h="${esc(c.q)}">🔊 Hear it</button></div>`:''}
        <div class="prompt"><b>${esc(c.prompt)}</b></div>
        ${hintShown&&!revealed?`<div class="hint">${esc(c.hint)}</div>`:''}
-       ${ans}</div>
+       ${ans}${mine}</div>
      <div class="row">
        ${!revealed?`${!hintShown?'<button class="btn" id="hint">💡 Hint</button>':''}<button class="btn pri" id="show">Show answer</button>`
         :`<button class="btn" id="note">＋ Notebook</button><button class="btn good" id="said">✓ Said it!</button><button class="btn" id="almost">Almost</button>`}
      </div>${s.role?'<div class="row"><button class="btn ghost" id="skipCards">Skip to the café →</button></div>':''}${noteFor(s.id)}</section>`;
+    const dopen=$('#drawOpen');if(dopen)dopen.onclick=()=>{drawing=true;draw()};
+    if(drawing&&s.kata)bindPad(c.hl,c.hl,saved=>{drawing=false;draw()});
     const sk=$('#skipCards');if(sk)sk.onclick=()=>{skipped=true;finished=true;draw()};
     st.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>speak(b.dataset.h));
     const h=$('#hint');if(h)h.onclick=()=>{hintShown=true;draw()};
@@ -379,7 +423,7 @@ function renderDeck(s){
     const nb=$('#note');if(nb)nb.onclick=()=>{answers.forEach(a=>Notes.add(a.jp,a.en||c.en));nb.textContent='In notebook ✓';nb.disabled=true};
     const next=ok=>{
       if(ok){got++;const t=answers[0].jp;if(!state.said.includes(t)){state.said.push(t);saveState()}}else{retry.push(queue[pos])}
-      pos++;hintShown=revealed=false;
+      pos++;hintShown=revealed=false;drawing=false;
       if(pos>=queue.length){ if(retry.length&&queue.length<=total+3){queue=queue.concat(retry);retry=[];}
         if(pos>=queue.length){finished=true;burst(s.kata?['🎊','✨','🔤']:['🎉','✨','⭐'],18)} }
       draw()};
