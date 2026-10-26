@@ -295,7 +295,7 @@ const TN={
  intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「ペンキの せんせい」は本人の実際の仕事に合わせて変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
  like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
  cafe:['5枚が終わると「Open the café door」が出る。押すとベルの音とメニューが出る。メニューの絵・値段は小道具。ルビーさんはメニューを見ながら自然に注文できる。','会話は3回(Round 1→2→3)。1回目は同じ文、2回目は好きなものを選ぶ、3回目は役を交代(ルビーさんが店員)。ミスはその場で直さず、終わってから正しい形を言って聞かせる。','言えないときは「🆘 My lines」で文を見せる。先生の店員のセリフは「Waiter lines」。値段は「ろっぴゃくえんです」のように先生が言う。黄色の値段(300・600・800)は読み方が変わるので、ルビーさんに言ってもらう練習にもできる。タップすると読み上げ。'],
- kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','画面の上のラウンド選択(1〜4)で、好きなラウンドに飛べる。3・4は、ラウンド1を一度終えるまで押せない(当てずっぽう防止)。復習の日はここから3に飛ぶ。Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。Round 3: 声を聞いて、文字の単語を3つから選ぶ(形ではなく文字を読む)。Round 4: 声を聞いて、文字を3つから選ぶ(1文字ずつ)。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','終わったら「My wall」(右上)でカタカナの壁を見せる。読めた文字がペンキで塗られていく(薄い=見た、色=読めた、金=別の日にも読めた)。似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): 「My wall」→「Paint 3 cells」(3分)。またはスマホのアプリ「Memory Hints」で3分。'],
+ kata:['メニューのカタカナ語は、英語に似ている(コーヒー=coffee)。「文字を覚える」より先に「英語の音で読める」を体験してもらう。','Round 1: 色つきの文字ブロックと音(ko・hi など)が出る。ルビーさんが音を読んで、3つの絵から選ぶ。違っても「おしい！」で何度でもOK。','画面の上のラウンド選択(1〜4)で、好きなラウンドに飛べる。3・4は、ラウンド1を一度終えるまで押せない(当てずっぽう防止)。復習の日はここから3に飛ぶ。Round 2: 音のヒントを隠して、もう一度。「Show sounds」で出せる。Round 3: 声を聞いて、文字の単語を3つから選ぶ(形ではなく文字を読む)。Round 4: 声を聞いて、文字を3つから選ぶ(1文字ずつ)。','選んだあとに「Say it!」で声に出す。覚えにくい文字は、文字ブロックをタップして自分のヒントの絵を描く(1〜2文字だけで十分)。','終わったら「My wall」(右上)。リンクの末尾に ?room=合言葉 を付けると、ルビーさんと先生で同じ壁を共有できる(宿題のあとも先生の画面で見える)。でカタカナの壁を見せる。読めた文字がペンキで塗られていく(薄い=見た、色=読めた、金=別の日にも読めた)。似た文字(シ/ツ、ソ/ン)はまだ出さない。宿題(任意): 「My wall」→「Paint 3 cells」(3分)。またはスマホのアプリ「Memory Hints」で3分。'],
  wrap:['まず「Now」で、最初と同じ5つをもう一度。「Before →」の横に最初の結果が出るので、変わったところを見せて褒める。上達が見えるのが大事。その後「言えた文」を見て、1つだけ褒める。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
 };
 
@@ -452,6 +452,7 @@ function renderWall(msg){
   body.innerHTML=`<div class="wallhead"><div><b>${done}</b> <span class="en">of ${tot} painted</span></div>
      <button class="btn pri" id="paint3">🎨 Paint 3 cells (3 min)</button></div>
      <div class="bar"><i style="width:${done/tot*100}%"></i></div>
+     <div class="en" id="syncInfo" role="status"></div>
      <div class="legend"><span><i></i>not yet</span><span><i style="background:color-mix(in srgb,#64748B 30%,var(--surface));border-color:#64748B"></i>seen (pale)</span><span><i style="background:#64748B;border-color:#64748B"></i>can read (solid)</span><span><i style="background:#F2C318;border-color:#B8920A"></i>remembered ⭐ (gold)</span></div>
      <div class="en" style="margin:2px 0 6px">Each row has its own colour (カ行 = brown, ハ行 = blue…). Pale → solid → gold shows how well you know the letter.</div>
      <div class="en" style="margin:6px 0">① Play Katakana café → letters appear here (pale = seen). ② Paint 3 cells → a 3-question quiz on letters you have met. ③ Answer right → the cell is painted!</div>
@@ -461,6 +462,7 @@ function renderWall(msg){
      <div class="wallgrid" style="grid-template-columns:repeat(7,1fr)">${EXTRA.map(c=>cellHtml(c,null)).join('')}</div>
      <div id="wdetail"></div>`;
   Wall.fresh={};
+  if(typeof Sync!=='undefined')Sync.info();
   $('#paint3').onclick=startQuiz;
   body.querySelectorAll('.cell[data-ch]').forEach(b=>b.onclick=()=>{
     const ch=b.dataset.ch;speak(ch);
@@ -510,6 +512,40 @@ function renderQuiz(){
 function openWall(){wallView='wall';quiz=null;$('#wallPanel').hidden=false;renderWall()}
 $('#wallBtn').onclick=openWall;
 $('#wallClose').onclick=()=>{$('#wallPanel').hidden=true};
+
+/* ---------- shared wall: syncs with Supabase when the link has ?room=CODE ---------- */
+const Sync=(function(){
+  const URL_='https://ozxlahysxpvxtzznzdoj.supabase.co/rest/v1/rooms',KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im96eGxhaHlzeHB2eHR6em56ZG9qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyOTkyNjAsImV4cCI6MjA5NTg3NTI2MH0.IOVf-yMw1GqMnwqWAKgMenqS8SsbV2POaGjv0dpcPsY';
+  let room='';try{room=(new URLSearchParams(location.search).get('room')||'').trim().slice(0,60)}catch(e){}
+  const on=!!room;let status=on?'connecting…':'',last='',timer=null,busy=false;
+  const H={apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'};
+  const merge=(a,b)=>{const o={};new Set([...Object.keys(a||{}),...Object.keys(b||{})]).forEach(c=>{const x=(a||{})[c],y=(b||{})[c];
+    if(!x)o[c]=y;else if(!y)o[c]=x;else o[c]=(y.lv>x.lv||(y.lv===x.lv&&(y.day||'')>(x.day||'')))?y:x});return o};
+  const info=()=>{const el=document.getElementById('syncInfo');if(el)el.textContent=on?('Shared wall · '+status+(last?' · last saved '+last:'')):''};
+  async function pull(){
+    const r=await fetch(URL_+'?code=eq.'+encodeURIComponent(room)+'&select=data,updated_at',{headers:H});
+    if(!r.ok)throw new Error(r.status);const rows=await r.json();
+    if(rows[0]){const d=rows[0].data||{};Wall.data=merge(Wall.data,d.wall);store.set('ruby1.wall',Wall.data,true);
+      try{last=new Date(rows[0].updated_at).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}catch(e){}}
+  }
+  async function push(){
+    if(busy)return;busy=true;
+    try{await pull();
+      const r=await fetch(URL_+'?on_conflict=code',{method:'POST',headers:{...H,Prefer:'resolution=merge-duplicates,return=minimal'},
+        body:JSON.stringify({code:room,data:{wall:Wall.data},updated_at:new Date().toISOString()})});
+      if(!r.ok)throw new Error(r.status);status='saved ✓';last=new Date().toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    }catch(e){status='offline (saved on this device)'}
+    busy=false;info();
+  }
+  function schedule(){if(!on)return;status='saving…';info();clearTimeout(timer);timer=setTimeout(push,1200)}
+  async function refresh(){if(!on)return;try{await pull();status='up to date ✓'}catch(e){status='offline (saved on this device)'}
+    info();if(!document.getElementById('wallPanel').hidden&&wallView==='wall')renderWall()}
+  if(on){refresh().then(()=>{if(Object.keys(Wall.data).length)schedule()});
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});setInterval(()=>{if(!document.hidden)refresh()},20000)}
+  return {on,room,schedule,info,get status(){return status}};
+})();
+const _set=store.set.bind(store);store.set=function(k,v,quiet){_set(k,v);if(k==='ruby1.wall'&&!quiet)Sync.schedule()};
+
 
 /* ---------- scene: katakana café (4 rounds: sounds+picture, picture only, hear→word, hear→letter) ---------- */
 const LETTERS=[['コ','ko','コーヒー','☕'],['ヒ','hi','コーヒー','☕'],['ケ','ke','ケーキ','🍰'],['キ','ki','ケーキ','🍰'],['ス','su','ジュース','🧃'],['ピ','pi','ピザ','🍕'],['ザ','za','ピザ','🍕'],['ク','ku','クッキー','🍪']];
@@ -768,8 +804,8 @@ $('#resetBtn').onclick=()=>{
   if(!resetArmed){b.textContent='Tap again to reset (voice is kept)';b.classList.add('pri');
     resetArmed=setTimeout(()=>{resetArmed=null;b.textContent='↺ Reset lesson (keeps my voice)';b.classList.remove('pri')},4000);return}
   clearTimeout(resetArmed);resetArmed=null;
-  ['ruby1.state','ruby1.can','ruby1.can2','ruby1.draw','ruby1.notes','ruby1.free','ruby1.hint','ruby1.wall','ruby1.kataUnlock'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  state.done={};state.said=[];Draw.data={};Wall.data={};Wall.fresh={};Notes.items=[];Notes.render();$('#nbFree').value='';
+  ['ruby1.state','ruby1.can','ruby1.can2','ruby1.draw','ruby1.notes','ruby1.free','ruby1.hint','ruby1.kataUnlock'].concat(Sync.on?[]:['ruby1.wall']).forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  state.done={};state.said=[];Draw.data={};if(!Sync.on)Wall.data={};Wall.fresh={};Notes.items=[];Notes.render();$('#nbFree').value='';
   cafeState={open:false,round:1,help:false,swap:false};cur=0;
   b.textContent='Reset ✓';b.classList.remove('pri');setTimeout(()=>{b.textContent='↺ Reset lesson (keeps my voice)'},2000);
   render();
