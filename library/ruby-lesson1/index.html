@@ -70,8 +70,13 @@ button{font:inherit;cursor:pointer}
 .nbpanel ul{list-style:none;margin:8px 0;padding:0}
 .nbpanel li{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
 textarea{width:100%;min-height:80px;border:2px solid var(--line);border-radius:12px;padding:10px;font:inherit;background:var(--bg);color:var(--ink)}
-.cando{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
-.cando .opts{display:flex;gap:6px}
+.cando{display:grid;gap:10px}
+.ci{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.ci .opts{display:flex;gap:6px;align-items:center}
+.ci .was{font-size:.85rem;color:var(--muted);margin-right:4px}
+@media (max-width:560px){.ci{grid-template-columns:1fr}}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.tile{border:2px solid var(--ink);background:var(--bg);color:var(--ink);border-radius:12px;padding:6px 14px;font-family:var(--f-disp);font-size:1.5rem;font-weight:700}
 .opt{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;min-height:40px;font-size:1.2rem}
 .opt[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
 .photo{border:2px dashed var(--line);border-radius:16px;min-height:160px;display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted);text-align:center;padding:10px}
@@ -230,12 +235,12 @@ const SCENES=[
 
 /* teacher-only notes (Japanese) */
 const TN={
- warm:['ルビーさんの写真を1枚見せてもらい、「これは なんですか？」「だれですか？」など、1文だけ。写真は右のボタンで画面に表示(保存されません)。','先に「はじめに、できるかチェック」を3分で。「忘れたこと」を責めないのがポイント。','言えなくても「ゆっくりでOK」と伝える。5秒待つ→最初の1文字→選択肢2つの順。'],
+ warm:['ルビーさんの写真を1枚見せてもらい、「これは なんですか？」「だれですか？」など、1文だけ。写真は右のボタンで画面に表示(保存されません)。','写真の話のあと、「いまのレベルチェック」を3分で。実際に聞いて、言えたかを先生が押す: 名前→好きなもの→カフェで注文→ひらがな・カタカナ(下の文字を見せて読んでもらう)。責めずに、楽しく。😀=自分で言えた 🙂=ヒントで言えた 😅=まだ。','言えなくても「ゆっくりでOK」と伝える。5秒待つ→最初の1文字→選択肢2つの順。'],
  intro:['1枚ずつ: 絵→聞く→言う→文字を見る。文字は先生が言った瞬間にチャットにも打つ。','3枚目の「とそうの せんせい」は本人の実際の仕事に変えてOK。','4枚目は逆に先生に質問してもらう(役割交代で楽しい)。'],
  like:['先生が「さかなは すきですか？」と聞く→ルビーさんが本当のことを答える。どちらの答えも正解。','「すきじゃないです」は前に習った形。出てこなければ最初の文字ヒント。','答えたら「なんで？」を日本語1語で(おいしい/からい 等)。深追いしない。'],
  cafe:['5枚→言えたら、先生が店員、ルビーさんがお客さんでミニ会話。','時間は3回で十分。ミスはその場で直さず、最後に正しい形をもう一度言って聞かせる。','2回目からは、メニューを自分で選んでOK。'],
  kata:['1回5文字まで。文字の形は説明しすぎない。絵と単語で覚える。','「あいす」の「ア」が黄色くなっているのを見せる→「ア」だけ言う。','似た文字(シ/ツ、ソ/ン)はまだ出さない。後の回で。'],
- wrap:['「言えた文」を見て、1つだけ褒める。上達が見えるのが大事。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
+ wrap:['まず「Now」で、最初と同じ5つをもう一度。「Before →」の横に最初の結果が出るので、変わったところを見せて褒める。上達が見えるのが大事。その後「言えた文」を見て、1つだけ褒める。','どのヒントが効いたか(待つ/最初の文字/選択肢)を記録→次回に生かす。','宿題は任意: 「今週の1枚を送って」だけ。']
 };
 
 /* ---------- state ---------- */
@@ -254,22 +259,38 @@ function navBtns(){return `<div class="row">${cur>0?'<button class="btn ghost" i
 function bindNav(){const p=$('#prev'),n=$('#next');if(p)p.onclick=()=>{cur--;render()};if(n)n.onclick=()=>{cur++;render()}}
 
 /* ---------- scene: warm-up ---------- */
-const CAN=[['intro','🙋‍♀️','Say who I am'],['like','🍕','Say what I like'],['cafe','☕','Order at a café'],['hira','あ','Read hiragana'],['kata','ア','Read katakana']];
+const CAN=[
+ ['intro','🙋‍♀️','Say who I am','おなまえは なんですか？'],
+ ['like','🍕','Say what I like','なにが すきですか？'],
+ ['cafe','☕','Order at a café','Imagine you are at a café. Order something!'],
+ ['hira','あ','Read hiragana','',['ねこ','りんご','おちゃ','くるま','あした']],
+ ['kata','ア','Read katakana','',['コーヒー','ケーキ','ピザ','カレー','アイス']]];
+const LEVELS=[['😀','Easy'],['🙂','With a hint'],['😅','Not yet']];
+const EMO={Easy:'😀','With a hint':'🙂','Not yet':'😅'};
+function checkHtml(vals,before){
+  return `<div class="cando">${CAN.map(c=>`<div class="ci"><div><b>${c[1]} ${esc(c[2])}</b>${c[3]?`<div class="en">Ask: ${esc(c[3])}</div>`:''}${c[4]?`<div class="tiles">${c[4].map(t=>`<button class="tile" data-say="${esc(t)}">${esc(t)}</button>`).join('')}</div>`:''}</div>
+   <div class="opts" data-k="${c[0]}">${before?`<span class="was">Before ${before[c[0]]?EMO[before[c[0]]]:'–'} →</span>`:''}${LEVELS.map(o=>`<button class="opt" aria-label="${o[1]}" title="${o[1]}" aria-pressed="${vals[c[0]]===o[1]}" data-v="${o[1]}">${o[0]}</button>`).join('')}</div></div>`).join('')}</div>
+  <p class="en">😀 said it on her own &nbsp; 🙂 with a hint &nbsp; 😅 not yet</p>`;
+}
+function bindCheck(root,vals,key){
+  root.querySelectorAll('.opts').forEach(o=>o.onclick=e=>{const b=e.target.closest('.opt');if(!b)return;
+    vals[o.dataset.k]=b.dataset.v;store.set(key,vals);o.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+  root.querySelectorAll('.tile').forEach(t=>t.onclick=()=>speak(t.dataset.say));
+}
 function renderWarm(s){
   const can=store.get('ruby1.can',{});
   const st=$('#stage');
   st.innerHTML=`<section class="panel"><h2>${esc(s.title)}</h2><div class="goal">${esc(s.goal)}</div>
-   <h3>1. Picture of my week</h3>
-   <div class="photo" id="photo">Tap “Choose a photo” to show a picture from your week.<br>(It stays on this screen only.)</div>
+   <h3>1. Today’s picture</h3>
+   <div class="photo" id="photo">Tap “Choose a photo” to show a picture.<br>(It stays on this screen only.)</div>
    <div class="row"><label class="btn">Choose a photo<input type="file" accept="image/*" id="photoIn" hidden></label></div>
    <div class="frames"><span>これは ___ です。</span><span>___が すきです。</span><span>___に いきました。</span></div>
-   <h3>2. How is it going? <span class="en">(just for me — no right answers)</span></h3>
-   <div class="cando">${CAN.map(c=>`<div>${c[1]} ${esc(c[2])}</div><div class="opts" data-k="${c[0]}">${[['😀','Easy'],['🙂','So-so'],['😅','Forgot']].map(o=>`<button class="opt" aria-label="${o[1]}" aria-pressed="${can[c[0]]===o[1]}" data-v="${o[1]}">${o[0]}</button>`).join('')}</div>`).join('')}</div>
+   <h3>2. Before: where are we now? <span class="en">(a friendly check — no pressure)</span></h3>
+   ${checkHtml(can)}
    ${noteFor(s.id)}${navBtns()}</section>`;
   $('#photoIn').onchange=e=>{const f=e.target.files&&e.target.files[0];if(!f)return;const r=new FileReader();
     r.onload=()=>{$('#photo').innerHTML=`<img alt="Ruby's photo" src="${r.result}">`};r.readAsDataURL(f)};
-  st.querySelectorAll('.opts').forEach(o=>o.onclick=e=>{const b=e.target.closest('.opt');if(!b)return;
-    can[o.dataset.k]=b.dataset.v;store.set('ruby1.can',can);o.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+  bindCheck(st,can,'ruby1.can');
   state.done.warm=true;saveState();bindNav();
 }
 
@@ -327,17 +348,20 @@ function renderDeck(s){
 
 /* ---------- scene: wrap-up ---------- */
 function renderWrap(s){
-  const can=store.get('ruby1.can',{}),hintUsed=store.get('ruby1.hint','');
+  const can=store.get('ruby1.can',{}),can2=store.get('ruby1.can2',{}),hintUsed=store.get('ruby1.hint','');
   const said=state.said;
   const st=$('#stage');
   st.innerHTML=`<section class="panel"><h2>${esc(s.title)}</h2><div class="goal">${esc(s.goal)}</div>
    <h3>Sentences you said today</h3>
    ${said.length?`<ul class="said">${said.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`:'<p class="en">Say a few cards and they will show up here.</p>'}
    <div><b>${said.length}</b> <span class="en">of 20 cards</span><div class="bar"><i style="width:${Math.min(100,said.length/20*100)}%"></i></div></div>
+   <h3>Now: what changed?</h3>
+   ${checkHtml(can2,can)}
    <div class="goal">Optional homework (3 minutes): send me one photo from your day 📷</div>
    <h3 class="en" style="font-size:1rem">For the teacher: which hint helped today?</h3>
    <div class="row" id="hintLog">${['Waiting 5 sec','First letter','Two choices'].map(h=>`<button class="btn ghost" aria-pressed="${hintUsed===h}" data-v="${h}">${h}</button>`).join('')}</div>
    ${noteFor(s.id)}${navBtns()}</section>`;
+  bindCheck(st,can2,'ruby1.can2');
   $('#hintLog').onclick=e=>{const b=e.target.closest('button');if(!b)return;store.set('ruby1.hint',b.dataset.v);
     $('#hintLog').querySelectorAll('button').forEach(x=>x.style.borderColor=x===b?'var(--accent)':'')};
   burst(['🌸','⭐','🎉'],12);
