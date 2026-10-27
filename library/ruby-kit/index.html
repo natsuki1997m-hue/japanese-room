@@ -246,13 +246,13 @@ function tableHtml(type,rows,label){
     });
     h+=`<div class="rowmsg" id="msg-${type}-${ri}" hidden></div>`;
   });
-  h+=`</div><div class="row"><button class="btn pri" data-check="${type}">Check ✓</button><button class="btn" data-reveal="${type}">Show answers</button><button class="btn ghost" data-clear="${type}">Clear</button><span class="en" id="score-${type}"></span></div></section>`;
+  h+=`</div><div class="row"><button class="btn pri" data-check="${type}">Check answers</button><button class="btn" data-reveal="${type}">Show answers</button><button class="btn ghost" data-clear="${type}">Clear</button><span class="en" id="score-${type}"></span></div></section>`;
   return h;
 }
 function renderTable(){
   const st=$('#stage');
   st.innerHTML=`<section class="goal">Fill in each row. Write it with your keyboard, say it out loud, then press <b>Check</b>. The first row is an example.</section>`+
-    tableHtml('i',ADJ_I,'い-adjectives')+tableHtml('na',ADJ_NA,'な-adjectives')+tnBlock('Table: let her try first. Wrong cell → ask “Past or now? Not or yes?” before showing anything. Have her read each filled row aloud (見る→言う). Rows with all ✓ become the day’s “wins”.');
+    tableHtml('i',ADJ_I,'い-adjectives')+tableHtml('na',ADJ_NA,'な-adjectives')+tnBlock('Table: let her try first. Wrong cell → ask “Past or now? Not or yes?” before showing anything. Have her read each filled row aloud (見る→言う).');
   st.oninput=e=>{const i=e.target.closest('input[data-t]');if(!i)return;i.classList.remove('ok','ng');
     const t=i.dataset.t;Table[t]=Table[t]||{};Table[t][i.dataset.w+'|'+i.dataset.f]=i.value;store.set('ruby2.table',Table)};
   st.onkeydown=e=>{if(e.key==='Enter'&&e.target.matches('input[data-t]')&&!e.isComposing){const all=$$('input[data-t]:not([disabled])',st);const n=all[all.indexOf(e.target)+1];if(n)n.focus()}};
@@ -277,7 +277,7 @@ function checkTable(type){
     if(rowGood===4)rowsOk++;
     FORMS.forEach((f,fi)=>{});
   });
-  $('#score-'+type).textContent=`${good} correct ${total?'of '+total+' filled':''} · ${rowsOk} of ${rows.length-1} rows complete ${rowsOk===rows.length-1?'🎉':''}`;
+  $('#score-'+type).textContent=`${good} correct ${total?'of '+total+' filled':''}`;
 }
 
 /* ---- tab 2: switch game ---- */
@@ -299,56 +299,77 @@ const ITEMS=[
  {t:'na',w:'じょうず',e:'🍳',now:'いま、おにいさんは りょうりが',was:'こどものとき、おにいさんは りょうりが',nowEN:'Now, my brother’s cooking',wasEN:'As a child, my brother’s cooking',adj:'good'},
  {t:'na',w:'きれい',e:'✨',now:'いまの へやは',was:'きのうの へやは',nowEN:'The room now',wasEN:'The room yesterday',adj:'clean'},
  {t:'na',w:'かんたん',e:'📚',now:'きょうの しゅくだいは',was:'きのうの しゅくだいは',nowEN:"Today's homework",wasEN:"Yesterday's homework",adj:'easy'}];
-const GAME={n:10};
-let game=null;
+const GC=Object.assign({types:{i:true,na:true},forms:[true,true,true,true],n:10},store.get('ruby2.gamecfg',{}));
+const saveGC=()=>store.set('ruby2.gamecfg',GC);
+let game=null,gameCfgOpen=false;
+function makeQ(prev){
+  const types=['i','na'].filter(t=>GC.types[t]);const fl=[0,1,2,3].filter(f=>GC.forms[f]);
+  const pool=ITEMS.filter(x=>types.includes(x.t));
+  let it=pick(pool),f=pick(fl);
+  for(let k=0;k<6&&prev&&it===prev.it&&f===prev.f;k++){it=pick(pool);f=pick(fl)}
+  const fs=formsOf(it.t,it.w);
+  const others=shuffle([0,1,2,3].filter(k=>k!==f)).slice(0,2).map(k=>fs[k]);
+  const er=pick(errorsOf(it.t,it.w).filter(z=>!fs.includes(z)));
+  return {it,f,target:fs[f],opts:shuffle([fs[f],...others,er])};
+}
 function newGame(){
-  const forms=shuffle([0,1,2,3,0,1,2,3,0,1,2,3]).slice(0,GAME.n);
-  const pool=shuffle(ITEMS);
-  game={q:forms.map((f,i)=>({it:pool[i%pool.length],f})),i:0,res:[],tries:0,hint:0,show:false,stage:'play',msg:''};
-  game.q.forEach(x=>{const fs=formsOf(x.it.t,x.it.w);x.target=fs[x.f];
-    const others=shuffle([0,1,2,3].filter(k=>k!==x.f)).slice(0,2).map(k=>fs[k]);
-    const er=pick(errorsOf(x.it.t,x.it.w).filter(z=>!fs.includes(z)));
-    x.opts=shuffle([x.target,...others,er])});
+  if(!GC.types.i&&!GC.types.na)GC.types.i=true;
+  if(!GC.forms.some(Boolean))GC.forms=[true,true,true,true];
+  const n=GC.n||10;game={q:[],i:0,tries:0,show:false,stage:'play',msg:'',endless:!GC.n};
+  let prev=null;for(let i=0;i<n;i++){const q=makeQ(prev);game.q.push(q);prev=q}
 }
 function meterHtml(){
-  const cells=[];['i','na'].forEach(t=>FORMS.forEach((f,fi)=>{const p=Adj.pct(t+':'+f.k);cells.push(`<div><span class="chip ${f.cls}">${t==='i'?'い':'な'} ${f.lab}</span><div class="bar"><i style="width:${p==null?0:p}%"></i></div><div class="en">${p==null?'not yet':p+'%'}</div></div>`)}));
-  return `<div class="meter" aria-label="Your progress">${cells.join('')}</div>`;
+  const cells=[];['i','na'].forEach(t=>FORMS.forEach((f,fi)=>{const p=Adj.pct(t+':'+f.k);cells.push(`<div><span class="chip ${f.cls}">${t==='i'?'い':'な'} ${f.lab}</span><div class="bar"><i style="width:${p==null?0:p}%"></i></div></div>`)}));
+  return `<div class="meter" aria-label="Progress">${cells.join('')}</div>`;
+}
+function gameCfgHtml(){
+  return `<details class="cfg" id="gcfg" ${gameCfgOpen?'open':''}><summary>⚙ Choose what to practise</summary>
+   <div class="cfgrow"><b style="min-width:70px">Words</b><button class="lt" style="min-width:70px" data-gt="i" aria-pressed="${!!GC.types.i}">い-adj</button><button class="lt" style="min-width:70px" data-gt="na" aria-pressed="${!!GC.types.na}">な-adj</button></div>
+   <div class="cfgrow"><b style="min-width:70px">Forms</b>${FORMS.map((f,i)=>`<button class="lt" style="min-width:96px" data-gf="${i}" aria-pressed="${!!GC.forms[i]}">${f.lab}${f.k.includes('-')?' ✗':''}</button>`).join('')}</div>
+   <div class="cfgrow"><b style="min-width:70px">Questions</b>${[5,10,0].map(n=>`<button class="lt" style="min-width:60px" data-gn="${n}" aria-pressed="${GC.n===n}">${n||'∞'}</button>`).join('')}</div></details>`;
 }
 function renderGame(){
   const st=$('#stage');if(!game)newGame();
   if(game.stage==='end'){
-    const ok=game.res.filter(x=>x).length;
-    st.innerHTML=`<section class="panel"><div class="done-msg"><div class="big">${ok>=8?'🌟':ok>=5?'👏':'💪'}</div><h2>${ok} of ${GAME.n} on the first try!</h2><div class="en">Every round makes the bars below grow.</div></div>${meterHtml()}
-      <div class="row c"><button class="btn pri" id="again">Play again</button></div></section>`;
-    $('#again').onclick=()=>{newGame();renderGame()};return;
+    st.innerHTML=`<section class="panel"><div class="done-msg"><div class="big">🌟</div><h2>Nice work!</h2></div>${meterHtml()}
+      <div class="row c"><button class="btn pri" id="again">Play again</button></div>${gameCfgHtml()}</section>`;
+    $('#again').onclick=()=>{newGame();renderGame()};bindGameCfg();return;
   }
-  const x=game.q[game.i];const it=x.it;const past=x.f>=2,neg=x.f%2===1;
+  const x=game.q[game.i];const it=x.it;const f=x.f;const past=f>=2,neg=f%2===1;
   const body=(past?it.was:it.now);
   const en=`${past?it.wasEN:it.nowEN} ${past?'was':'is'} ${neg?'not ':''}${it.adj}.`;
-  st.innerHTML=`<section class="panel"><div class="top"><h2>Switch game</h2><div class="dots" aria-label="Progress">${game.q.map((q,i)=>`<span class="dot ${i<game.i?(game.res[i]?'on':''):i===game.i?'cur':''}"></span>`).join('')}</div></div>
-    <div class="cue" aria-label="Clues"><span class="chip ${past?'was':'now'}">${past?'before':'now'}</span>${neg?'<span class="chip" style="border-color:var(--bad);color:var(--bad)">not ✗</span>':'<span class="chip" style="border-color:var(--good);color:var(--good)">yes ✓</span>'}</div>
+  st.innerHTML=`<section class="panel"><div class="top"><h2>Switch game</h2><span class="en">${game.endless?(game.i+1):(game.i+1)+' / '+game.q.length}</span></div>
+    <div class="cue" aria-label="Clues"><span class="chip ${past?'was':'now'}">${past?'before':'now'}</span>${neg?'<span class="chip" style="border-color:var(--bad);color:var(--bad)">not ✗</span>':'<span class="chip" style="border-color:var(--good);color:var(--good)">yes</span>'}</div>
     <div class="pic">${it.e}</div>
     <div class="sent">${esc(body)}<span class="blank ${game.stage==='solved'?'ok':''}">${game.stage==='solved'?esc(x.target):'&nbsp;'}</span>。</div>
     <div class="en" style="text-align:center">${esc(en)}</div>
     <div class="opts">${x.opts.map(o=>`<button class="opt" data-o="${esc(o)}" ${game.stage==='solved'?'disabled':''}>${esc(o)}</button>`).join('')}</div>
-    <div class="goal" role="status">${game.stage==='solved'?'✅ '+(game.tries===0?'First try!':'Got it!')+' <button class="btn ghost" id="say">🔊 Say it</button>':esc(game.msg||'Pick the ending that matches the clues.')}</div>
-    <div class="row c">${game.stage==='solved'?'<button class="btn pri" id="next">'+(game.i+1>=GAME.n?'Finish':'Next →')+'</button>':'<button class="btn ghost" id="hint">💭 Hint</button>'}<button class="btn ghost" id="pat" aria-pressed="${game.show}">Pattern chart</button></div>
+    <div class="goal" role="status">${game.stage==='solved'?'👍 <button class="btn ghost" id="say">🔊 Say it</button>':esc(game.msg||'Pick the ending that matches the clues.')}</div>
+    <div class="row c">${game.stage==='solved'?'<button class="btn pri" id="next">Next →</button>':'<button class="btn ghost" id="hint">💭 Hint</button>'}<button class="btn ghost" id="pat" aria-pressed="${game.show}">Pattern chart</button></div>
     ${game.show?strip(it.t):''}
+    ${gameCfgHtml()}
     <h3>My progress</h3>${meterHtml()}
-    ${tnBlock('Game: before she answers, have her say the clues aloud (“before… not…”). Wrong → hint question, not the answer. Errors offered as distractors (おいしいくないです etc.) are real learner mistakes—name them: “Which two jobs are in one word?”')}</section>`;
+    ${tnBlock('Game: have her say the clues aloud (“before… not…”). Wrong → hint question, not the answer. The wrong choices are real learner errors (おいしいくないです etc.). Use ⚙ to drill just one weak form, e.g. い-adj “before ✗”.')}</section>`;
   $$('.opt',st).forEach(b=>b.onclick=()=>{
     const v=b.dataset.o;
-    if(v===x.target){game.stage='solved';const first=game.tries===0;game.res[game.i]=first;
-      if(first)Adj.rec(it.t+':'+FORMS[x.f].k,true);speak(body.replace(/[、]/g,'')+' '+x.target);renderGame()}
-    else{if(game.tries===0)Adj.rec(it.t+':'+FORMS[x.f].k,false);game.tries++;b.classList.add('bad');
-      const fs=formsOf(it.t,it.w);const wrongIdx=fs.indexOf(v);
-      game.msg=wrongIdx>=0?`Close! That one means “${wrongIdx>=2?'before':'now'}${wrongIdx%2?', not':''}”. Check the clues 🔎`:'Not a real ending 🙂 — look at the い/な rules.';
+    if(v===x.target){game.stage='solved';if(game.tries===0)Adj.rec(it.t+':'+FORMS[f].k,true);speak(body.replace(/[、]/g,'')+' '+x.target);renderGame()}
+    else{if(game.tries===0)Adj.rec(it.t+':'+FORMS[f].k,false);game.tries++;b.classList.add('bad');
+      const fs=formsOf(it.t,it.w);const wi=fs.indexOf(v);
+      game.msg=wi>=0?`Close! That one means “${wi>=2?'before':'now'}${wi%2?', not':''}”. Check the clues 🔎`:'Not a real ending 🙂 — look at the い/な rules.';
       $('.goal',st).textContent=game.msg}
   });
-  const h=$('#hint');if(h)h.onclick=()=>{game.msg='💭 '+HINT_Q[it.t][x.f];$('.goal',st).textContent=game.msg};
+  const h=$('#hint');if(h)h.onclick=()=>{game.msg='💭 '+HINT_Q[it.t][f];$('.goal',st).textContent=game.msg};
   $('#pat').onclick=()=>{game.show=!game.show;renderGame()};
-  const nx=$('#next');if(nx)nx.onclick=()=>{game.i++;game.tries=0;game.msg='';game.stage='play';if(game.i>=GAME.n)game.stage='end';renderGame()};
+  const nx=$('#next');if(nx)nx.onclick=()=>{game.i++;game.tries=0;game.msg='';game.stage='play';
+    if(game.i>=game.q.length){if(game.endless)game.q.push(makeQ(x));else game.stage='end'}renderGame()};
   const sy=$('#say');if(sy)sy.onclick=()=>speak(body.replace(/[、]/g,'')+' '+x.target);
+  bindGameCfg();
+}
+function bindGameCfg(){
+  const d=$('#gcfg');if(!d)return;d.ontoggle=()=>{gameCfgOpen=d.open};
+  $$('[data-gt]',d).forEach(b=>b.onclick=()=>{GC.types[b.dataset.gt]=!GC.types[b.dataset.gt];saveGC();gameCfgOpen=true;newGame();renderGame()});
+  $$('[data-gf]',d).forEach(b=>b.onclick=()=>{GC.forms[+b.dataset.gf]=!GC.forms[+b.dataset.gf];saveGC();gameCfgOpen=true;newGame();renderGame()});
+  $$('[data-gn]',d).forEach(b=>b.onclick=()=>{GC.n=+b.dataset.gn;saveGC();gameCfgOpen=true;newGame();renderGame()});
 }
 
 /* =====================================================================
@@ -371,41 +392,38 @@ const TALK=[
  {id:'t14',type:'Opinion',e:'💬',title:'Good or not good?',steps:['I say a thing. You say if it was good or not, and why.','Try: きのうの ごはん・しごと・てんき・えいが'],vocab:['よかったです','よくなかったです','おいしくなかったです','つまらなかったです'],tn:['Force both polarities: “もう1つ、よくなかった ことは？” — trains いい→よくない.'],mins:5},
  {id:'t15',type:'Opinion',e:'💬',title:'My week: best & worst',steps:['Tell me the BEST thing and the WORST thing about this week.','Use a past adjective for each.'],vocab:['いちばん','たいへんでした','たのしかったです'],tn:['Expected output: 4–6 sentences. If one sentence, say: “もうすこし おしえて！”'],mins:5},
  {id:'t16',type:'Plan',e:'📅',title:'Plan the next weekend',slots:['どこに いきますか','だれと','なにを たべたいですか','なんじに','いくら'],steps:['Plan your weekend with the boxes.','Use ます and たいです.','Ask me to join: いっしょに いきませんか？'],vocab:['いきたいです','いっしょに','〜じに','〜ませんか'],tn:['Number / time practice: なんじ・なんじかん. Check よじ（✕よんじ）.'],mins:6}];
-const Talk={used:store.get('ruby2.talk',[]),cur:null,filter:'All',timer:null,left:0};
+const Talk={cur:null,filter:'All',list:false};
 function renderTalk(){
   const st=$('#stage');
   const types=['All',...new Set(TALK.map(t=>t.type))];
   const c=Talk.cur;
-  st.innerHTML=`<section class="panel"><div class="top"><h2>Talk cards</h2><span class="en">${Talk.used.length} of ${TALK.length} cards done</span></div>
+  const vis=TALK.filter(t=>Talk.filter==='All'||t.type===Talk.filter);
+  st.innerHTML=`<section class="panel"><h2>Talk cards</h2>
    <div class="row">${types.map(t=>`<button class="btn ghost" data-f="${t}" aria-pressed="${Talk.filter===t}">${t}</button>`).join('')}</div>
-   <div class="row c"><button class="btn pri" id="draw">🎴 Draw a card</button></div>
-   ${c?cardHtml(c):'<div class="goal">Press <b>Draw a card</b>. A card gives you a job to do — and it takes a few sentences to finish it!</div>'}
+   <div class="row"><button class="btn pri" id="draw">🎴 Random card</button><button class="btn" id="listBtn" aria-pressed="${Talk.list}">☰ ${Talk.list?'Hide':'Show'} all cards</button></div>
+   ${Talk.list?`<div class="set">${vis.map(t=>`<button class="btn" data-id="${t.id}" style="text-align:left">${t.e} <b>${esc(t.title)}</b> <span class="en">· ${t.type}</span></button>`).join('')}</div>`:''}
+   ${c?cardHtml(c):'<div class="goal">Press <b>Random card</b>, or open the list and pick one. Each card is a job that takes several sentences to finish.</div>'}
    </section>`;
   $$('[data-f]',st).forEach(b=>b.onclick=()=>{Talk.filter=b.dataset.f;renderTalk()});
   $('#draw').onclick=()=>{
-    stopTimer();
-    let pool=TALK.filter(t=>Talk.filter==='All'||t.type===Talk.filter);
-    const fresh=pool.filter(t=>!Talk.used.includes(t.id));if(fresh.length)pool=fresh;
-    Talk.cur=pick(pool.filter(t=>!Talk.cur||t.id!==Talk.cur.id).length?pool.filter(t=>!Talk.cur||t.id!==Talk.cur.id):pool);renderTalk()};
-  const d=$('#doneCard');if(d)d.onclick=()=>{if(!Talk.used.includes(c.id)){Talk.used.push(c.id);store.set('ruby2.talk',Talk.used)}stopTimer();renderTalk()};
-  const ts=$('#tstart');if(ts)ts.onclick=()=>startTimer(c.mins*60);
+    const pool=TALK.filter(t=>(Talk.filter==='All'||t.type===Talk.filter)&&(!Talk.cur||t.id!==Talk.cur.id));
+    Talk.cur=pick(pool.length?pool:TALK);renderTalk()};
+  $('#listBtn').onclick=()=>{Talk.list=!Talk.list;renderTalk()};
+  $$('[data-id]',st).forEach(b=>b.onclick=()=>{Talk.cur=TALK.find(t=>t.id===b.dataset.id);Talk.list=false;renderTalk()});
   const sr=$('#storyBtn');if(sr)sr.onclick=()=>{$('#story').hidden=!$('#story').hidden};
   const sp=$('#storySay');if(sp)sp.onclick=()=>speak(c.story);
   $$('.vocab span',st).forEach(s=>{s.style.cursor='pointer';s.onclick=()=>speak(s.textContent)});
 }
 function cardHtml(c){
-  return `<div class="tcard"><div class="row"><span class="big">${c.e}</span><div><div class="sub">${c.type} · about ${c.mins} min</div><h2>${esc(c.title)}</h2></div></div>
+  return `<div class="tcard"><div class="row"><span class="big">${c.e}</span><div><div class="sub">${c.type}</div><h2>${esc(c.title)}</h2></div></div>
     ${c.slots?`<div class="slots">${c.slots.map(s=>`<div class="slot"><b>${esc(s)}</b>…</div>`).join('')}</div>`:''}
     ${c.scene?`<div class="scene" aria-label="Picture">${c.scene.map(s=>`<span>${s}</span>`).join('')}</div>`:''}
     ${c.story?`<div class="row"><button class="btn" id="storySay">🔊 Listen to the story</button><button class="btn ghost" id="storyBtn">Show text</button></div><div id="story" class="jp" hidden style="font-size:1.1rem;font-weight:500">${esc(c.story)}</div>`:''}
     <ol style="margin:0;padding-left:1.3em">${c.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
     <div class="vocab" aria-label="Useful words">${c.vocab.map(v=>`<span>${esc(v)}</span>`).join('')}</div>
-    <div class="row"><button class="btn" id="tstart">⏱ Start timer</button><span class="timer" id="tshow" aria-live="off"></span><button class="btn good" id="doneCard">Done ✓</button></div>
     ${settings.tn?`<div class="tn"><b>Teacher</b>${c.tn.map(x=>esc(x)).join('<br>')}</div>`:''}</div>`;
 }
-function startTimer(sec){stopTimer();Talk.left=sec;tick();Talk.timer=setInterval(()=>{Talk.left--;tick();if(Talk.left<=0)stopTimer()},1000)}
-function stopTimer(){if(Talk.timer){clearInterval(Talk.timer);Talk.timer=null}}
-function tick(){const e=$('#tshow');if(e)e.textContent=Talk.left>0?`${Math.floor(Talk.left/60)}:${String(Talk.left%60).padStart(2,'0')}`:'Time! 🎉'}
+function stopTimer(){}
 
 /* =====================================================================
    KATAKANA — all letters
@@ -558,7 +576,7 @@ function renderPractice(){
       <div class="kdetail" style="justify-content:center;text-align:center"><div class="kbig" style="color:${row?row[1]:'var(--ink)'}">${c}</div>
       <div><div style="font-size:1.4rem"><b>${ROMA[c]}</b></div>${a[0]?`<div class="kword">${a[1]} ${hl}</div>`:''}</div></div>
       <div class="goal">Hear it → say it → see the picture word.</div>
-      <div class="row c"><button class="btn" id="h1">🔊 Letter</button>${a[0]?'<button class="btn" id="h2">🔊 Word</button>':''}<button class="btn pri" id="nx">I said it ✓ ${p.i+1<p.set.length?'Next →':'Start the game →'}</button></div></section>`;
+      <div class="row c"><button class="btn" id="h1">🔊 Letter</button>${a[0]?'<button class="btn" id="h2">🔊 Word</button>':''}<button class="btn pri" id="nx">I said it ${p.i+1<p.set.length?'→':'· Start the game →'}</button></div></section>`;
     $('#quit').onclick=quit;$('#h1').onclick=()=>speak(c);const h2=$('#h2');if(h2)h2.onclick=()=>speak(a[0]);
     setTimeout(()=>speak(c),200);
     $('#nx').onclick=()=>{Wall.mark(c,'seen');p.i++;if(p.i>=p.set.length){p.phase='hear';p.queue=shuffle(p.set);p.i=0;p.first={};p.solved=false;p.wrong=false;p.opts=null}renderPractice()};
@@ -572,7 +590,7 @@ function renderPractice(){
     st.innerHTML=`<section class="panel">${head('2 · Hear → letter')}<div class="en">${p.set.length-p.queue.length+(p.solved?1:0)} of ${p.set.length} done</div>
       <div class="row c"><button class="btn pri" id="hr" style="font-size:1.4rem;min-width:140px">🔊 Listen</button></div>
       <div class="tiles">${p.opts.map(o=>`<button class="tile" data-o="${o}" ${p.solved?'disabled':''}>${o}</button>`).join('')}</div>
-      <div class="goal" role="status">${p.solved?'✅ '+ROMA[c]+(p.wrong?'':' — first try!'):esc(p.msg||'Which letter says it?')}</div>
+      <div class="goal" role="status">${p.solved?'👍 '+ROMA[c]:esc(p.msg||'Which letter says it?')}</div>
       ${p.solved?'<div class="row c"><button class="btn pri" id="nx2">Next →</button></div>':''}</section>`;
     $('#quit').onclick=quit;$('#hr').onclick=()=>speak(c);if(!p.solved)setTimeout(()=>speak(c),250);
     $$('.tile',st).forEach(b=>b.onclick=()=>{
@@ -590,7 +608,7 @@ function renderPractice(){
       <div class="kword" style="text-align:center;font-size:2.8rem">${esc(w)}</div>
       <div class="row c"><button class="btn" id="hw">🔊 Hear it</button></div>
       <div class="tiles">${p.opts.map(o=>`<button class="tile" data-o="${esc(o[0])}" style="font-size:3rem" ${p.solved?'disabled':''}>${o[1]}</button>`).join('')}</div>
-      <div class="goal" role="status">${p.solved?'✅ '+esc(w)+(p.wrong?'':' — first try!'):esc(p.msg||'Which picture is it? Read it first!')}</div>
+      <div class="goal" role="status">${p.solved?'👍 '+esc(w):esc(p.msg||'Which picture is it? Read it first!')}</div>
       ${p.solved?'<div class="row c"><button class="btn pri" id="nx3">Next →</button></div>':''}</section>`;
     $('#quit').onclick=quit;$('#hw').onclick=()=>speak(w);
     $$('.tile',st).forEach(b=>b.onclick=()=>{
@@ -641,11 +659,11 @@ const Sync=(function(){
     try{await pull();
       const r=await fetch(URL_+'?on_conflict=code',{method:'POST',headers:{...H,Prefer:'resolution=merge-duplicates,return=minimal'},
         body:JSON.stringify({code:room,data:{...remote,wall:Wall.data,adj:Adj.hist,kata:Kata.cfg},updated_at:new Date().toISOString()})});
-      if(!r.ok)throw new Error(r.status);status='saved ✓';last=fmt(new Date())}catch(e){status='offline (saved on this device)'}
+      if(!r.ok)throw new Error(r.status);status='saved';last=fmt(new Date())}catch(e){status='offline (saved on this device)'}
     busy=false;info();
   }
   function schedule(){if(!on)return;status='saving…';info();clearTimeout(timer);timer=setTimeout(push,1200)}
-  async function refresh(){if(!on)return;try{await pull();status='up to date ✓'}catch(e){status='offline (saved on this device)'}
+  async function refresh(){if(!on)return;try{await pull();status='up to date'}catch(e){status='offline (saved on this device)'}
     info();if(tab==='kata'&&Kata.view==='wall'&&!document.activeElement.closest('#cfgBox'))renderKata();if(tab==='switch'&&game&&game.stage!=='play')renderGame()}
   if(on){refresh();document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});setInterval(()=>{if(!document.hidden)refresh()},30000)}
   return {on,schedule,info};
