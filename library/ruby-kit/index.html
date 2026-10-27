@@ -298,7 +298,16 @@ const ITEMS=[
  {t:'na',w:'ひま',e:'🛋️',now:'こんしゅうの しゅうまつは',was:'せんしゅうの しゅうまつは',nowEN:"This weekend",wasEN:'Last weekend',adj:'free'},
  {t:'na',w:'じょうず',e:'🍳',now:'いま、おにいさんは りょうりが',was:'こどものとき、おにいさんは りょうりが',nowEN:'Now, my brother’s cooking',wasEN:'As a child, my brother’s cooking',adj:'good'},
  {t:'na',w:'きれい',e:'✨',now:'いまの へやは',was:'きのうの へやは',nowEN:'The room now',wasEN:'The room yesterday',adj:'clean'},
- {t:'na',w:'かんたん',e:'📚',now:'きょうの しゅくだいは',was:'きのうの しゅくだいは',nowEN:"Today's homework",wasEN:"Yesterday's homework",adj:'easy'}];
+ {t:'na',w:'かんたん',e:'📚',now:'きょうの しゅくだいは',was:'きのうの しゅくだいは',nowEN:"Today's homework",wasEN:"Yesterday's homework",adj:'easy'},
+ {t:'i',w:'きたない',e:'🧹',now:'いま、わたしの へやは',was:'せんしゅう、わたしの へやは',nowEN:'Now, my room',wasEN:'Last week, my room',adj:'dirty'},
+ {t:'i',w:'むしあつい',e:'🌴',now:'きょうの マカイは',was:'きのうの マカイは',nowEN:"Today's Makai",wasEN:"Yesterday's Makai",adj:'humid'},
+ {t:'i',w:'たのしい',e:'⛵',now:'きょうの セーリングは',was:'きのうの セーリングは',nowEN:"Today's sailing",wasEN:"Yesterday's sailing",adj:'fun'},
+ {t:'i',w:'たかい',e:'🍓',now:'この ラテは',was:'きのうの ラテは',nowEN:'This latte',wasEN:"Yesterday's latte",adj:'expensive'},
+ {t:'i',w:'おいしい',e:'🍕',now:'きょうの ピザは',was:'きのうの ピザは',nowEN:"Today's pizza",wasEN:"Yesterday's pizza",adj:'delicious'},
+ {t:'i',w:'いい',e:'🎂',now:'こんしゅうの パーティーは',was:'せんしゅうの パーティーは',nowEN:"This week's party",wasEN:"Last week's party",adj:'good'},
+ {t:'na',w:'しずか',e:'👨',now:'いま、かれしは',was:'せんしゅう、かれしは',nowEN:'Now, my boyfriend',wasEN:'Last week, my boyfriend',adj:'quiet'},
+ {t:'na',w:'すき',e:'🐟',now:'いま、さかなが',was:'こどものとき、さかなが',ens:['Now, I like fish.','Now, I don’t like fish.','As a child, I liked fish.','As a child, I didn’t like fish.']},
+ {t:'na',w:'だいすき',e:'🍕',now:'いま、ピザが',was:'こどものとき、ピザが',ens:['Now, I love pizza.','Now, I don’t love pizza.','As a child, I loved pizza.','As a child, I didn’t love pizza.']}];
 const GC=Object.assign({types:{i:true,na:true},forms:[true,true,true,true],n:10},store.get('ruby2.gamecfg',{}));
 const saveGC=()=>store.set('ruby2.gamecfg',GC);
 let game=null,gameCfgOpen=false;
@@ -337,7 +346,7 @@ function renderGame(){
   }
   const x=game.q[game.i];const it=x.it;const f=x.f;const past=f>=2,neg=f%2===1;
   const body=(past?it.was:it.now);
-  const en=`${past?it.wasEN:it.nowEN} ${past?'was':'is'} ${neg?'not ':''}${it.adj}.`;
+  const en=it.ens?it.ens[f]:`${past?it.wasEN:it.nowEN} ${past?'was':'is'} ${neg?'not ':''}${it.adj}.`;
   st.innerHTML=`<section class="panel"><div class="top"><h2>Switch game</h2><span class="en">${game.endless?(game.i+1):(game.i+1)+' / '+game.q.length}</span></div>
     <div class="cue" aria-label="Clues"><span class="chip ${past?'was':'now'}">${past?'before':'now'}</span>${neg?'<span class="chip" style="border-color:var(--bad);color:var(--bad)">not ✗</span>':'<span class="chip" style="border-color:var(--good);color:var(--good)">yes</span>'}</div>
     <div class="pic">${it.e}</div>
@@ -391,6 +400,10 @@ const TALK=[
  {id:'t13',type:'Retell',e:'📣',title:'Listen & retell (a trip)',story:'せんしゅう、ともだちと りょこうしました。ホテルは ひろかったです。でも、すこし たかかったです。よる、レストランで ステーキを たべました。とても おいしかったです。',steps:['Listen twice.','Tell it back. Say what was good and what was expensive.'],vocab:['りょこう','ひろかったです','たかかったです'],tn:['Past adjectives in context: ひろかった/たかかった. Then ask her own trip.'],mins:7},
  {id:'t14',type:'Opinion',e:'💬',title:'Good or not good?',steps:['I say a thing. You say if it was good or not, and why.','Try: きのうの ごはん・しごと・てんき・えいが'],vocab:['よかったです','よくなかったです','おいしくなかったです','つまらなかったです'],tn:['Force both polarities: “もう1つ、よくなかった ことは？” — trains いい→よくない.'],mins:5},
  {id:'t15',type:'Opinion',e:'💬',title:'My week: best & worst',steps:['Tell me the BEST thing and the WORST thing about this week.','Use a past adjective for each.'],vocab:['いちばん','たいへんでした','たのしかったです'],tn:['Expected output: 4–6 sentences. If one sentence, say: “もうすこし おしえて！”'],mins:5},
+ {id:'t17',type:'Timeline',e:'⛵',title:'Sailing',slots:['いつ セーリングを しましたか','どこで','だれと','どのくらい','どうでしたか'],steps:['Tell me about your sailing.','Use ました for what you did.','End with a past adjective: たのしかったです / たいへんでした。'],vocab:['セーリング','れんしゅう','どのくらい','たのしかったです'],tn:['Her own hobby → long answers. どのくらい (how long) is in her word list.'],mins:5},
+ {id:'t18',type:'Picture',e:'🎨',title:'The wall job',scene:['🏠','🧱','🎨','🪣','🖌️','🪜','👷','🧤','🥪','☕','🌤️','📱'],steps:['You painted a friend’s wall. Tell me about it.','How many days? (ふつかかん・みっかかん…)','Was it hard? Was it fun?'],vocab:['かべ','ペインティング','〜かん','おわりました'],tn:['Reuse today’s ふつか + かん. Ask: なんにちかん？ なんじかん？ ふたりで？'],mins:6},
+ {id:'t19',type:'Interview me',e:'🛫',title:'Famous places',steps:['Ask me: What is famous in my town?','Then tell me what is famous in Cairns / Adelaide.','Ask how to get there: どうやって いきますか？'],vocab:['ゆうめい','ひこうき','くるま','どうやって'],tn:['Words from her sheet: ゆうめい・ひこうき・くるま. Push: くるまで／ひこうきで.'],mins:6},
+ {id:'t20',type:'Opinion',e:'🕘',title:'Overtime',steps:['Do you have overtime? When? How long?','Was yesterday busy? Say it in the past.','Ask me about my work.'],vocab:['ざんぎょう','いそがしかったです','どのくらい','いつも'],tn:['Her 残業 sentences are already strong—extend with past adjectives and ふつか＋かん / なんじかん.'],mins:5},
  {id:'t16',type:'Plan',e:'📅',title:'Plan the next weekend',slots:['どこに いきますか','だれと','なにを たべたいですか','なんじに','いくら'],steps:['Plan your weekend with the boxes.','Use ます and たいです.','Ask me to join: いっしょに いきませんか？'],vocab:['いきたいです','いっしょに','〜じに','〜ませんか'],tn:['Number / time practice: なんじ・なんじかん. Check よじ（✕よんじ）.'],mins:6}];
 const Talk={cur:null,filter:'All',list:false};
 function renderTalk(){
