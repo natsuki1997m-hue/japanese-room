@@ -98,12 +98,23 @@ button:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
   border-right:var(--bw) solid var(--line);border-bottom:var(--bw) solid var(--line);transform:rotate(45deg) skew(10deg,10deg)}
 .sit{color:var(--muted);font-size:1rem;font-weight:700;margin-top:6px}
 @media (prefers-reduced-motion: reduce){button{transition:none}}
+.tabs button{min-width:0}
+@media (max-width:560px){.tabs{gap:6px}.tabs button{font-size:.8rem;padding:10px 2px;line-height:1.3}}
+#tab-set[aria-selected="true"]{background:var(--blue)}
+.gl{background:var(--panel);border:var(--bw) solid var(--line);border-radius:var(--r2);box-shadow:var(--sh2);padding:10px 16px 12px;margin-bottom:12px}
+.gl h3{margin:0 0 6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--disp);font-weight:var(--dispw);font-size:1.1rem}
+.gl h3 .lt{background:var(--yellow);color:var(--on);border:2px solid var(--line);border-radius:999px;padding:0 12px;font-size:.95rem}
+.gl h3 label{margin-left:auto;font-family:var(--body);font-weight:700;font-size:.85rem}
+.gi{display:flex;flex-wrap:wrap;gap:6px 18px}
+.gi label,.gl h3 label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-weight:700;padding:3px 0}
+.gi input,.gl h3 input{width:20px;height:20px;accent-color:var(--pink);flex:none}
+.cnt{font-weight:700;font-size:.9rem;background:var(--soft);border:2px dashed var(--line);border-radius:var(--r2);padding:8px 14px}
 [hidden]{display:none!important}
 .back{align-self:flex-start;font-weight:700;font-size:.85rem;color:var(--muted);text-decoration:none}
 </style>
-
 </head>
 <body>
+
 <main>
   <a class="back" href="../index.html">← Playground</a>
   <header>
@@ -117,6 +128,7 @@ button:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
     <button id="tab-card" role="tab" aria-selected="true">役割カード</button>
     <button id="tab-warm" role="tab" aria-selected="false">ウォームアップ</button>
     <button id="tab-bingo" role="tab" aria-selected="false">文法ビンゴ</button>
+    <button id="tab-set" role="tab" aria-selected="false">文法えらび</button>
   </div>
 
   <section id="cardView" aria-label="役割カード">
@@ -185,6 +197,16 @@ button:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
     </div>
   </section>
 
+  <section id="setView" aria-label="文法えらび" hidden>
+    <p class="sub" style="margin:0 0 10px">今日の授業で使う文法にチェック。役割カード・ハプニング・お題・ビンゴが、選んだ文法だけになります。（このブラウザに保存されます）</p>
+    <div class="row" style="margin-bottom:12px">
+      <button id="selAll" type="button">ぜんぶ選ぶ</button>
+      <button id="selNone" type="button">ぜんぶはずす</button>
+    </div>
+    <div id="gramList"></div>
+    <div class="cnt" id="gramCount"></div>
+  </section>
+
   <section id="bingoView" aria-label="文法ビンゴ" hidden>
     <div class="row" style="margin-bottom:8px">
       <button id="b1" class="primary">ビンゴ 1</button>
@@ -194,6 +216,7 @@ button:focus-visible{outline:4px solid var(--blue);outline-offset:3px}
     </div>
     <p class="sub" style="margin:0 0 10px">ふつうに先生と話して、文法を自然に使えたらそのマスをクリック。1列そろえばビンゴ。全部うめたらボーナス！（ビンゴ2はビンゴ1のあと）</p>
     <div class="banner" id="banner"></div>
+    <p class="sub" id="bnote" hidden style="margin:0 0 8px">※ 選んだ文法が9個に足りないので、残りのマスは選んでいない文法で埋めています。</p>
     <div class="board" id="board"></div>
     <div class="notes" style="margin-top:14px"><b>先生の質問リスト（文法名は言わずに聞く）</b>
       <ul>
@@ -228,13 +251,36 @@ var BINGO=[
 [["〜たいです","I want to ___"],["〜ので","because ___"],["〜と思います","I think ___"],["〜てもいいですか","May I ___?"],["〜ないほうがいいです","better not to ___"],["〜に行きます","go to ___ to do ___"],["〜たことがあります","have ___ed before"],["〜つもりです","I plan to ___"],["〜ないでください","Please don't ___"]],
 [["〜てはいけません","must not ___"],["〜なければいけません","have to ___"],["〜ましょうか","Shall I ___?"],["〜てください","Please ___"],["〜ています","doing ___ now"],["もう〜ました","already ___ed"],["〜くなりました","became ___"],["〜すぎます","too much ___"],["〜たほうがいいです","better to ___"]]
 ];
+
+/* grammar selection (Genki I sections) */
+var GRAMS=[
+["L6","て形・お願い・許可",[["kudasai","〜てください"],["te_mo","〜てもいいですか"],["te_ha","〜てはいけません"],["masho","〜ましょうか"],["te_seq","て形でつなぐ"]]],
+["L7","いま・目的",[["teiru","〜ています"],["ni_iku","〜に行きます（目的）"]]],
+["L8","ふつう形・気持ち",[["omou","〜と思います"],["itteita","〜と言っていました"],["naide","〜ないでください"]]],
+["L9","もう・まだ",[["mou","もう〜ました"]]],
+["L10","変化・予定",[["naru","〜くなりました"],["tsumori","〜つもりです"]]],
+["L11","したい・経験",[["tai","〜たいです"],["koto","〜たことがあります"]]],
+["L12","理由・アドバイス・義務",[["sugiru","〜すぎます"],["hou","〜たほうが／ないほうがいいです"],["node","〜ので（〜からは L6）"],["nakereba","〜なければいけません"]]]
+];
+var ALLG=[];GRAMS.forEach(function(g){g[2].forEach(function(x){ALLG.push(x[0])})});
+var sel={};
+(function(){var saved=null;try{saved=JSON.parse(localStorage.getItem("gram"))}catch(e){}
+  ALLG.forEach(function(id){sel[id]=saved&&typeof saved[id]==="boolean"?saved[id]:true})})();
+var CARD_T=[["te_mo"],["te_ha"],["hou"],["masho"],["node"],["tsumori"],["tai","ni_iku"],["koto"],["omou"],["kudasai"],["itteita"],["te_seq"]];
+var HAP_T=[["masho"],["masho","ni_iku"],["masho"],["hou"],["hou"],["naide"],["nakereba","omou"],["sugiru","omou"]];
+var TOPIC_T=[["koto","tsumori","ni_iku"],["tai","sugiru","koto"],["te_seq","tsumori","omou","node"],["teiru","nakereba"],["tai","mou","sugiru","node","ni_iku"],["tai","naru","nakereba"]];
+var BINGO_T=["tai","node","omou","te_mo","hou","ni_iku","koto","tsumori","naide","te_ha","nakereba","masho","kudasai","teiru","mou","naru","sugiru","hou"];
+var QL_T=["node","tsumori","koto","ni_iku","omou","nakereba","masho"];
+function allOn(t){return t.every(function(id){return sel[id]})}
+function anyOn(t){return t.some(function(id){return sel[id]})}
+function availIdx(T,fn){var r=[];T.forEach(function(t,i){if(fn(t,i))r.push(i)});return r}
 var LINES=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
 function $(i){return document.getElementById(i)}
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;")}
 
 /* tabs */
 function show(which){
-  ["card","warm","bingo"].forEach(function(k){
+  ["card","warm","bingo","set"].forEach(function(k){
     $(k+"View").hidden=(k!==which);
     $("tab-"+k).setAttribute("aria-selected",k===which);
   });
@@ -242,6 +288,7 @@ function show(which){
 $("tab-card").onclick=function(){show("card")};
 $("tab-warm").onclick=function(){show("warm")};
 $("tab-bingo").onclick=function(){show("bingo")};
+$("tab-set").onclick=function(){show("set")};
 
 /* cards */
 var deck=[],cur=-1,seen=[],tries=1;
@@ -254,7 +301,8 @@ function render(){
   $("hist").innerHTML=seen.map(function(n){return"<span>No."+(n+1)+"</span>"}).join("");
 }
 $("draw").onclick=function(){
-  if(!deck.length)deck=shuffle(CARDS.map(function(_,i){return i}));
+  if(!deck.length)deck=shuffle(availIdx(CARD_T,allOn));
+  if(!deck.length){cur=-1;$("card").innerHTML='<div class="empty">選んだ文法に合うカードがありません。「文法えらび」で増やしてください。</div>';return}
   cur=deck.pop();seen.push(cur);tries=1;
   $("memo").hidden=true;$("reveal").setAttribute("aria-pressed","false");$("reveal").textContent="先生メモを見る";
   render();
@@ -272,10 +320,20 @@ $("reveal").onclick=function(){
 };
 
 /* bingo */
-var cur2=0,marks=[[],[]];
+var cur2=0,marks=[[],[]],BD=BINGO,fill=[false,false];
+function buildBingo(){
+  var flat=[];BINGO.forEach(function(b){b.forEach(function(c){flat.push(c)})});
+  var on=[],off=[];flat.forEach(function(c,i){(sel[BINGO_T[i]]?on:off).push(c)});
+  fill=[on.length<9,on.length<18];
+  var list=on.concat(off);
+  BD=[list.slice(0,9),list.slice(9,18)];
+  if(on.length===0){BD=BINGO}
+  marks=[[],[]];
+}
+buildBingo();
 function drawBoard(){
   var b=$("board");b.innerHTML="";
-  BINGO[cur2].forEach(function(p,i){
+  BD[cur2].forEach(function(p,i){
     var d=document.createElement("button");d.className="cell";d.type="button";
     d.setAttribute("aria-pressed",!!marks[cur2][i]);
     d.innerHTML='<span class="mk">✔</span><span class="pat">'+esc(p[0])+'</span><span class="cue">'+esc(p[1])+'</span>';
@@ -287,6 +345,7 @@ function drawBoard(){
   hit.forEach(function(l){l.forEach(function(i){cells[i].classList.add("line")})});
   var all=m.filter(Boolean).length===9;
   $("banner").textContent=all?"全部そろった！ ボーナスラウンド！":hit.length?"ビンゴ！ "+hit.length+"ライン":"";
+  var nb=document.getElementById("bnote");if(nb)nb.hidden=!fill[cur2];
   $("b1").className=cur2===0?"primary":"";$("b2").className=cur2===1?"primary":"";
 }
 $("b1").onclick=function(){cur2=0;drawBoard()};
@@ -310,7 +369,9 @@ function renderTopic(){
   $("g1memo").innerHTML='<b>見本</b>　'+esc(t[2])+'<br><b>出やすい文法</b>　<span class="pat">'+esc(t[3])+'</span>';
 }
 $("topic").onclick=function(){
-  var n;do{n=Math.floor(Math.random()*TOPICS.length)}while(n===tp&&TOPICS.length>1);
+  var pool=availIdx(TOPIC_T,anyOn);
+  if(!pool.length){tp=-1;$("topicCard").innerHTML='<div class="empty">選んだ文法に合うお題がありません。「文法えらび」で増やしてください。</div>';return}
+  var n;do{n=pool[Math.floor(Math.random()*pool.length)]}while(n===tp&&pool.length>1);
   tp=n;$("g1memo").hidden=true;$("g1reveal").setAttribute("aria-pressed","false");$("g1reveal").textContent="先生の見本を見る";
   renderTopic();
 };
@@ -336,7 +397,9 @@ function renderHap(){
   $("hapMemo").innerHTML='<b>想定パターン</b>　<span class="pat">'+esc(h[2])+'</span><br><b>例</b>　'+esc(h[3]);
 }
 $("hap").onclick=function(){
-  var n;do{n=Math.floor(Math.random()*HAP.length)}while(n===hp&&HAP.length>1);
+  var pool=availIdx(HAP_T,allOn);
+  if(!pool.length){hp=-1;$("hapCard").innerHTML='<div class="empty">選んだ文法に合うハプニングがありません。「文法えらび」で増やしてください。</div>';return}
+  var n;do{n=pool[Math.floor(Math.random()*pool.length)]}while(n===hp&&pool.length>1);
   hp=n;$("hapMemo").hidden=true;$("hapReveal").setAttribute("aria-pressed","false");$("hapReveal").textContent="先生メモを見る";
   renderHap();
 };
@@ -345,6 +408,33 @@ $("hapReveal").onclick=function(){
   $("hapMemo").hidden=!on;$("hapReveal").setAttribute("aria-pressed",on);$("hapReveal").textContent=on?"先生メモをかくす":"先生メモを見る";
 };
 
+
+/* settings screen */
+function saveSel(){try{localStorage.setItem("gram",JSON.stringify(sel))}catch(e){}}
+function applySel(){
+  saveSel();deck=[];buildBingo();drawBoard();
+  Array.prototype.forEach.call($("bingoView").querySelectorAll(".notes li"),function(li,i){li.hidden=!sel[QL_T[i]]});
+  $("gramCount").textContent="役割カード "+availIdx(CARD_T,allOn).length+"／"+CARD_T.length+" 枚　・　ハプニング "+availIdx(HAP_T,allOn).length+"／"+HAP_T.length+" 枚　・　お題 "+availIdx(TOPIC_T,anyOn).length+"／"+TOPIC_T.length+" 個　・　ビンゴ "+BINGO_T.filter(function(id){return sel[id]}).length+"／18 マス";
+  GRAMS.forEach(function(g,gi){var box=document.getElementById("lall"+gi);if(box){var n=g[2].filter(function(x){return sel[x[0]]}).length;box.checked=n===g[2].length;box.indeterminate=n>0&&n<g[2].length}});
+}
+function buildSettings(){
+  var h="";
+  GRAMS.forEach(function(g,gi){
+    h+='<div class="gl"><h3><span class="lt">'+g[0]+'</span>'+esc(g[1])+'<label><input type="checkbox" id="lall'+gi+'">この課をぜんぶ</label></h3><div class="gi">';
+    g[2].forEach(function(x){h+='<label><input type="checkbox" data-g="'+x[0]+'">'+esc(x[1])+'</label>'});
+    h+='</div></div>';
+  });
+  $("gramList").innerHTML=h;
+  Array.prototype.forEach.call($("gramList").querySelectorAll("input[data-g]"),function(b){
+    b.checked=!!sel[b.dataset.g];
+    b.onchange=function(){sel[b.dataset.g]=b.checked;applySel()};
+  });
+  GRAMS.forEach(function(g,gi){$("lall"+gi).onchange=function(){var v=this.checked;g[2].forEach(function(x){sel[x[0]]=v});
+    Array.prototype.forEach.call($("gramList").querySelectorAll("input[data-g]"),function(b){b.checked=!!sel[b.dataset.g]});applySel()}});
+}
+$("selAll").onclick=function(){ALLG.forEach(function(id){sel[id]=true});buildSettings();applySel()};
+$("selNone").onclick=function(){ALLG.forEach(function(id){sel[id]=false});buildSettings();applySel()};
+buildSettings();applySel();
 /* sub tabs */
 function game(n){
   $("game1").hidden=(n!==1);$("game2").hidden=(n!==2);
