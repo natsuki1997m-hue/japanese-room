@@ -22,6 +22,8 @@ button:active { transform:translate(3px,3px); box-shadow:none; }
 a.teacher { display:inline-block; margin-top:14px; font-size:13px; font-weight:800; color:var(--muted); text-decoration:none; border-bottom:2px dashed var(--muted); }
 .tnote { margin-top:8px; font-size:12px; font-weight:700; color:var(--accent-ink); }
 button:disabled { opacity:.6; cursor:wait; }
+.keep { display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; }
+.keep input { width:20px; height:20px; margin:0; padding:0; accent-color:var(--accent-ink); }
 .err { min-height:22px; margin-top:12px; font-size:13px; font-weight:700; color:var(--bad); }
 </style>
 </head>
@@ -32,6 +34,7 @@ button:disabled { opacity:.6; cursor:wait; }
   <p>Enter your name and passcode to see your lesson report.</p>
   <input id="name" type="text" placeholder="Your name" aria-label="Your name" autofocus>
   <input id="pass" type="password" placeholder="Passcode" aria-label="Passcode" autocapitalize="characters">
+  <label class="keep"><input id="keep" type="checkbox" checked> Keep me signed in for 1 hour</label>
   <button id="go" type="submit">Enter →</button>
   <div class="err" id="err" role="alert"></div>
   <a href="library/index.html" class="teacher" style="margin-right:14px">🎮 Nihongo Playground</a>
@@ -41,7 +44,7 @@ button:disabled { opacity:.6; cursor:wait; }
 <script>
 const IDX = {"f67234c0520b7198": "735b0fa484ee0163", "2032198f0e6cfb43": "735b0fa484ee0163", "1887e2897be80165": "735b0fa484ee0163", "f1d14341071ad17f": "735b0fa484ee0163", "e7acf8eb9fa23c8e": "735b0fa484ee0163", "9ff6ee57447be41b": "735b0fa484ee0163", "409398640eca8552": "735b0fa484ee0163", "81fdff283ec2829b": "735b0fa484ee0163", "7f41ed63ca3e129d": "d8a25f4a6510f1b4", "b27fc3c8b512c166": "d8a25f4a6510f1b4", "4ca6f6d5a544bf57": "d8a25f4a6510f1b4", "c6c634130b4628d5": "d8a25f4a6510f1b4", "55182b9a0c3ba864": "d8a25f4a6510f1b4", "67afa66d813d2b98": "d8a25f4a6510f1b4", "28c5b5622d721fd1": "57c576adacf3b8a4", "bc12b8f31ccdb4f7": "57c576adacf3b8a4", "11155dac624a9bea": "57c576adacf3b8a4", "7d3805ebbf897567": "57c576adacf3b8a4", "514803870aa0ff7b": "57c576adacf3b8a4", "bcc6a580c046b735": "57c576adacf3b8a4", "3c2afbc2ce5d41ad": "57c576adacf3b8a4", "61f847547a4c52ed": "7e2afc8234ac1007", "98789b6581c45bdf": "7e2afc8234ac1007", "42ee91c6b1437cb3": "7e2afc8234ac1007", "33cb18c8009ad909": "7e2afc8234ac1007", "c15a38d79530284d": "7e2afc8234ac1007", "4ee3679892e6ac5a": "e2335062fa8ef1ff", "a80593acf104546c": "e2335062fa8ef1ff", "036d1c79853d8972": "e2335062fa8ef1ff", "a30a997579a6d873": "993f05c7ec1a9ce5", "6ca268fa22316ba1": "993f05c7ec1a9ce5", "01991eeeb2c8ed7d": "993f05c7ec1a9ce5", "1d89f11d0ea9aa3a": "993f05c7ec1a9ce5", "25a60e50768374c2": "993f05c7ec1a9ce5", "7135a16ae88578c3": "993f05c7ec1a9ce5", "2d1d92b1f4cc7fd3": "993f05c7ec1a9ce5", "91184a0dd41538c6": "993f05c7ec1a9ce5", "5f761acdc3b790a7": "f95b1dbb899bc5d8", "cfbe6b8b92a03dc1": "f95b1dbb899bc5d8", "d3318721068cb6ec": "f95b1dbb899bc5d8", "c2378da8d2ebf7fc": "f95b1dbb899bc5d8", "c36c637758a640a7": "f95b1dbb899bc5d8", "5d026c6f67725b3b": "f95b1dbb899bc5d8", "4161578100784890": "f95b1dbb899bc5d8", "972e92b2ee3757ec": "f95b1dbb899bc5d8", "304528b7f627f4d5": "2350fc14600dc189", "fa459031cb2afb24": "2350fc14600dc189", "520183dcc3feb664": "2350fc14600dc189", "8e3ba9c230f6244e": "2350fc14600dc189", "87a1423c903ce1b2": "2350fc14600dc189", "f210839f37770a8b": "2350fc14600dc189", "d277670919a94ba3": "92961a3733279bb7", "6e93255b14cacc10": "92961a3733279bb7", "8c890803cbe40a78": "92961a3733279bb7", "7842f2b782024e17": "92961a3733279bb7", "ed95b4cf5b005012": "92961a3733279bb7", "0e7c1f864ccfb9ff": "2e71c8e68488d443", "3c88f95b8922dc72": "2e71c8e68488d443", "8c7e9fb864739c75": "2e71c8e68488d443", "7faf5c4e05b4279d": "2e71c8e68488d443", "d93244e7b08131ef": "2e71c8e68488d443", "aae5be5f6474904b": "30a957c0e68719bd", "9d2a31adf43abc1e": "30a957c0e68719bd", "d75ac11680d05f47": "30a957c0e68719bd", "44366b976c2283c2": "30a957c0e68719bd", "f4aa0655cdb8d4fc": "5abe71e18bbe9793", "f25bffd67aab9f36": "5abe71e18bbe9793", "af2bdbe1aa9b6ec1": "5abe71e18bbe9793", "bde3e4b27228cb1c": "5abe71e18bbe9793", "fd68daac7b3c61ca": "5abe71e18bbe9793", "db42328112177c2d": "0eda6938db79755e", "98397dd93972ef47": "0eda6938db79755e", "5fd726bc56c3e869": "0eda6938db79755e", "bad01d811d983f03": "0eda6938db79755e", "6191cb143183e74b": "0eda6938db79755e", "dc643bcaab25345d": "0eda6938db79755e"};
 const ITER = 200000;
-const BUILD = 1795244640;
+const BUILD = 1795245134;
 const normName = s => s.normalize("NFKC").toLowerCase().replace(/[\s　]+/g, "").replace(/(さん|san)$/, "");
 const normPass = s => s.normalize("NFKC").toUpperCase().replace(/[^A-Z0-9]/g, "");
 const enc = new TextEncoder();
@@ -74,6 +77,12 @@ async function open(name, pass) {
   return new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-CBC", iv }, aesKey, ct));
 }
 
+const JR_KEEP_MS = 60 * 60 * 1000;   // ログインしたままにする時間（使うたびに数え直す。ページ側 _template/index.html が更新する）
+const jrKvGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const jrKvSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
+const jrKvDel = k => { try { localStorage.removeItem(k); } catch (e) {} };
+function jrShowPage(html) { document.open(); document.write(html); document.close(); }
+
 document.getElementById("f").addEventListener("submit", async e => {
   e.preventDefault();
   const err = document.getElementById("err"), go = document.getElementById("go");
@@ -83,12 +92,28 @@ document.getElementById("f").addEventListener("submit", async e => {
   go.disabled = true; go.textContent = "Opening…";
   try {
     const html = await open(name, pass);
+    jrKvSet("jr_lastname", name);
+    if (document.getElementById("keep").checked) jrKvSet("jr_keep", JSON.stringify({ n: name, p: pass, t: Date.now() })); else jrKvDel("jr_keep");
     try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}   // ログイン直後は必ずホーム（宿題がある画面）から始める。前に見ていたページの #… を引きつがない
-    document.open(); document.write(html); document.close();
+    jrShowPage(html);
   } catch (x) {
     err.textContent = BAD; go.disabled = false; go.textContent = "Enter →";
   }
 });
+
+// 前回「ログインしたまま」にして、最後に使ってから1時間以内なら、そのまま開く（再読み込み・タブを閉じて開き直しも同じ）。開くページは前の画面（#…）のまま
+(async () => {
+  const last = jrKvGet("jr_lastname"); if (last) document.getElementById("name").value = last;
+  let k = null; try { k = JSON.parse(jrKvGet("jr_keep") || "null"); } catch (e) {}
+  if (!k) return;
+  if (!k.t || Date.now() - k.t > JR_KEEP_MS) { jrKvDel("jr_keep"); return; }
+  const go = document.getElementById("go"); go.disabled = true; go.textContent = "Opening…";
+  try {
+    const html = await open(k.n, k.p);
+    jrKvSet("jr_keep", JSON.stringify({ n: k.n, p: k.p, t: Date.now() }));
+    jrShowPage(html);
+  } catch (x) { jrKvDel("jr_keep"); go.disabled = false; go.textContent = "Enter →"; }
+})();
 </script>
 </body>
 </html>
