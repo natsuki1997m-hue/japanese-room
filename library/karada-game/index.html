@@ -692,7 +692,7 @@ function gameMemory(){
 /* ============ 6. モンスターを つくろう ============ */
 const MON=[
  {id:'me',ic:'eyeL',pair:['おおきい','ちいさい']},{id:'kuchi',ic:'mouth',pair:['おおきい','ちいさい']},
- {id:'mimi',ic:'earL',pair:['おおきい','ちいさい']},{id:'hana',ic:'nose',pair:['ながい','みじかい']},
+ {id:'mimi',ic:'earL',pair:['おおきい','ちいさい']},{id:'hana',ic:'nose',pair:['おおきい','ちいさい']},
  {id:'te',ic:'handL',pair:['おおきい','ちいさい']},{id:'kami',ic:'hair',pair:['ながい','みじかい']},
  {id:'ashi',ic:'footL',pair:['ながい','みじかい']}
 ];
@@ -715,7 +715,7 @@ function monsterSVG(p,v){
   s+=im('hair',bx+bw/2,by+m.hy,1,[.5,1,1.7][p.kami+1],.5,1);
   s+=im('eyeL',bx+bw*m.ex[0],by+m.ey,Z(p.me),Z(p.me))+im('eyeR',bx+bw*m.ex[1],by+m.ey,Z(p.me),Z(p.me));
   s+=im('mouth',bx+bw/2,by+m.my,.7*Z(p.kuchi),.7*Z(p.kuchi));
-  s+=im('nose',bx+bw/2,by+m.ny,1,[.6,1,1.9][p.hana+1],.5,.1);
+  s+=im('nose',bx+bw/2,by+m.ny+8,[.6,1,1.7][p.hana+1],[.6,1,1.7][p.hana+1],.5,.3);
   return s+'</svg>';
 }
 function gameMonster(){
