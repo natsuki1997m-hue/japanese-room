@@ -251,7 +251,7 @@ function resolveVoice(text,nat){
       fs=VOICE[c]?[c]:[`w_${VKANA[m[1]]}_${pp}`,t];
     }else if((m=p.match(/^(.+?)が(.+です)$/))&&VKANA[m[1]]&&VT.ta[m[2]]){
       const c=`c_${VKANA[m[1]]}_ga_${VT.ta[m[2]]}`;
-      fs=VOICE[c]?[c]:[`w_${VKANA[m[1]]}_ga`,VT.ta[m[2]]];
+      fs=VOICE[c]?[c]:(VOICE[`w_${VKANA[m[1]]}_ga`]?[`w_${VKANA[m[1]]}_ga`,VT.ta[m[2]]]:[`w_${VKANA[m[1]]}`,VT.ta[m[2]]]);
     }
     if(!fs||fs.some(f=>!f||!VOICE[f]))return null;
     fs.forEach((f,j)=>seq.push({f,gap:i===0&&j===0?0:0}));
