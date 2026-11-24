@@ -67,6 +67,13 @@ h2 .n{display:inline-grid;place-items:center;width:32px;height:32px;border-radiu
 svg.pad{width:100%;aspect-ratio:1/1;background:#fff;border-radius:34px 14px 34px 14px;touch-action:none;display:block;box-shadow:inset 0 0 0 4px var(--mustard)}
 .levels{display:flex;gap:6px;justify-content:center;margin:8px 0}
 .levels .chip{font-size:13px;padding:7px 13px;border-radius:99px}
+.res{min-height:76px;display:flex;align-items:center;justify-content:center;gap:16px}
+.sc{font-family:"Dela Gothic One",sans-serif;font-size:58px;line-height:1;transform:rotate(-3deg)}
+.sc.ok{color:var(--teal)}.sc.ng{color:var(--tomato)}
+.stamp{width:66px;height:66px;border-radius:50%;border:3.5px solid var(--tomato);color:var(--tomato);display:grid;place-items:center;align-content:center;transform:rotate(-9deg);line-height:1}
+.stamp.ok{border-color:var(--teal);color:var(--teal)}
+.stamp b{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:26px}
+.stamp small{font-size:9px;font-weight:700;margin-top:1px}
 .fb{min-height:44px;text-align:center;font-weight:700;font-size:15px;margin-top:6px}
 .fb.ok{color:var(--ok)}.fb.bad{color:var(--tomato)}
 .btnrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
@@ -367,13 +374,13 @@ function judge(U,ch,tf,level){
     if(nf.length>1&&U.length===n-2)extra=' Did you forget the two small marks (゛ or ゜)?';
     else if(U.length<n)extra=' You are missing '+(n-U.length)+' stroke'+(n-U.length>1?'s':'')+'.';
     else extra=' You wrote '+(U.length-n)+' too many.';
-    return{ok:false,reason:'count',msg:`${ch} has ${n} stroke${n>1?'s':''}. You wrote ${U.length}.`+extra}}
+    return{ok:false,score:25,marks:[],reason:'count',msg:`${ch} has ${n} stroke${n>1?'s':''}. You wrote ${U.length}.`+extra}}
   const F=fitTo(U,R);
-  if(F.us<F.rs*.3)return{ok:false,reason:'size',msg:'A little bigger, please! Use more of the box.'};
+  if(F.us<F.rs*.3)return{ok:false,score:40,marks:[],reason:'size',msg:'A little bigger, please! Use more of the box.'};
   const Rn=R.map(r=>resample(r));
   const thr=Math.max(9,({1:19,2:15,3:12.5}[level]||15)*tf.s);
   const lo=level===3?.7:.55,hi=level===3?1.7:1.9,ends=thr*1.7;
-  const flags=[],bad=[];
+  const flags=[],bad=[],scs=[];
   F.Un.forEach((u,i)=>{
     const r=Rn[i],d=meanD(u,r),rd=meanD(u,r.slice().reverse());
     const lr=plen(u)/(plen(r)||1);
@@ -384,7 +391,8 @@ function judge(U,ch,tf,level){
     if(Math.hypot(sd[0],sd[1])>ends)iss.push('start');
     if(Math.hypot(ed[0],ed[1])>ends)iss.push('end');
     if(iss.length){for(let j=0;j<n;j++)if(j!==i&&meanD(u,Rn[j])<thr){iss.unshift('order');break}}
-    flags.push(!iss.length);if(iss.length)bad.push({i,iss,sd,ed,d})});
+    scs.push(Math.max(0,100-30*d/thr-12*iss.length));flags.push(!iss.length);if(iss.length)bad.push({i,iss,sd,ed,d,rm:r[16],r0:r[0],r1:r[NPT-1]})});
+  const total=Math.round(scs.reduce((a,b)=>a+b,0)/n);
   const say=b=>{const P={order:'is out of order',dir:'goes the other way',shape:'has a different curve',short:'is too short',long:'is too long'};
     const parts=b.iss.map(k=>P[k]||(k==='start'?'starts too far '+dirWord(b.sd):'ends too far '+dirWord(b.ed)));
     return `Stroke ${b.i+1} ${parts.slice(0,2).join(' and ')}.`};
@@ -399,20 +407,20 @@ function judge(U,ch,tf,level){
     if(!best||sc<best.sc)best={x,sc}}
   if(best&&best.sc<mine*.8&&best.sc<thr*1.15){
     const w=bad.length?' '+say(bad.sort((p,q)=>q.d-p.d)[0]):' Compare the shape with the pink guide.';
-    return{ok:false,reason:'confused>'+best.x,flags,msg:`This looks more like “${best.x}” than “${ch}”.`+w}}
-  if(!bad.length)return{ok:true};
+    return{ok:false,score:Math.min(total,55),marks:bad,reason:'confused>'+best.x,flags,msg:`This looks more like “${best.x}” than “${ch}”.`+w}}
+  if(!bad.length)return{ok:true,score:Math.max(70,total)};
   bad.sort((p,q)=>q.d-p.d);
   const first=bad[0],pr=['order','dir','shape','short','long','start','end'];
   const reason=pr.find(k=>first.iss.includes(k))||'shape';
   const msg=bad.slice(0,2).map(say).join(' ');
-  return{ok:false,reason,flags,msg}}
+  return{ok:false,score:Math.min(total,69),marks:bad,reason,flags,msg}}
 
 function Writer(host,unit,o){
   const parts=partsOf(unit);let step=0,level=o.level,strokes=[],cur=null,refs=null,dead=false,locked=false;
-  host.innerHTML=`<div class="padwrap"><svg class="pad" viewBox="0 0 109 109"><g class="bg"><line x1="54.5" y1="4" x2="54.5" y2="105" stroke="#e9e4f5" stroke-width=".8" stroke-dasharray="3 3"/><line x1="4" y1="54.5" x2="105" y2="54.5" stroke="#e9e4f5" stroke-width=".8" stroke-dasharray="3 3"/></g><g class="guide"></g><g class="cmp"></g><g class="user"></g><g class="demo"></g></svg></div>
+  host.innerHTML=`<div class="res"></div><div class="padwrap"><svg class="pad" viewBox="0 0 109 109"><g class="bg"><line x1="54.5" y1="4" x2="54.5" y2="105" stroke="#e9e4f5" stroke-width=".8" stroke-dasharray="3 3"/><line x1="4" y1="54.5" x2="105" y2="54.5" stroke="#e9e4f5" stroke-width=".8" stroke-dasharray="3 3"/></g><g class="guide"></g><g class="cmp"></g><g class="user"></g><g class="demo"></g></svg></div>
   <div class="fb"></div>
   <div class="btnrow"><button class="btn sm" data-a="undo">↶ Undo</button><button class="btn sm" data-a="clear">Clear</button><button class="btn sm yel" data-a="demo">▶ Show me</button><button class="btn sm yel" data-a="peek" style="display:none">👀 Peek</button><button class="btn sm mint" data-a="check">Check ✓</button></div>`;
-  const svg=host.querySelector('svg'),gG=svg.querySelector('.guide'),gU=svg.querySelector('.user'),gC=svg.querySelector('.cmp'),gD=svg.querySelector('.demo'),fb=host.querySelector('.fb');
+  const svg=host.querySelector('svg'),gG=svg.querySelector('.guide'),gU=svg.querySelector('.user'),gC=svg.querySelector('.cmp'),gD=svg.querySelector('.demo'),fb=host.querySelector('.fb'),res=host.querySelector('.res');
   const say=(t,c)=>{fb.textContent=t;fb.className='fb '+(c||'')};
   function curPart(){return{ch:parts[step],tf:tfOf(unit,step)}}
   function drawGuide(op,nums){
@@ -424,7 +432,7 @@ function Writer(host,unit,o){
     host.querySelector('[data-a=peek]').style.display=level===3?'':'none';
     if(level===1)drawGuide(.45,true);else if(level===2)drawGuide(.16,false);else gG.innerHTML=''}
   function pt(e){const r=svg.getBoundingClientRect();return[(e.clientX-r.left)/r.width*109,(e.clientY-r.top)/r.height*109]}
-  function redraw(){gC.innerHTML='';gU.innerHTML='';strokes.forEach(s=>gU.appendChild(poly(s,'#2b2540')))}
+  function redraw(){res.innerHTML='';gC.innerHTML='';gU.innerHTML='';strokes.forEach(s=>gU.appendChild(poly(s,'#2b2540')))}
   function poly(s,col){const p=document.createElementNS(NS,'polyline');p.setAttribute('points',s.map(q=>q.join(',')).join(' '));p.setAttribute('fill','none');p.setAttribute('stroke',col);p.setAttribute('stroke-width',3.4);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');if(s.length===1){p.setAttribute('points',`${s[0][0]},${s[0][1]} ${s[0][0]+.01},${s[0][1]}`)}return p}
   svg.addEventListener('pointerdown',e=>{if(locked)return;e.preventDefault();svg.setPointerCapture(e.pointerId);cur=[pt(e)];strokes.push(cur);redraw();say('')});
   svg.addEventListener('pointermove',e=>{if(!cur)return;const q=pt(e),l=cur[cur.length-1];if(Math.hypot(q[0]-l[0],q[1]-l[1])>.8){cur.push(q);redraw()}});
@@ -433,16 +441,24 @@ function Writer(host,unit,o){
     STROKES[ch].forEach((d,i)=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff7aa8');p.setAttribute('stroke-width',7);p.setAttribute('stroke-linecap','round');g.appendChild(p);const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;
       setTimeout(()=>{if(dead)return;p.style.transition='stroke-dashoffset .7s ease';p.style.strokeDashoffset=0},i*850+100)});
     setTimeout(()=>{if(!dead)gD.innerHTML=''},STROKES[ch].length*850+1500)}
+  function showScore(r){const s=r.score,good=s>=70,st=s>=90?['優','Excellent']:s>=80?['良','Good']:s>=70?['可','OK']:['再','Try again'];
+    res.innerHTML=`<span class="sc ${good?'ok':'ng'}">${s}</span><span class="stamp ${good?'ok':'ng'}"><b>${st[0]}</b><small>${st[1]}</small></span>`}
   function showCmp(r){gC.innerHTML='';const{ch,tf}=curPart();const g=document.createElementNS(NS,'g');g.setAttribute('transform',`translate(${tf.tx} ${tf.ty}) scale(${tf.s})`);
-    STROKES[ch].forEach(d=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff6b4a');p.setAttribute('stroke-width',5);p.setAttribute('stroke-dasharray','2 4');p.setAttribute('stroke-linecap','round');p.setAttribute('opacity','.85');g.appendChild(p)});gC.appendChild(g);
-    if(r.flags)gU.querySelectorAll('polyline').forEach((p,i)=>p.setAttribute('stroke',r.flags[i]===false?'#e5483a':'#1b9a6b'))}
+    STROKES[ch].forEach(d=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff9a7a');p.setAttribute('stroke-width',9);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');p.setAttribute('opacity','.4');g.appendChild(p)});gC.appendChild(g);
+    const LAB={order:'order',dir:'other way',shape:'curve',short:'longer',long:'shorter',start:'start here',end:'end here'};
+    (r.marks||[]).forEach(m=>{const k=m.iss.find(x=>LAB[x]);if(!k)return;
+      const pt=k==='start'?m.r0:k==='end'?m.r1:m.rm;
+      if(k==='start'||k==='end'){const c=document.createElementNS(NS,'circle');c.setAttribute('cx',pt[0]);c.setAttribute('cy',pt[1]);c.setAttribute('r',4);c.setAttribute('fill','none');c.setAttribute('stroke','#e5483a');c.setAttribute('stroke-width',1.4);gC.appendChild(c)}
+      const x=Math.min(78,Math.max(3,pt[0]+5)),y=Math.min(103,Math.max(9,pt[1]-3));
+      const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y);t.setAttribute('font-size',6.6);t.setAttribute('font-weight',700);t.setAttribute('fill','#e5483a');t.setAttribute('stroke','#fff');t.setAttribute('stroke-width',2.2);t.setAttribute('paint-order','stroke');t.textContent=(m.i+1)+' '+LAB[k];gC.appendChild(t)});
+    if(r.flags)gU.querySelectorAll('polyline').forEach((p,i)=>p.setAttribute('stroke',r.flags[i]===false?'#e5483a':'#1d2a44'))}
   function check(){
     if(locked)return;if(!strokes.length){say('Write the letter first!','bad');return}
     const{ch,tf}=curPart();const r=judge(strokes,ch,tf,level);
-    o.onAttempt&&o.onAttempt(r.ok,r.ok?'ok':'w:'+r.reason);
+    o.onAttempt&&o.onAttempt(r.ok,r.ok?'ok':'w:'+r.reason);showScore(r);
     if(r.ok){
       if(step<parts.length-1){say('Nice! Now the small one ✨','ok');step++;strokes=[];setTimeout(()=>{if(dead)return;redraw();applyLevel();say('Now write the small '+parts[step],'')},800);o.onStep&&o.onStep(step)}
-      else{locked=true;say(['Beautiful! 🌸','Great job! 🌸','You did it! 🌸'][Math.random()*3|0],'ok');gU.querySelectorAll('polyline').forEach(p=>p.setAttribute('stroke','#2fb67a'));o.onDone&&o.onDone(true)}
+      else{locked=true;say(['Beautiful! 🌸','Great job! 🌸','You did it! 🌸'][Math.random()*3|0],'ok');gU.querySelectorAll('polyline').forEach(p=>p.setAttribute('stroke','#1b9a6b'));o.onDone&&o.onDone(true)}
     }else{say(r.msg,'bad');showCmp(r)}}
   host.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
     if(a==='undo'&&!locked){strokes.pop();redraw();say('')}
