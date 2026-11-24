@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
+<title>Voice Recorder – Hiragana Garden</title>
+<style>
+:root{--bg:#fff3d6;--ink:#1d2a44;--muted:#6f7587;--tomato:#ff6b4a;--mustard:#ffc531;--teal:#1fa89a}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic","Hiragino Maru Gothic ProN",system-ui,sans-serif;font-weight:700}
+.wrap{max-width:480px;margin:0 auto;padding:16px 16px 60px;text-align:center}
+.tabs{display:flex;gap:8px;justify-content:center;margin-bottom:10px}
+.tab{border:none;border-radius:99px;padding:8px 16px;font:inherit;background:#fff;color:var(--ink)}
+.tab.on{background:var(--ink);color:#fff}
+.prog{height:12px;background:#fff;border-radius:99px;overflow:hidden}.prog i{display:block;height:100%;background:var(--tomato);width:0}
+.cnt{font-size:13px;color:var(--muted);margin:6px 0}
+.card{background:#fff;border-radius:34px 14px 34px 14px;padding:22px 10px 18px;margin:12px 0}
+.big{font-size:104px;line-height:1.1}.pic{font-size:56px;line-height:1.2}.wd{font-size:54px;line-height:1.2}
+.st{min-height:22px;font-size:14px;color:var(--muted);margin-top:4px}
+.rec{width:104px;height:104px;border-radius:50%;border:none;background:var(--tomato);color:#fff;font:inherit;font-size:15px;margin:10px auto;display:block;box-shadow:0 5px 0 #d8452a}
+.rec.on{background:var(--ink);box-shadow:0 5px 0 #000;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.6}}
+.row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.btn{border:none;border-radius:99px;padding:11px 20px;font:inherit;font-size:15px;background:#fff;color:var(--ink)}
+.btn.pink{background:var(--tomato);color:#fff}.btn.mint{background:var(--teal);color:#fff}.btn[disabled]{opacity:.35}
+.grid{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:14px}
+.g{min-width:38px;padding:5px 3px;border-radius:12px;background:#fff;border:2px solid transparent;font-size:15px;color:var(--ink)}
+.g.d{background:#bfeee6}.g.c{border-color:var(--tomato)}
+.note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.6}
+</style></head><body><div class="wrap">
+<div class="tabs"><button class="tab on" id="tL">Letters</button><button class="tab" id="tW">Words</button></div>
+<div class="prog"><i id="pg"></i></div><div class="cnt" id="cnt"></div>
+<div class="card"><div id="show"></div></div>
+<button class="rec" id="rec">● Record</button>
+<div class="st" id="st">Tap Record, say it, tap again.</div>
+<div class="row"><button class="btn" id="pl" disabled>▶ Play</button><button class="btn" id="prev">← Back</button><button class="btn mint" id="next">Next →</button></div>
+<div class="row"><button class="btn pink" id="exp">Export recordings</button></div>
+<div class="grid" id="grid"></div>
+<p class="note">Your recordings are saved on this phone as you go, so you can stop and come back. Use a quiet room, hold the phone a fist away from your mouth, and say each one short and clear.</p>
+</div>
+<script>
+const LET=["あ", "い", "う", "え", "お", "か", "き", "く", "け", "こ", "さ", "し", "す", "せ", "そ", "た", "ち", "つ", "て", "と", "な", "に", "ぬ", "ね", "の", "は", "ひ", "ふ", "へ", "ほ", "ま", "み", "む", "め", "も", "や", "ゆ", "よ", "ら", "り", "る", "れ", "ろ", "わ", "を", "ん", "が", "ぎ", "ぐ", "げ", "ご", "ざ", "じ", "ず", "ぜ", "ぞ", "だ", "ぢ", "づ", "で", "ど", "ば", "び", "ぶ", "べ", "ぼ", "ぱ", "ぴ", "ぷ", "ぺ", "ぽ", "きゃ", "きゅ", "きょ", "しゃ", "しゅ", "しょ", "ちゃ", "ちゅ", "ちょ", "にゃ", "にゅ", "にょ", "ひゃ", "ひゅ", "ひょ", "みゃ", "みゅ", "みょ", "りゃ", "りゅ", "りょ", "ぎゃ", "ぎゅ", "ぎょ", "じゃ", "じゅ", "じょ", "びゃ", "びゅ", "びょ", "ぴゃ", "ぴゅ", "ぴょ"];const WRD=[["あい", "💗"], ["いえ", "🏠"], ["うえ", "⬆️"], ["あお", "🔵"], ["あか", "🔴"], ["かお", "😊"], ["いか", "🦑"], ["いけ", "🏞️"], ["こえ", "📢"], ["さけ", "🍶"], ["すし", "🍣"], ["しお", "🧂"], ["せかい", "🌏"], ["そら", "☁️"], ["たこ", "🐙"], ["つき", "🌙"], ["とけい", "⏰"], ["ねこ", "🐱"], ["にく", "🥩"], ["はな", "🌸"], ["ひと", "🧑"], ["ふね", "🚢"], ["へび", "🐍"], ["ほし", "⭐"], ["まど", "🪟"], ["みみ", "👂"], ["むし", "🐛"], ["めがね", "👓"], ["もも", "🍑"], ["やま", "⛰️"], ["ゆき", "⛄"], ["よる", "🌃"], ["らいおん", "🦁"], ["りす", "🐿️"], ["れもん", "🍋"], ["わに", "🐊"], ["ほん", "📖"], ["えんぴつ", "✏️"], ["くるま", "🚗"], ["さくら", "🌸"], ["ひこうき", "✈️"], ["うさぎ", "🐰"], ["くま", "🐻"], ["ぞう", "🐘"], ["ぶた", "🐷"], ["かば", "🦛"], ["ばなな", "🍌"], ["ぱん", "🍞"], ["たまご", "🥚"], ["いちご", "🍓"], ["みかん", "🍊"], ["りんご", "🍎"], ["かさ", "☂️"], ["とり", "🐦"], ["てがみ", "💌"], ["うみ", "🌊"], ["あめ", "🌧️"], ["みず", "💧"], ["いす", "🪑"], ["でんしゃ", "🚃"], ["じてんしゃ", "🚲"], ["ちきゅう", "🌍"], ["ぎゅうにゅう", "🥛"], ["ちょうちょ", "🦋"], ["しゃしん", "📷"], ["おちゃ", "🍵"], ["ひゃく", "💯"], ["りょこう", "🧳"], ["ぎょうざ", "🥟"], ["びょういん", "🏥"], ["かいしゃ", "🏢"], ["おもちゃ", "🧸"], ["しゅくだい", "📝"], ["ごはん", "🍚"], ["どあ", "🚪"], ["ぼうし", "👒"], ["ぺん", "🖊️"], ["ぴあの", "🎹"], ["ぷりん", "🍮"], ["ぽすと", "📮"], ["べんとう", "🍱"], ["かばん", "🎒"], ["でんわ", "☎️"], ["ぶどう", "🍇"], ["くつ", "👟"], ["あひる", "🦆"], ["にわとり", "🐓"], ["うし", "🐄"], ["うま", "🐴"], ["さる", "🐒"], ["とら", "🐯"], ["きつね", "🦊"], ["ぬいぐるみ", "🧸"], ["がいこく", "🌐"], ["ぎんこう", "🏦"], ["じしょ", "📕"], ["ごみ", "🗑️"], ["ひよこ", "🐥"], ["ちず", "🗺️"], ["ぜんぶ", "💯"], ["ぞうきん", "🧽"], ["ずかん", "📚"], ["でぐち", "🚪"], ["ばら", "🌹"], ["きく", "🌼"]];
+let mode='L',idx=0,rec=null,chunks=[],stream=null,lastUrl=null;
+const $=i=>document.getElementById(i);
+const items=()=>mode==='L'?LET.map(t=>({t,show:`<div class="big">${t}</div>`})):WRD.map(w=>({t:w[0],show:`<div class="pic">${w[1]}</div><div class="wd">${w[0]}</div>`}));
+/* IndexedDB */
+let db;const open=()=>new Promise((res,rej)=>{const r=indexedDB.open('hira-voice',1);r.onupgradeneeded=()=>r.result.createObjectStore('clips');r.onsuccess=()=>{db=r.result;res()};r.onerror=rej});
+const put=(k,v)=>new Promise(res=>{const t=db.transaction('clips','readwrite');t.objectStore('clips').put(v,k);t.oncomplete=res});
+const get=k=>new Promise(res=>{const q=db.transaction('clips').objectStore('clips').get(k);q.onsuccess=()=>res(q.result)});
+const all=()=>new Promise(res=>{const o={};const q=db.transaction('clips').objectStore('clips').openCursor();q.onsuccess=e=>{const c=e.target.result;if(c){o[c.key]=c.value;c.continue()}else res(o)}});
+let have={};
+async function refresh(){have=await all();draw()}
+function draw(){const it=items();const cur=it[idx];$('show').innerHTML=cur.show;
+ const n=it.filter(x=>have[x.t]).length;$('pg').style.width=(n/it.length*100)+'%';$('cnt').textContent=`${idx+1} / ${it.length}  ·  recorded ${n}`;
+ $('pl').disabled=!have[cur.t];
+ $('grid').innerHTML=it.map((x,i)=>`<button class="g ${have[x.t]?'d':''} ${i===idx?'c':''}" data-i="${i}">${x.t}</button>`).join('')}
+$('grid').onclick=e=>{const b=e.target.closest('.g');if(!b)return;idx=+b.dataset.i;draw();$('st').textContent=''};
+$('tL').onclick=()=>{mode='L';idx=0;$('tL').classList.add('on');$('tW').classList.remove('on');draw()};
+$('tW').onclick=()=>{mode='W';idx=0;$('tW').classList.add('on');$('tL').classList.remove('on');draw()};
+$('prev').onclick=()=>{if(idx>0){idx--;draw();$('st').textContent=''}};
+$('next').onclick=()=>{const n=items().length;if(idx<n-1){idx++;draw();$('st').textContent=''}};
+$('pl').onclick=async()=>{const b=have[items()[idx].t];if(!b)return;if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(b.blob);new Audio(lastUrl).play()};
+$('rec').onclick=async()=>{
+ if(rec&&rec.state==='recording'){rec.stop();return}
+ try{if(!stream)stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true}})}catch(e){$('st').textContent='Please allow the microphone.';return}
+ chunks=[];const mt=['audio/webm;codecs=opus','audio/mp4','audio/webm'].find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m))||'';
+ rec=new MediaRecorder(stream,mt?{mimeType:mt}:{});const t=items()[idx].t;
+ rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+ rec.onstop=async()=>{$('rec').classList.remove('on');$('rec').textContent='● Record';const blob=new Blob(chunks,{type:rec.mimeType||mt||'audio/mp4'});
+  if(blob.size<1500){$('st').textContent='Too short — try again.';return}
+  await put(t,{blob,type:blob.type});await refresh();$('st').textContent='Saved ✓ Tap ▶ to listen, or Next →';};
+ rec.start();$('rec').classList.add('on');$('rec').textContent='■ Stop';$('st').textContent='Recording…'};
+$('exp').onclick=async()=>{const o=await all();const keys=Object.keys(o);if(!keys.length){$('st').textContent='Nothing recorded yet.';return}
+ $('st').textContent='Preparing…';const out={};
+ for(const k of keys){out[k]=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(o[k].blob)})}
+ const file=new File([JSON.stringify(out)],'hiragana-voice.json',{type:'application/json'});
+ try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'hiragana-voice'});$('st').textContent=keys.length+' clips shared.';return}}catch(e){}
+ const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download='hiragana-voice.json';document.body.appendChild(a);a.click();a.remove();$('st').textContent=keys.length+' clips exported.'};
+open().then(refresh);
+</script></body></html>
