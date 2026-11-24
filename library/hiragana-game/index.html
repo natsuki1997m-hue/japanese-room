@@ -352,33 +352,67 @@ function resample(pts,n=NPT){
   return out}
 const meanD=(a,b)=>{let s=0;for(let i=0;i<a.length;i++)s+=Math.hypot(a[i][0]-b[i][0],a[i][1]-b[i][1]);return s/a.length};
 const bbox=pts=>{let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;pts.forEach(p=>{x0=Math.min(x0,p[0]);y0=Math.min(y0,p[1]);x1=Math.max(x1,p[0]);y1=Math.max(y1,p[1])});return{x0,y0,x1,y1,w:x1-x0,h:y1-y0,cx:(x0+x1)/2,cy:(y0+y1)/2}};
-function judge(U,R,s){
-  const n=R.length;
-  if(U.length!==n)return{ok:false,reason:'count',msg:`This letter has ${n} stroke${n>1?'s':''}. You wrote ${U.length}.`};
-  const ub=bbox(U.flat()),rb=bbox(R.flat());
-  const us=Math.max(ub.w,ub.h),rs=Math.max(rb.w,rb.h);
-  if(us<rs*.3)return{ok:false,reason:'size',msg:'A little bigger, please! Use more of the box.'};
-  const k=us<1e-6?1:rs/us;
-  const Un=U.map(st=>resample(st.map(p=>[(p[0]-ub.cx)*k+rb.cx,(p[1]-ub.cy)*k+rb.cy])));
+const REFC={};
+function refOf(ch,tf){const k=ch+'|'+tf.s+'|'+tf.tx+'|'+tf.ty;return REFC[k]||(REFC[k]=sampleRef(ch,tf))}
+const plen=p=>{let s=0;for(let i=1;i<p.length;i++)s+=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);return s};
+function fitTo(U,R){
+  const ub=bbox(U.flat()),rb=bbox(R.flat());const us=Math.max(ub.w,ub.h),rs=Math.max(rb.w,rb.h);const k=us<1e-6?1:rs/us;
+  return{us,rs,k,Un:U.map(st=>resample(st.map(p=>[(p[0]-ub.cx)*k+rb.cx,(p[1]-ub.cy)*k+rb.cy])))}}
+const dirWord=v=>Math.abs(v[0])>=Math.abs(v[1])?(v[0]<0?'left':'right'):(v[1]<0?'up':'down');
+const NOUN=['count','size'];
+function judge(U,ch,tf,level){
+  const R=refOf(ch,tf),n=R.length;
+  if(U.length!==n){
+    const nf=ch.normalize('NFD');let extra='';
+    if(nf.length>1&&U.length===n-2)extra=' Did you forget the two small marks (゛ or ゜)?';
+    else if(U.length<n)extra=' You are missing '+(n-U.length)+' stroke'+(n-U.length>1?'s':'')+'.';
+    else extra=' You wrote '+(U.length-n)+' too many.';
+    return{ok:false,reason:'count',msg:`${ch} has ${n} stroke${n>1?'s':''}. You wrote ${U.length}.`+extra}}
+  const F=fitTo(U,R);
+  if(F.us<F.rs*.3)return{ok:false,reason:'size',msg:'A little bigger, please! Use more of the box.'};
   const Rn=R.map(r=>resample(r));
-  const thr=Math.max(11,19*s);
-  const D=Un.map(u=>Rn.map(r=>Math.min(meanD(u,r),meanD(u,r.slice().reverse())*1.0)));
-  const dir=Un.map((u,i)=>meanD(u,Rn[i])>meanD(u,Rn[i].slice().reverse()));
-  let bad=-1;
-  for(let i=0;i<n;i++){const d=meanD(Un[i],Rn[i]);if(d>=thr){bad=i;break}}
-  if(bad<0)return{ok:true};
-  const i=bad;
-  const rd=meanD(Un[i],Rn[i].slice().reverse());
-  if(rd<thr)return{ok:false,reason:'direction',stroke:i+1,msg:`Stroke ${i+1}: right shape, but it goes the other way. Check the arrow!`};
-  for(let j=0;j<n;j++)if(j!==i&&meanD(Un[i],Rn[j])<thr)return{ok:false,reason:'order',stroke:i+1,msg:`Stroke order: your stroke ${i+1} looks like stroke ${j+1}. Try "Show me".`};
-  return{ok:false,reason:'shape',stroke:i+1,msg:`Almost! Look again at stroke ${i+1}.`}}
+  const thr=Math.max(9,({1:19,2:15,3:12.5}[level]||15)*tf.s);
+  const lo=level===3?.7:.55,hi=level===3?1.7:1.9,ends=thr*1.7;
+  const flags=[],bad=[];
+  F.Un.forEach((u,i)=>{
+    const r=Rn[i],d=meanD(u,r),rd=meanD(u,r.slice().reverse());
+    const lr=plen(u)/(plen(r)||1);
+    const sd=[u[0][0]-r[0][0],u[0][1]-r[0][1]],ed=[u[NPT-1][0]-r[NPT-1][0],u[NPT-1][1]-r[NPT-1][1]];
+    const iss=[];
+    if(d>=thr)iss.push(rd<thr*.9?'dir':'shape');
+    if(plen(r)>24){if(lr<lo)iss.push('short');else if(lr>hi)iss.push('long')}
+    if(Math.hypot(sd[0],sd[1])>ends)iss.push('start');
+    if(Math.hypot(ed[0],ed[1])>ends)iss.push('end');
+    if(iss.length){for(let j=0;j<n;j++)if(j!==i&&meanD(u,Rn[j])<thr){iss.unshift('order');break}}
+    flags.push(!iss.length);if(iss.length)bad.push({i,iss,sd,ed,d})});
+  const say=b=>{const P={order:'is out of order',dir:'goes the other way',shape:'has a different curve',short:'is too short',long:'is too long'};
+    const parts=b.iss.map(k=>P[k]||(k==='start'?'starts too far '+dirWord(b.sd):'ends too far '+dirWord(b.ed)));
+    return `Stroke ${b.i+1} ${parts.slice(0,2).join(' and ')}.`};
+  /* does it look like a different letter? */
+  const mine=F.Un.reduce((s,u,i)=>s+meanD(u,Rn[i]),0)/n;
+  let best=null;
+  const small='ゃゅょ'.includes(ch);
+  const pool=small?['ゃ','ゅ','ょ']:ALL.filter(c=>c.length===1&&!'ゃゅょ'.includes(c));
+  for(const x of pool){if(x===ch||!STROKES[x]||STROKES[x].length!==n)continue;
+    const Rx=refOf(x,tf),Fx=fitTo(U,Rx);const Rxn=Rx.map(r=>resample(r));
+    const sc=Fx.Un.reduce((s,u,i)=>s+meanD(u,Rxn[i]),0)/n;
+    if(!best||sc<best.sc)best={x,sc}}
+  if(best&&best.sc<mine*.8&&best.sc<thr*1.15){
+    const w=bad.length?' '+say(bad.sort((p,q)=>q.d-p.d)[0]):' Compare the shape with the pink guide.';
+    return{ok:false,reason:'confused>'+best.x,flags,msg:`This looks more like “${best.x}” than “${ch}”.`+w}}
+  if(!bad.length)return{ok:true};
+  bad.sort((p,q)=>q.d-p.d);
+  const first=bad[0],pr=['order','dir','shape','short','long','start','end'];
+  const reason=pr.find(k=>first.iss.includes(k))||'shape';
+  const msg=bad.slice(0,2).map(say).join(' ');
+  return{ok:false,reason,flags,msg}}
 
 function Writer(host,unit,o){
   const parts=partsOf(unit);let step=0,level=o.level,strokes=[],cur=null,refs=null,dead=false,locked=false;
-  host.innerHTML=`<div class="padwrap"><svg class="pad" viewBox="0 0 109 109"><g class="bg"><line x1="54.5" y1="4" x2="54.5" y2="105" stroke="#e9e4f5" stroke-width=".8" stroke-dasharray="3 3"/><line x1="4" y1="54.5" x2="105" y2="54.5" stroke="#e9e4f5" stroke-width=".8" stroke-dasharray="3 3"/></g><g class="guide"></g><g class="user"></g><g class="demo"></g></svg></div>
+  host.innerHTML=`<div class="padwrap"><svg class="pad" viewBox="0 0 109 109"><g class="bg"><line x1="54.5" y1="4" x2="54.5" y2="105" stroke="#e9e4f5" stroke-width=".8" stroke-dasharray="3 3"/><line x1="4" y1="54.5" x2="105" y2="54.5" stroke="#e9e4f5" stroke-width=".8" stroke-dasharray="3 3"/></g><g class="guide"></g><g class="cmp"></g><g class="user"></g><g class="demo"></g></svg></div>
   <div class="fb"></div>
   <div class="btnrow"><button class="btn sm" data-a="undo">↶ Undo</button><button class="btn sm" data-a="clear">Clear</button><button class="btn sm yel" data-a="demo">▶ Show me</button><button class="btn sm yel" data-a="peek" style="display:none">👀 Peek</button><button class="btn sm mint" data-a="check">Check ✓</button></div>`;
-  const svg=host.querySelector('svg'),gG=svg.querySelector('.guide'),gU=svg.querySelector('.user'),gD=svg.querySelector('.demo'),fb=host.querySelector('.fb');
+  const svg=host.querySelector('svg'),gG=svg.querySelector('.guide'),gU=svg.querySelector('.user'),gC=svg.querySelector('.cmp'),gD=svg.querySelector('.demo'),fb=host.querySelector('.fb');
   const say=(t,c)=>{fb.textContent=t;fb.className='fb '+(c||'')};
   function curPart(){return{ch:parts[step],tf:tfOf(unit,step)}}
   function drawGuide(op,nums){
@@ -390,7 +424,7 @@ function Writer(host,unit,o){
     host.querySelector('[data-a=peek]').style.display=level===3?'':'none';
     if(level===1)drawGuide(.45,true);else if(level===2)drawGuide(.16,false);else gG.innerHTML=''}
   function pt(e){const r=svg.getBoundingClientRect();return[(e.clientX-r.left)/r.width*109,(e.clientY-r.top)/r.height*109]}
-  function redraw(){gU.innerHTML='';strokes.forEach(s=>gU.appendChild(poly(s,'#2b2540')))}
+  function redraw(){gC.innerHTML='';gU.innerHTML='';strokes.forEach(s=>gU.appendChild(poly(s,'#2b2540')))}
   function poly(s,col){const p=document.createElementNS(NS,'polyline');p.setAttribute('points',s.map(q=>q.join(',')).join(' '));p.setAttribute('fill','none');p.setAttribute('stroke',col);p.setAttribute('stroke-width',3.4);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');if(s.length===1){p.setAttribute('points',`${s[0][0]},${s[0][1]} ${s[0][0]+.01},${s[0][1]}`)}return p}
   svg.addEventListener('pointerdown',e=>{if(locked)return;e.preventDefault();svg.setPointerCapture(e.pointerId);cur=[pt(e)];strokes.push(cur);redraw();say('')});
   svg.addEventListener('pointermove',e=>{if(!cur)return;const q=pt(e),l=cur[cur.length-1];if(Math.hypot(q[0]-l[0],q[1]-l[1])>.8){cur.push(q);redraw()}});
@@ -399,14 +433,17 @@ function Writer(host,unit,o){
     STROKES[ch].forEach((d,i)=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff7aa8');p.setAttribute('stroke-width',7);p.setAttribute('stroke-linecap','round');g.appendChild(p);const L=p.getTotalLength();p.style.strokeDasharray=L;p.style.strokeDashoffset=L;
       setTimeout(()=>{if(dead)return;p.style.transition='stroke-dashoffset .7s ease';p.style.strokeDashoffset=0},i*850+100)});
     setTimeout(()=>{if(!dead)gD.innerHTML=''},STROKES[ch].length*850+1500)}
+  function showCmp(r){gC.innerHTML='';const{ch,tf}=curPart();const g=document.createElementNS(NS,'g');g.setAttribute('transform',`translate(${tf.tx} ${tf.ty}) scale(${tf.s})`);
+    STROKES[ch].forEach(d=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff6b4a');p.setAttribute('stroke-width',5);p.setAttribute('stroke-dasharray','2 4');p.setAttribute('stroke-linecap','round');p.setAttribute('opacity','.85');g.appendChild(p)});gC.appendChild(g);
+    if(r.flags)gU.querySelectorAll('polyline').forEach((p,i)=>p.setAttribute('stroke',r.flags[i]===false?'#e5483a':'#1b9a6b'))}
   function check(){
     if(locked)return;if(!strokes.length){say('Write the letter first!','bad');return}
-    const{ch,tf}=curPart();const r=judge(strokes,refs,tf.s);
+    const{ch,tf}=curPart();const r=judge(strokes,ch,tf,level);
     o.onAttempt&&o.onAttempt(r.ok,r.ok?'ok':'w:'+r.reason);
     if(r.ok){
       if(step<parts.length-1){say('Nice! Now the small one ✨','ok');step++;strokes=[];setTimeout(()=>{if(dead)return;redraw();applyLevel();say('Now write the small '+parts[step],'')},800);o.onStep&&o.onStep(step)}
       else{locked=true;say(['Beautiful! 🌸','Great job! 🌸','You did it! 🌸'][Math.random()*3|0],'ok');gU.querySelectorAll('polyline').forEach(p=>p.setAttribute('stroke','#2fb67a'));o.onDone&&o.onDone(true)}
-    }else{say(r.msg,'bad')}}
+    }else{say(r.msg,'bad');showCmp(r)}}
   host.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
     if(a==='undo'&&!locked){strokes.pop();redraw();say('')}
     if(a==='clear'&&!locked){strokes=[];redraw();say('')}
@@ -564,13 +601,13 @@ async function teacherDetail(id,name){
   const MN={write1:'Write · trace',write2:'Write · fade',write3:'Write · memory',sound:'Sound Match',catch:'Letter Catch',dict:'Listen & Write',puzzle:'Word Puzzle',memory:'Memory Match'};
   const md={};rows.forEach(r=>{const x=md[r.mode]||(md[r.mode]={n:0,c:0});x.n++;if(r.correct)x.c++});
   const attention=Object.entries(st).filter(([u,s])=>s.n>=2&&(s.c/s.n<.7||s.recent.slice(-2).every(v=>v===0))).sort((a,b)=>a[1].c/a[1].n-b[1].c/b[1].n).slice(0,10);
-  const conf={};rows.forEach(r=>{if(!r.correct&&r.given&&!r.given.startsWith('w:')&&isUnit(r.given)&&isUnit(r.ch)){const k=r.ch+'→'+r.given;conf[k]=(conf[k]||0)+1}});
+  const conf={};rows.forEach(r=>{if(r.correct||!r.given||!isUnit(r.ch))return;const g=r.given.startsWith('w:confused>')?r.given.slice(11):(r.given.startsWith('w:')?null:r.given);if(g&&isUnit(g)){const k=r.ch+'→'+g;conf[k]=(conf[k]||0)+1}});
   const confs=Object.entries(conf).sort((a,b)=>b[1]-a[1]).slice(0,8);
-  const WHY={count:'wrong number of strokes',order:'stroke order',direction:'stroke direction',shape:'shape',size:'size',gaveup:'gave up'};
+  const WHY={count:'wrong number of strokes',order:'stroke order',dir:'stroke direction',direction:'stroke direction',shape:'shape of the curve',short:'stroke too short',long:'stroke too long',start:'wrong starting point',end:'wrong ending point',size:'size',gaveup:'gave up'};const whyTxt=k=>k.startsWith('confused>')?'looked like '+k.slice(9):(WHY[k]||k);
   const sent=[];
   if(attention.length)sent.push(`Needs attention: ${attention.slice(0,5).map(([u,s])=>`<b class="kana">${u}</b> (${s.c}/${s.n})`).join(', ')}.`);
   confs.filter(c=>c[1]>=2).slice(0,3).forEach(([k,n])=>{const[a,b]=k.split('→');sent.push(`<b class="kana">${a}</b> is often mistaken for <b class="kana">${b}</b> (${n}×).`)});
-  Object.entries(st).filter(([u,s])=>Object.values(s.why).reduce((x,y)=>x+y,0)>=2).slice(0,3).forEach(([u,s])=>{const top=Object.entries(s.why).sort((a,b)=>b[1]-a[1])[0];sent.push(`Writing <b class="kana">${u}</b>: most errors are ${WHY[top[0]]||top[0]} (${top[1]}×).`)});
+  Object.entries(st).filter(([u,s])=>Object.values(s.why).reduce((x,y)=>x+y,0)>=2).slice(0,3).forEach(([u,s])=>{const top=Object.entries(s.why).sort((a,b)=>b[1]-a[1])[0];sent.push(`Writing <b class="kana">${u}</b>: most errors are ${whyTxt(top[0])} (${top[1]}×).`)});
   const strong=Object.values(st).filter(s=>mastery(s)===3).length;
   const dl=Object.entries(days).slice(-10).reverse();
   const m=[0,0,0,0];ALL.forEach(u=>m[mastery(st[u])]++);
@@ -579,7 +616,7 @@ async function teacherDetail(id,name){
   ${sent.length?`<h2>QUICK READ</h2><div class="card"><ul style="margin:0;padding-left:18px">${sent.map(s=>`<li style="margin:4px 0">${s}</li>`).join('')}</ul></div>`:''}
   <h2>GARDEN</h2><div class="legend"><span>· not yet</span><span>🌱 growing</span><span>🌿 getting there</span><span>🌸 strong</span></div>${gardenHTML(st)}
   <h2>BY ACTIVITY</h2><div class="card"><table>${Object.entries(md).map(([k,v])=>`<tr><td>${MN[k]||k}</td><td>${v.c}/${v.n}</td><td style="width:40%"><div class="bar"><i style="width:${v.c/v.n*100}%"></i></div></td></tr>`).join('')}</table></div>
-  ${attention.length?`<h2>NEEDS ATTENTION</h2><div class="card"><table><tr><th>Letter</th><th>Correct</th><th></th><th>Writing errors</th></tr>${attention.map(([u,s])=>`<tr><td class="kana" style="font-size:20px">${u}</td><td>${s.c}/${s.n}</td><td style="width:30%"><div class="bar bad"><i style="width:${s.c/s.n*100}%"></i></div></td><td class="note">${Object.entries(s.why).map(([k,n])=>`${WHY[k]||k} ${n}`).join(', ')}</td></tr>`).join('')}</table></div>`:''}
+  ${attention.length?`<h2>NEEDS ATTENTION</h2><div class="card"><table><tr><th>Letter</th><th>Correct</th><th></th><th>Writing errors</th></tr>${attention.map(([u,s])=>`<tr><td class="kana" style="font-size:20px">${u}</td><td>${s.c}/${s.n}</td><td style="width:30%"><div class="bar bad"><i style="width:${s.c/s.n*100}%"></i></div></td><td class="note">${Object.entries(s.why).map(([k,n])=>`${whyTxt(k)} ${n}`).join(', ')}</td></tr>`).join('')}</table></div>`:''}
   ${confs.length?`<h2>MIX-UPS (chosen instead)</h2><div class="card"><table>${confs.map(([k,n])=>{const[a,b]=k.split('→');return `<tr><td class="kana" style="font-size:20px">${a} → ${b}</td><td>${n}×</td></tr>`}).join('')}</table></div>`:''}
   <h2>RECENT DAYS</h2><div class="card"><table>${dl.map(([d,v])=>`<tr><td>${d}</td><td>${v.n} answers</td><td>${Math.round(v.c/v.n*100)}%</td></tr>`).join('')}</table></div>`;
   $('tBox').onclick=null}
