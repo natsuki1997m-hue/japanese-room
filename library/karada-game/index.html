@@ -69,6 +69,7 @@ svg.body .hlov{animation:pulse .7s ease-in-out infinite alternate;filter:drop-sh
 .opts2 .opt .lb{display:block;font-size:20px;margin-top:4px}
 .bubble{background:#fff;border:3px solid var(--ink);border-radius:20px;padding:10px 14px;font-size:22px;font-weight:900;text-align:center;line-height:1.6;margin-bottom:8px}
 .bubble small{display:block;font-size:12.5px;font-weight:500;opacity:.65}
+.flipx{transform:scaleX(-1)}
 .trayrow{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:10px 0}
 .pc{touch-action:none;user-select:none;-webkit-user-select:none;border:3px solid var(--line);background:#fff;border-radius:18px;width:78px;height:78px;padding:4px;display:flex;align-items:center;justify-content:center}
 .pc img{max-width:62px;max-height:62px}
@@ -381,7 +382,7 @@ const heartStr=n=>'♥'.repeat(Math.max(0,n))+'♡'.repeat(Math.max(0,3-n));
 
 
 /* ============ 日本語 / English（せつめいの ぶぶんだけ えいごに する） ============ */
-const I18N={"← もどる": "← Back", "すごい！ ぜんぶ ばっちり！": "Amazing! Perfect score!", "いいね！ あと すこし！": "Nice! Almost there!", "だいじょうぶ！ もういちど やってみよう！": "You can do it! Try again!", "もういちど みてみよう": "Review these words", "もういちど": "Play again", "ホーム": "Home", "げんき 第7課「からだの ぶぶん」で あそぼう！": "Genki Lesson 7: Parts of the Body — let's play!", "なまえ": "Name", "なまえを いれてね": "Type your name", "からだタッチ！": "Body Touch!", "きこえた ところを はやく タッチ！": "Touch the part you hear — fast!", "びょういんごっこ": "Hospital Play", "どこが いたい？ なおしてあげよう": "Where does it hurt? Help the patient!", "ふくわらい": "Fukuwarai (Face Puzzle)", "めかくしで かおを つくろう": "Build a face blindfolded", "にている ことば": "Look-alike Words", "にていることば": "Look-alike Words", "ひっかけに ちゅうい！": "Watch out for tricks!", "しんけいすいじゃく": "Memory Match", "えと ことば、かんじを あわせよう": "Match pictures, words and kanji", "モンスターを つくろう": "Build a Monster", "モンスター": "Monster", "せつめいを きいて つくる": "Listen and build it", "ずかん": "Picture Book", "まず ここで ことばを みてみよう（タッチすると こえが でるよ）": "Start here to see the words (touch to hear them)", "きろく": "Progress", "とくいな ことば・にがてな ことば": "Your strong and weak words", "⚠ このブラウザでは こえが でません。もじで あそんでね。": "⚠ This browser has no voice. Play with the text.", "きろくは この ブラウザの なかに ほぞんされます。": "Your progress is saved in this browser.", "🔊 おと": "🔊 Sound", "かんじ（ふりがなつき）": "Kanji with furigana", "👂 ききとりモード（もじなし）": "👂 Listening mode (no text)", "🇬🇧 えいごヒント": "🇬🇧 English hints", "からだを タッチしてみよう！": "Touch the body!", "🔄 うしろ": "🔄 Back view", "🔄 まえ": "🔄 Front view", "👂 よく きいて！": "👂 Listen carefully!", "ここが": "This is the", "👂 かんじゃさんの こえを きいて！": "👂 Listen to the patient!", "いたい = It hurts ／ ここを タッチしてあげよう": "Tap the part that hurts", "ここを タッチしてあげよう": "Tap the part that hurts", "あかい ところが いたいよ。ただしい ことばを えらんでね": "The red spot hurts. Choose the right word.", "どっちで あそぶ？": "Which mode?", "めかくしで かおを つくるよ": "Build a face blindfolded", "🙈 ふつう": "🙈 Normal", "おいた ところに 👌 が でるよ": "A 👌 shows where you placed it", "😈 むずかしい": "😈 Hard", "どこに おいたか わからない！": "You can't see where you placed it!", "😈 めかくし ちゅう…": "😈 Blindfolded…", "めかくし ちゅう…": "Blindfolded…", "を えらんでください": "Pick this piece!", "👆 ここに おいてね": "👆 Place it here", "かおの うえで はなしてね！": "Release it on the face!", "ドキドキ… 🥁": "Here we go… 🥁", "めかくしを とるよ": "Taking off the blindfold!", "できた！ 😆": "Done! 😆", "へんな かお！ いいね！": "What a funny face! Nice!", "おてほん": "Model", "つぎへ": "Next", "どれで あそぶ？": "Choose a mode", "🖼 え ＋ ことば（ひらがな）": "🖼 Picture + word (hiragana)", "かんじ ＋ ひらがな": "Kanji + hiragana", "🔥 え ＋ かんじ（むずかしい！）": "🔥 Picture + kanji (hard!)", "ペアを さがそう！": "Find the pairs!", "めくった かず:": "Flips:", "できた！": "Done!", "きみの モンスター": "Your monster", "せいかい": "Answer", "つぎの モンスター": "Next monster", "けっかを みる": "See results", "🔊 もういちど": "🔊 Hear again", "まだ きろくが ありません。": "No records yet.", "ゲームを やってみよう！": "Play a game!", "あそんだ かいすう:": "Games played:", "／ ぜんぶの せいかいりつ:": "/ Overall accuracy:", "🌱 できるように なった！": "🌱 Now you can do it!", "⭐ とくい！": "⭐ Strong!", "💪 もっと れんしゅう": "💪 Needs practice", "👀 まえは できたのに…": "👀 Slipped…", "ことばごとの せいかいりつ": "Accuracy by word", "まだ": "Not yet", "さいきんの あそび": "Recent games"};
+const I18N={"よくできたね！": "Well done!", "← もどる": "← Back", "すごい！ ぜんぶ ばっちり！": "Amazing! Perfect score!", "いいね！ あと すこし！": "Nice! Almost there!", "だいじょうぶ！ もういちど やってみよう！": "You can do it! Try again!", "もういちど みてみよう": "Review these words", "もういちど": "Play again", "ホーム": "Home", "げんき 第7課「からだの ぶぶん」で あそぼう！": "Genki Lesson 7: Parts of the Body — let's play!", "なまえ": "Name", "なまえを いれてね": "Type your name", "からだタッチ！": "Body Touch!", "きこえた ところを はやく タッチ！": "Touch the part you hear — fast!", "びょういんごっこ": "Hospital Play", "どこが いたい？ なおしてあげよう": "Where does it hurt? Help the patient!", "ふくわらい": "Fukuwarai (Face Puzzle)", "めかくしで かおを つくろう": "Build a face blindfolded", "にている ことば": "Look-alike Words", "にていることば": "Look-alike Words", "ひっかけに ちゅうい！": "Watch out for tricks!", "しんけいすいじゃく": "Memory Match", "えと ことば、かんじを あわせよう": "Match pictures, words and kanji", "モンスターを つくろう": "Build a Monster", "モンスター": "Monster", "せつめいを きいて つくる": "Listen and build it", "ずかん": "Picture Book", "まず ここで ことばを みてみよう（タッチすると こえが でるよ）": "Start here to see the words (touch to hear them)", "きろく": "Progress", "とくいな ことば・にがてな ことば": "Your strong and weak words", "⚠ このブラウザでは こえが でません。もじで あそんでね。": "⚠ This browser has no voice. Play with the text.", "きろくは この ブラウザの なかに ほぞんされます。": "Your progress is saved in this browser.", "🔊 おと": "🔊 Sound", "かんじ（ふりがなつき）": "Kanji with furigana", "👂 ききとりモード（もじなし）": "👂 Listening mode (no text)", "🇬🇧 えいごヒント": "🇬🇧 English hints", "からだを タッチしてみよう！": "Touch the body!", "🔄 うしろ": "🔄 Back view", "🔄 まえ": "🔄 Front view", "👂 よく きいて！": "👂 Listen carefully!", "ここが": "This is the", "👂 かんじゃさんの こえを きいて！": "👂 Listen to the patient!", "いたい = It hurts ／ ここを タッチしてあげよう": "Tap the part that hurts", "ここを タッチしてあげよう": "Tap the part that hurts", "あかい ところが いたいよ。ただしい ことばを えらんでね": "The red spot hurts. Choose the right word.", "どっちで あそぶ？": "Which mode?", "めかくしで かおを つくるよ": "Build a face blindfolded", "🙈 ふつう": "🙈 Normal", "おいた ところに 👌 が でるよ": "A 👌 shows where you placed it", "😈 むずかしい": "😈 Hard", "どこに おいたか わからない！": "You can't see where you placed it!", "😈 めかくし ちゅう…": "😈 Blindfolded…", "めかくし ちゅう…": "Blindfolded…", "を えらんでください": "Pick this piece!", "👆 ここに おいてね": "👆 Place it here", "かおの うえで はなしてね！": "Release it on the face!", "ドキドキ… 🥁": "Here we go… 🥁", "めかくしを とるよ": "Taking off the blindfold!", "できた！ 😆": "Done! 😆", "へんな かお！ いいね！": "What a funny face! Nice!", "おてほん": "Model", "つぎへ": "Next", "どれで あそぶ？": "Choose a mode", "🖼 え ＋ ことば（ひらがな）": "🖼 Picture + word (hiragana)", "かんじ ＋ ひらがな": "Kanji + hiragana", "🔥 え ＋ かんじ（むずかしい！）": "🔥 Picture + kanji (hard!)", "ペアを さがそう！": "Find the pairs!", "めくった かず:": "Flips:", "できた！": "Done!", "きみの モンスター": "Your monster", "せいかい": "Answer", "つぎの モンスター": "Next monster", "けっかを みる": "See results", "🔊 もういちど": "🔊 Hear again", "まだ きろくが ありません。": "No records yet.", "ゲームを やってみよう！": "Play a game!", "あそんだ かいすう:": "Games played:", "／ ぜんぶの せいかいりつ:": "/ Overall accuracy:", "🌱 できるように なった！": "🌱 Now you can do it!", "⭐ とくい！": "⭐ Strong!", "💪 もっと れんしゅう": "💪 Needs practice", "👀 まえは できたのに…": "👀 Slipped…", "ことばごとの せいかいりつ": "Accuracy by word", "まだ": "Not yet", "さいきんの あそび": "Recent games"};
 const I18R=[
  [/^をさわって！ \((\d+)\/(\d+)\)$/,(m)=>`Touch it! (${m[1]}/${m[2]})`],
  [/^どっちの「(.+)」？$/,(m)=>`Which "${m[1]}"?`],
@@ -542,7 +543,7 @@ function gameFuku(){
   $('#fH').onclick=()=>{fukuHard=true;gameFukuPlay()};
 }
 function gameFukuPlay(){
-  const order=shuffle(FUKU);let ti=0,sel=null,placedOfType=0,missed=false,items=[],pieces=[],locked=false;
+  const order=shuffle(FUKU);let ti=0,sel=null,placedOfType=0,missed=false,items=[],pieces=[],locked=false,usedI=[],curI=0;
   const stage=shell('ふくわらい',`<span id="pg"></span>`);
   const fw=235,fh=fw*A.face.h/A.face.w;
   stage.innerHTML=`<div class="say" id="sy"></div>
@@ -554,7 +555,7 @@ function gameFukuPlay(){
    <div class="trayrow" id="tr"></div>`;
   function tray(){
     const rest=order.slice(ti);
-    $('#tr').innerHTML=rest.map(f=>`<button class="pc" data-k="${f.k}">${iconImg(A.hp[f.p].src)}</button>`).join('');
+    $('#tr').innerHTML=rest.map(f=>{let o='';for(let i=0;i<f.n;i++){if(sel&&f===sel&&usedI.includes(i))continue;o+=`<button class="pc" data-k="${f.k}" data-i="${i}">${iconImg(A.hp[f.p].src,i===1?'flipx':'')}</button>`}return o}).join('');
     document.querySelectorAll('#tr .pc').forEach(b=>b.addEventListener('pointerdown',e=>grab(b,e)));
   }
   function prompt(){
@@ -570,28 +571,28 @@ function gameFukuPlay(){
   }
   function placeAt(e){
     const pt=svgPt($('#cv'),e);
-    pieces.push({f:sel,x:pt.x,y:pt.y,flip:(sel.p==='ear'||sel.p==='brow'||sel.p==='eye')&&placedOfType===1});
+    pieces.push({f:sel,x:pt.x,y:pt.y,flip:sel.n===2&&curI===1});usedI.push(curI);
     placedOfType++;tone(fukuHard?440:520+placedOfType*80,.1);
     if(!fukuHard)$('#cov').insertAdjacentHTML('beforeend',`<text x="${pt.x}" y="${pt.y+10}" font-size="30" text-anchor="middle" class="pop" style="transform-box:fill-box;transform-origin:center">👌</text>`);
     else{$('#cvh').textContent=`✋ ${ti+(placedOfType>=sel.n?1:0)} / ${order.length}`}
-    if(placedOfType<sel.n){hint();return}
-    items.push({id:sel.k,ok:!missed});sel=null;missed=false;ti++;
+    if(placedOfType<sel.n){tray();hint();return}
+    items.push({id:sel.k,ok:!missed});sel=null;missed=false;usedI=[];ti++;
     if(ti>=order.length)return reveal();
     tray();prompt();
   }
   function grab(b,e){
     if(locked)return;e.preventDefault();
-    const f=order[ti];
+    const f=order[ti];curI=+(b.dataset.i||0);
     if(!sel){
       if(b.dataset.k!==f.k){missed=true;sfxNg();b.classList.add('shake');T(()=>b.classList.remove('shake'),400);say(W[f.k].kana+'を えらんでください');return}
-      sfxOk();sel=f;placedOfType=0;b.classList.add('picked');hint();
+      sfxOk();sel=f;placedOfType=0;usedI=[];b.classList.add('picked');hint();
     }else if(b.dataset.k!==sel.k)return;
     const q=A.hp[sel.p],cv=$('#cv'),k=cv.getBoundingClientRect().width/390,w=q.w*sel.sc*k,h=q.h*sel.sc*k;
     const g=document.createElement('img');g.src=q.src;
-    g.style.cssText=`position:fixed;left:0;top:0;width:${w}px;height:${h}px;pointer-events:none;z-index:50;opacity:.92;filter:drop-shadow(0 6px 6px rgba(0,0,0,.25));transform:translate(${e.clientX-w/2}px,${e.clientY-h/2}px)`;
+    g.style.cssText=`position:fixed;left:0;top:0;width:${w}px;height:${h}px;pointer-events:none;z-index:50;opacity:.92;filter:drop-shadow(0 6px 6px rgba(0,0,0,.25));transform:translate(${e.clientX-w/2}px,${e.clientY-h/2}px) scale(${curI===1&&sel.n===2?-1:1},1)`;
     document.body.appendChild(g);
     let moved=false;const sx=e.clientX,sy=e.clientY;
-    const mv=ev=>{if(Math.hypot(ev.clientX-sx,ev.clientY-sy)>8)moved=true;g.style.transform=`translate(${ev.clientX-w/2}px,${ev.clientY-h/2}px)`};
+    const mv=ev=>{if(Math.hypot(ev.clientX-sx,ev.clientY-sy)>8)moved=true;g.style.transform=`translate(${ev.clientX-w/2}px,${ev.clientY-h/2}px) scale(${curI===1&&sel.n===2?-1:1},1)`};
     const up=ev=>{
       window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',up);window.removeEventListener('pointercancel',up);g.remove();
       if(!moved)return;
@@ -608,7 +609,7 @@ function gameFukuPlay(){
       return `<g transform="translate(${p.x} ${p.y}) scale(${p.flip?-1:1} 1)"><g class="pop" style="animation-delay:${1.2+i*.12}s;transform-box:fill-box;transform-origin:center"><image href="${q.src}" x="${-w/2}" y="${-h/2}" width="${w}" height="${h}"/></g></g>`}).join('');
     T(()=>{$('#cov').style.opacity=0;sfxFan()},900);
     T(()=>{$('#cov').style.display='none';$('#sy').innerHTML='できた！ 😆<small>へんな かお！ いいね！</small>';$('#tr').innerHTML=`<div class="refc"><img src="${A.ref.src}" alt=""><span>おてほん</span></div>`},1900);
-    T(()=>showResult('fuku',items,{append:true}),3300);
+    T(()=>{$('#stage').insertAdjacentHTML('beforeend',`<div class="card result" id="resbox"><div class="big" style="font-size:54px">🎉</div><p>よくできたね！</p><div class="row"><button class="btn" id="again">もういちど</button><button class="btn ghost" id="tohome">ホーム</button></div></div>`);$('#again').onclick=()=>go('fuku');$('#tohome').onclick=()=>go('home');sfxFan();$('#resbox').scrollIntoView({behavior:'smooth',block:'center'})},3300);
   }
   tray();prompt();
 }
