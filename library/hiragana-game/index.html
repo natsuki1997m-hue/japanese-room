@@ -31,6 +31,8 @@ h2 .n{display:inline-grid;place-items:center;width:32px;height:32px;border-radiu
 .top .sp{flex:1}
 .back{background:none;border:none;font-family:inherit;font-weight:700;color:var(--muted);font-size:14px;cursor:pointer;padding:4px 2px}
 .mw{display:inline-block;line-height:0}
+.rm .mascot{width:64px;height:64px}
+.gm{text-align:center}.gm .mascot{width:84px;height:84px}
 .mascot{width:104px;height:104px;object-fit:contain}
 .emo{font-size:76px;line-height:1;display:inline-block}
 .hello{display:flex;align-items:center;gap:8px;margin-bottom:4px}
@@ -192,6 +194,7 @@ footer{margin-top:30px;font-size:11px;color:var(--muted);text-align:center}
 <!-- GARDEN -->
 <section class="screen" id="s-garden">
   <div class="top"><button class="back" data-home>← Home</button></div>
+  <div class="gm" id="m-garden"></div>
   <h1>My Garden 🌸</h1>
   <p class="sub" id="gdSub"></p>
   <div class="legend"><span>· not yet</span><span>🌱 growing</span><span>🌿 getting there</span><span>🌸 strong</span></div>
@@ -446,7 +449,7 @@ function Writer(host,unit,o){
       setTimeout(()=>{if(dead)return;p.style.transition='stroke-dashoffset .7s ease';p.style.strokeDashoffset=0},i*850+100)});
     setTimeout(()=>{if(!dead)gD.innerHTML=''},STROKES[ch].length*850+1500)}
   function showScore(r){const s=r.score,good=s>=70,st=s>=90?['優','Excellent']:s>=80?['良','Good']:s>=70?['可','OK']:['再','Try again'];
-    res.innerHTML=`<span class="sc ${good?'ok':'ng'}">${s}</span><span class="stamp ${good?'ok':'ng'}"><b>${st[0]}</b><small>${st[1]}</small></span>`}
+    res.innerHTML=`<span class="sc ${good?'ok':'ng'}">${s}</span><span class="stamp ${good?'ok':'ng'}"><b>${st[0]}</b><small>${st[1]}</small></span><span class="rm">${mascot(s>=90?'cheer':good?'happy':'oops')}</span>`}
   function showCmp(r){gC.innerHTML='';const{ch,tf}=curPart();const g=document.createElementNS(NS,'g');g.setAttribute('transform',`translate(${tf.tx} ${tf.ty}) scale(${tf.s})`);
     STROKES[ch].forEach(d=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff9a7a');p.setAttribute('stroke-width',9);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');p.setAttribute('opacity','.4');g.appendChild(p)});gC.appendChild(g);
     const LAB={order:'order',dir:'other way',shape:'curve',short:'longer',long:'shorter',start:'start here',end:'end here'};
@@ -499,7 +502,7 @@ function gameScreen(title,total){show('s-game');$('gInfo').textContent=title;$('
 function gProg(){$('gProg').style.width=(G.i/G.total*100)+'%'}
 function finish(title,label,score,msg){
   $('rTitle').textContent=title;$('rScore').textContent=score;$('rMsg').textContent=msg;
-  const sc=parseFloat(score);$('m-result').innerHTML=mascot('cheer');show('s-result');$('rAgain').onclick=()=>startMode(S.last)}
+  const mm=/(\d+)\s*\/\s*(\d+)/.exec(score),ra=mm?(+mm[1])/(+mm[2]||1):1;$('m-result').innerHTML=mascot(ra>=.9?'cheer':ra>=.7?'happy':ra>=.4?'wink':'calm');show('s-result');$('rAgain').onclick=()=>startMode(S.last)}
 $('rGarden').onclick=()=>showGarden();
 
 /* sound match */
@@ -596,6 +599,7 @@ function startMemory(){
 function gardenHTML(stats,sel){
   return SETS.map(s=>`<h2>${s.jp} · ${s.en.replace(/ \(.*/,'')}</h2>`+ROWS.filter(r=>r.set===s.id).map(r=>`<div class="garden" style="margin-bottom:7px">${[0,1,2,3,4].map(k=>{const u=r.u[k];if(!u)return `<div class="gc empty"></div>`;const st=stats[u];const m=mastery(st);return `<div class="gc l${m}" title="${st?st.c+'/'+st.n:''}"><span class="kana">${u}</span><i>${EMO[m]}</i></div>`}).join('')}</div>`).join('')).join('')}
 function showGarden(){
+  $('m-garden').innerHTML=mascot('shy');
   const m=[0,0,0,0];ALL.forEach(u=>m[mastery(S.stats[u])]++);
   $('gdSub').textContent=`🌸 ${m[3]} strong · 🌿 ${m[2]} getting there · 🌱 ${m[1]} growing · ${m[0]} not yet planted`;
   $('gdBox').innerHTML=gardenHTML(S.stats);show('s-garden')}
