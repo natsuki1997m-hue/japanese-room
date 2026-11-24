@@ -94,7 +94,8 @@ svg.pad{width:100%;aspect-ratio:1/1;background:#fff;border-radius:34px 14px 34px
 .tile.used{opacity:.25;pointer-events:none}
 .shake{animation:shake .35s}
 @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
-.pic{font-size:84px;text-align:center;line-height:1.1}
+.pic{font-size:130px;text-align:center;line-height:1.35;padding:18px 0 14px}
+.pz{display:flex;flex-direction:column;justify-content:center;min-height:calc(100svh - 190px);padding-bottom:30px}.pz .center{margin:6px 0 26px}.pz .slots{gap:12px;margin:26px 0}.pz .slot,.pz .tile{width:76px;height:86px;font-size:40px}.pz .tiles{gap:12px;margin-top:22px}
 .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .mcard{aspect-ratio:1/1.05;border-radius:24px 10px 24px 10px;background:var(--teal);display:grid;place-items:center;cursor:pointer;text-align:center;line-height:1.1;font-size:0}
 .mcard:nth-child(even){border-radius:10px 24px 10px 24px}
@@ -121,7 +122,7 @@ th{color:var(--muted);font-size:11.5px}
 .bar.bad i{background:var(--tomato)}
 .tlist button{display:flex;width:100%;justify-content:space-between;align-items:center;margin-bottom:10px;text-align:left;border-radius:22px 8px 22px 8px}
 .note{font-size:12px;color:var(--muted)}
-input[type=text]{font-family:inherit;font-weight:700;font-size:18px;border:none;border-radius:24px 10px 24px 10px;padding:14px 18px;width:100%;margin:12px 0;background:#fff;color:var(--ink)}
+input[type=text]{font-family:inherit;font-weight:700;font-size:18px;border:none;border-radius:24px 10px 24px 10px;padding:14px 18px;width:100%;max-width:280px;display:block;margin:16px auto;text-align:center;background:#fff;color:var(--ink)}
 input[type=text]:focus{outline:3px solid var(--mustard)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:99px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .25s;z-index:20}
 .toast.on{opacity:1}
@@ -140,7 +141,7 @@ footer{margin-top:30px;font-size:11px;color:var(--muted);text-align:center}
     <p class="sub">Hiragana Garden</p>
     <p style="margin:14px 0 0">Every letter you practice makes a little seed grow. Let's plant your garden!</p>
     <input type="text" id="nameIn" placeholder="Your name" autocomplete="off" maxlength="30">
-    <button class="btn pink" id="goBtn" style="width:100%">Start 🌱</button>
+    <button class="btn pink" id="goBtn" style="width:100%;max-width:280px">Start 🌱</button>
     <p class="note" style="margin-top:14px"><a href="#" id="teachLink" style="color:var(--muted)">Teacher</a></p>
   </div>
 </section>
@@ -565,7 +566,7 @@ function puzzleQ(){
   const x=G.ws[G.i];G.slots=Array(x.u.length).fill(null);G.tiles=shuf(x.u.map((u,i)=>({u,i,used:false})));
   if(x.u.length>1&&G.tiles.every((t,k)=>t.u===x.u[k]))G.tiles.reverse();
   G.miss=false;
-  const draw=()=>{$('gBody').innerHTML=`<div class="pic">${x.e}</div><div class="center"><button class="btn sm pink" id="pHear">${SPK} Hear it</button></div><div class="slots" id="pSlots">${G.slots.map((s,k)=>`<div class="slot kana ${s?'f':''}" data-k="${k}">${s?s.u:''}</div>`).join('')}</div><div class="tiles">${G.tiles.map((t,k)=>`<div class="tile kana ${t.used?'used':''}" data-t="${k}">${t.u}</div>`).join('')}</div><div class="fb" id="pFb"></div>`;
+  const draw=()=>{$('gBody').innerHTML=`<div class="pz"><div class="pic">${x.e}</div><div class="center"><button class="btn sm pink" id="pHear">${SPK} Hear it</button></div><div class="slots" id="pSlots">${G.slots.map((s,k)=>`<div class="slot kana ${s?'f':''}" data-k="${k}">${s?s.u:''}</div>`).join('')}</div><div class="tiles">${G.tiles.map((t,k)=>`<div class="tile kana ${t.used?'used':''}" data-t="${k}">${t.u}</div>`).join('')}</div><div class="fb" id="pFb"></div></div>`;
     $('pHear').onclick=()=>speak(x.w)};
   draw();
   $('gBody').onclick=e=>{const t=e.target.closest('[data-t]'),s=e.target.closest('[data-k]');
