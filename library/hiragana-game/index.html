@@ -586,7 +586,7 @@ function puzzleQ(){
     $('pHear').onclick=()=>speak(x.w)};
   draw();
   $('gBody').onclick=e=>{const t=e.target.closest('[data-t]'),s=e.target.closest('[data-k]');
-    if(t){const tile=G.tiles[+t.dataset.t];const k=G.slots.indexOf(null);if(k<0||tile.used)return;tile.used=true;G.slots[k]=tile;draw();speak(tile.u);
+    if(t){const tile=G.tiles[+t.dataset.t];const k=G.slots.indexOf(null);if(k<0||tile.used)return;tile.used=true;G.slots[k]=tile;draw();
       if(G.slots.every(Boolean)){const got=G.slots.map(z=>z.u).join('|'),want=x.u.join('|');
         if(got===want){rec('puzzle',x.w,!G.miss);if(!G.miss)G.score++;$('pFb').innerHTML=`<div class="pfb">✨ ${x.w}<small>${MEAN[x.w]||''}</small></div>`;$('pFb').className='fb ok';speak(x.w);G.i++;gProg();setTimeout(puzzleQ,2600)}
         else{G.miss=true;rec('puzzle',x.w,false,G.slots.map(z=>z.u).join(''));$('pSlots').classList.add('shake');setTimeout(()=>{G.slots.fill(null);G.tiles.forEach(z=>z.used=false);draw();$('pFb').textContent='Not quite. Try again!';$('pFb').className='fb bad'},450)}}}
