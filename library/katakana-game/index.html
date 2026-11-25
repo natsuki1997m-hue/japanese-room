@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#fff3d6;--ink:#1d2a44;--muted:#6f7587;--tomato:#ff6b4a;--mustard:#ffc531;--teal:#1fa89a;--mint:#6fd3c6;--coral:#ff9a7a;--sky:#a8c8ff;--lav:#c9b6ff;--peach:#ffd9a0;--pink:#ff6b4a;--pink-d:#d9452a;--yellow:#ffc531;--card:#fff;--ok:#1b9a6b;--bad:#e5483a;--soft:#fff3d6}
+:root{--bg:#dcf3f5;--ink:#1d2a44;--muted:#6f7587;--tomato:#ff7a3d;--mustard:#ffcb3d;--teal:#138d9c;--mint:#86dbe0;--coral:#ff9d7a;--sky:#9ccfff;--lav:#cbb9ff;--peach:#ffdcae;--pink:#ff7a3d;--pink-d:#d95a22;--yellow:#ffcb3d;--card:#fff;--ok:#1b9a6b;--bad:#e5483a;--soft:#dcf3f5}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font-family:"Zen Maru Gothic",sans-serif;font-weight:500;line-height:1.55;min-height:100vh}
@@ -98,8 +98,8 @@ svg.pad{width:100%;aspect-ratio:1/1;background:#fff;border-radius:34px 14px 34px
 @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
 .pfb{font-size:40px;line-height:1.3}.pfb small{display:block;font-size:20px;color:var(--muted);font-weight:700;margin-top:2px}
 .sumbox{background:#fff;border-radius:26px 12px 26px 12px;padding:14px 16px;margin:12px 0;text-align:left}.sumbox h3{margin:0 0 8px;font-size:17px}.sumbox.ok{border:3px solid var(--teal)}.sumbox.work{border:3px solid var(--tomato)}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.sc1{font-size:24px;background:#d8f3ee;border-radius:12px;padding:2px 10px}
-.wrow{display:flex;align-items:center;gap:12px;padding:6px 0;border-top:2px dotted #f0d9b8}.wrow:first-of-type{border-top:none}.wl{font-size:38px;min-width:56px;text-align:center}.wt{font-size:14px;line-height:1.4}.wt small{font-size:13px;color:var(--muted);font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.sc1{font-size:24px;background:#cdeef0;border-radius:12px;padding:2px 10px}
+.wrow{display:flex;align-items:center;gap:12px;padding:6px 0;border-top:2px dotted #c4e4e8}.wrow:first-of-type{border-top:none}.wl{font-size:38px;min-width:56px;text-align:center}.wt{font-size:14px;line-height:1.4}.wt small{font-size:13px;color:var(--muted);font-weight:700}
 .pic{font-size:130px;text-align:center;line-height:1.35;padding:18px 0 14px}
 .pz{display:flex;flex-direction:column;justify-content:center;min-height:calc(100svh - 190px);padding-bottom:30px}.pz .center{margin:6px 0 26px}.pz .slots{gap:12px;margin:26px 0}.pz .slot,.pz .tile{width:76px;height:86px;font-size:40px}
 .slot,.tile,.drop{white-space:nowrap}.pz .slot.two,.pz .tile.two{font-size:27px}.drop.two{font-size:23px}.pz .tiles{gap:12px;margin-top:22px}
@@ -114,7 +114,7 @@ svg.pad{width:100%;aspect-ratio:1/1;background:#fff;border-radius:34px 14px 34px
 .garden{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .gc{border-radius:18px 7px 18px 7px;background:#fff;text-align:center;padding:5px 0 3px;font-size:22px;line-height:1.15}
 .gc i{display:block;font-style:normal;font-size:15px;font-family:"Zen Maru Gothic"}
-.gc.l0{background:#f1e3bf;color:#a9976b}.gc.l1{background:#ffd0c2}.gc.l2{background:#ffe49a}.gc.l3{background:#bfeee6}
+.gc.l0{background:#c4e4e8;color:#5f8f95}.gc.l1{background:#ffd5c0}.gc.l2{background:#ffe9a6}.gc.l3{background:#bdeef0}
 .gc.empty{visibility:hidden}
 .legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);font-weight:700;margin:6px 0}
 .big{font-size:44px;font-weight:800;font-family:"Dela Gothic One",sans-serif;font-weight:400}
@@ -122,9 +122,9 @@ svg.pad{width:100%;aspect-ratio:1/1;background:#fff;border-radius:34px 14px 34px
 .stat{background:#fff;border-radius:22px 8px 22px 8px;padding:10px 14px}
 .stat b{font-size:24px;display:block;line-height:1.1}.stat span{font-size:12px;color:var(--muted);font-weight:700}
 table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{padding:5px 6px;border-bottom:1.5px solid #f1e3bf;text-align:left}
+th,td{padding:5px 6px;border-bottom:1.5px solid #c4e4e8;text-align:left}
 th{color:var(--muted);font-size:11.5px}
-.bar{height:10px;border-radius:6px;background:#f1e3bf;overflow:hidden;min-width:60px}
+.bar{height:10px;border-radius:6px;background:#c4e4e8;overflow:hidden;min-width:60px}
 .bar i{display:block;height:100%;background:var(--teal)}
 .bar.bad i{background:var(--tomato)}
 .tlist button{display:flex;width:100%;justify-content:space-between;align-items:center;margin-bottom:10px;text-align:left;border-radius:22px 8px 22px 8px}
@@ -466,7 +466,7 @@ function Writer(host,unit,o){
   function showScore(r){const s=r.score,good=s>=70,st=s>=90?['優','Excellent']:s>=80?['良','Good']:s>=70?['可','OK']:['再','Try again'];
     res.innerHTML=`<span class="sc ${good?'ok':'ng'}">${s}</span><span class="stamp ${good?'ok':'ng'}"><b>${st[0]}</b><small>${st[1]}</small></span><span class="rm">${mascot(s>=90?'cheer':good?'happy':'oops')}</span>`}
   function showCmp(r){gC.innerHTML='';const{ch,tf}=curPart();const g=document.createElementNS(NS,'g');g.setAttribute('transform',`translate(${tf.tx} ${tf.ty}) scale(${tf.s})`);
-    STROKES[ch].forEach(d=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff9a7a');p.setAttribute('stroke-width',9);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');p.setAttribute('opacity','.4');g.appendChild(p)});gC.appendChild(g);
+    STROKES[ch].forEach(d=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',d);p.setAttribute('fill','none');p.setAttribute('stroke','#ff9d7a');p.setAttribute('stroke-width',9);p.setAttribute('stroke-linecap','round');p.setAttribute('stroke-linejoin','round');p.setAttribute('opacity','.4');g.appendChild(p)});gC.appendChild(g);
     const LAB={order:'order',dir:'other way',shape:'curve',short:'longer',long:'shorter',start:'start here',end:'end here'};
     (r.marks||[]).forEach(m=>{const k=m.iss.find(x=>LAB[x]);if(!k)return;
       const pt=k==='start'?m.r0:k==='end'?m.r1:m.rm;
@@ -544,7 +544,7 @@ function runCatch(hard){
   $('gBody').innerHTML=`<div class="center" style="margin-top:8px"><span class="hearts" id="ctH"></span> &nbsp; <button class="btn sm pink" id="ctPlay">${SPK} Again</button> <button class="btn sm" id="ctHint">Show letter</button> <span class="pill" id="ctHintBox" style="display:none;font-size:18px"></span></div><p class="sub center" style="margin-top:4px">Listen. Tap the falling letter you hear!</p><div class="arena" id="arena"></div>`;
   const ar=$('arena');
   CT={tg,ti:0,caught:0,lives:5,drops:[],last:performance.now(),H:ar.clientHeight,W:ar.clientWidth,need:5,total:tg.length*5};
-  const hearts=()=>$('ctH').innerHTML='<span style="color:#ff6b4a">'+'●'.repeat(CT.lives)+'</span><span style="color:#e8d6a8">'+'●'.repeat(5-CT.lives)+'</span>';hearts();
+  const hearts=()=>$('ctH').innerHTML='<span style="color:#ff7a3d">'+'●'.repeat(CT.lives)+'</span><span style="color:#b5dadf">'+'●'.repeat(5-CT.lives)+'</span>';hearts();
   const tgt=()=>CT.tg[CT.ti];
   const say=()=>{speak(tgt());$('ctHintBox').style.display='none'};say();
   $('ctPlay').onclick=()=>speak(tgt());
