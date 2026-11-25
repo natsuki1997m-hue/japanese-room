@@ -101,7 +101,8 @@ svg.pad{width:100%;aspect-ratio:1/1;background:#fff;border-radius:34px 14px 34px
 .chips{display:flex;flex-wrap:wrap;gap:6px}.sc1{font-size:24px;background:#d8f3ee;border-radius:12px;padding:2px 10px}
 .wrow{display:flex;align-items:center;gap:12px;padding:6px 0;border-top:2px dotted #f0d9b8}.wrow:first-of-type{border-top:none}.wl{font-size:38px;min-width:56px;text-align:center}.wt{font-size:14px;line-height:1.4}.wt small{font-size:13px;color:var(--muted);font-weight:700}
 .pic{font-size:130px;text-align:center;line-height:1.35;padding:18px 0 14px}
-.pz{display:flex;flex-direction:column;justify-content:center;min-height:calc(100svh - 190px);padding-bottom:30px}.pz .center{margin:6px 0 26px}.pz .slots{gap:12px;margin:26px 0}.pz .slot,.pz .tile{width:76px;height:86px;font-size:40px}.pz .tiles{gap:12px;margin-top:22px}
+.pz{display:flex;flex-direction:column;justify-content:center;min-height:calc(100svh - 190px);padding-bottom:30px}.pz .center{margin:6px 0 26px}.pz .slots{gap:12px;margin:26px 0}.pz .slot,.pz .tile{width:76px;height:86px;font-size:40px}
+.slot,.tile,.drop{white-space:nowrap}.pz .slot.two,.pz .tile.two{font-size:27px}.drop.two{font-size:23px}.pz .tiles{gap:12px;margin-top:22px}
 .mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
 .mcard{aspect-ratio:1/1.05;border-radius:24px 10px 24px 10px;background:var(--teal);display:grid;place-items:center;cursor:pointer;text-align:center;line-height:1.1;font-size:0}
 .mcard:nth-child(even){border-radius:10px 24px 10px 24px}
@@ -549,7 +550,7 @@ function runCatch(hard){
   $('ctPlay').onclick=()=>speak(tgt());
   $('ctHint').onclick=()=>{const b=$('ctHintBox');b.textContent=tgt();b.className='pill kana';b.style.display='';b.style.fontSize='20px'};
   function spawn(){if(!CT)return;const isT=Math.random()<.45;const d=isT?tgt():(()=>{const c=distractors(tgt(),pool,3);const mix=c.concat(pool.filter(x=>x!==tgt()));return shuf(mix)[0]||c[0]})();
-    const el=document.createElement('div');el.className='drop kana';el.textContent=d;const x=Math.random()*(CT.W-66)+2;el.style.left=x+'px';el.style.top='-66px';ar.appendChild(el);
+    const el=document.createElement('div');el.className='drop kana'+(d.length>1?' two':'');el.textContent=d;const x=Math.random()*(CT.W-66)+2;el.style.left=x+'px';el.style.top='-66px';ar.appendChild(el);
     const o={el,u:d,y:-66,v:(60+Math.random()*30+CT.caught*2)*(hard?1.7:1)};CT.drops.push(o);
     el.addEventListener('pointerdown',ev=>{ev.preventDefault();if(!CT||o.dead)return;o.dead=true;
       if(o.u===tgt()){rec('catch',tgt(),true);CT.caught++;el.classList.add('pop');setTimeout(()=>el.remove(),250);G.i=CT.caught;G.total=CT.total;gProg();
@@ -590,7 +591,7 @@ function puzzleQ(){
   const x=G.ws[G.i];G.slots=Array(x.u.length).fill(null);G.tiles=shuf(x.u.map((u,i)=>({u,i,used:false})));
   if(x.u.length>1&&G.tiles.every((t,k)=>t.u===x.u[k]))G.tiles.reverse();
   G.miss=false;
-  const draw=()=>{$('gBody').innerHTML=`<div class="pz"><div class="pic">${x.e}</div><div class="center"><button class="btn sm pink" id="pHear">${SPK} Hear it</button></div><div class="slots" id="pSlots">${G.slots.map((s,k)=>`<div class="slot kana ${s?'f':''}" data-k="${k}">${s?s.u:''}</div>`).join('')}</div><div class="tiles">${G.tiles.map((t,k)=>`<div class="tile kana ${t.used?'used':''}" data-t="${k}">${t.u}</div>`).join('')}</div><div class="fb" id="pFb"></div></div>`;
+  const draw=()=>{$('gBody').innerHTML=`<div class="pz"><div class="pic">${x.e}</div><div class="center"><button class="btn sm pink" id="pHear">${SPK} Hear it</button></div><div class="slots" id="pSlots">${G.slots.map((s,k)=>`<div class="slot kana ${s?'f':''} ${s&&s.u.length>1?'two':''}" data-k="${k}">${s?s.u:''}</div>`).join('')}</div><div class="tiles">${G.tiles.map((t,k)=>`<div class="tile kana ${t.used?'used':''} ${t.u.length>1?'two':''}" data-t="${k}">${t.u}</div>`).join('')}</div><div class="fb" id="pFb"></div></div>`;
     $('pHear').onclick=()=>speak(x.w)};
   draw();
   $('gBody').onclick=e=>{const t=e.target.closest('[data-t]'),s=e.target.closest('[data-k]');
