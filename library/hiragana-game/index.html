@@ -525,7 +525,11 @@ function soundQ(){
 let CT=null;
 function stopCatch(){if(CT){cancelAnimationFrame(CT.raf);clearInterval(CT.sp);CT=null}}
 function startCatch(){
-  stopCatch();const pool=poolUnits();gameScreen('Letter Catch',1);
+  stopCatch();gameScreen('Letter Catch',1);
+  $('gBody').innerHTML=`<div class="center" style="margin-top:40px"><p class="sub">Choose a speed</p><div style="display:flex;flex-direction:column;gap:14px;max-width:280px;margin:18px auto"><button class="btn mint" id="ctE" style="padding:18px"><b>Easy</b><br><small>Letters fall slowly</small></button><button class="btn pink" id="ctD" style="padding:18px"><b>Difficult</b><br><small>Letters fall faster</small></button></div></div>`;
+  $('ctE').onclick=()=>runCatch(false);$('ctD').onclick=()=>runCatch(true)}
+function runCatch(hard){
+  stopCatch();const pool=poolUnits();gameScreen(hard?'Letter Catch · Difficult':'Letter Catch',1);
   const tg=weightedSample(pool,Math.min(3,pool.length));
   $('gBody').innerHTML=`<div class="center" style="margin-top:8px"><span class="hearts" id="ctH"></span> &nbsp; <button class="btn sm pink" id="ctPlay">${SPK} Again</button> <button class="btn sm" id="ctHint">Show letter</button> <span class="pill" id="ctHintBox" style="display:none;font-size:18px"></span></div><p class="sub center" style="margin-top:4px">Listen. Tap the falling letter you hear!</p><div class="arena" id="arena"></div>`;
   const ar=$('arena');
@@ -537,13 +541,13 @@ function startCatch(){
   $('ctHint').onclick=()=>{const b=$('ctHintBox');b.textContent=tgt();b.className='pill kana';b.style.display='';b.style.fontSize='20px'};
   function spawn(){if(!CT)return;const isT=Math.random()<.45;const d=isT?tgt():(()=>{const c=distractors(tgt(),pool,3);const mix=c.concat(pool.filter(x=>x!==tgt()));return shuf(mix)[0]||c[0]})();
     const el=document.createElement('div');el.className='drop kana';el.textContent=d;const x=Math.random()*(CT.W-66)+2;el.style.left=x+'px';el.style.top='-66px';ar.appendChild(el);
-    const o={el,u:d,y:-66,v:60+Math.random()*30+CT.caught*2};CT.drops.push(o);
+    const o={el,u:d,y:-66,v:(60+Math.random()*30+CT.caught*2)*(hard?1.7:1)};CT.drops.push(o);
     el.addEventListener('pointerdown',ev=>{ev.preventDefault();if(!CT||o.dead)return;o.dead=true;
       if(o.u===tgt()){rec('catch',tgt(),true);CT.caught++;el.classList.add('pop');setTimeout(()=>el.remove(),250);G.i=CT.caught;G.total=CT.total;gProg();
         if(CT.caught%CT.need===0){CT.ti++;if(CT.ti>=CT.tg.length){end(true);return}toast('New sound!');CT.drops.forEach(d=>{d.dead=true;d.el.remove()});CT.drops=[];say()}}
       else{rec('catch',tgt(),false,o.u);CT.lives--;hearts();el.classList.add('shake');setTimeout(()=>el.remove(),250);if(CT.lives<=0)end(false)}})}
   function end(win){const c=CT?CT.caught:0,t=CT?CT.total:1;stopCatch();finish('Letter Catch','',`${c} / ${t}`,win?'You caught them all! 🌸':'Good try! Listen once more and you will catch them next time.')}
-  CT.sp=setInterval(spawn,950);spawn();
+  CT.sp=setInterval(spawn,hard?750:950);spawn();
   const loop=now=>{if(!CT)return;const dt=Math.min(.05,(now-CT.last)/1000);CT.last=now;
     for(const o of CT.drops){if(o.dead)continue;o.y+=o.v*dt;o.el.style.top=o.y+'px';
       if(o.y>CT.H){o.dead=true;o.el.remove();if(o.u===tgt()){rec('catch',tgt(),false,null);CT.lives--;hearts();if(CT.lives<=0){end(false);return}}}}
